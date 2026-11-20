@@ -43,7 +43,7 @@ export function menuPara(p: Perfil): { title: string; items: EntradaMenu[] }[] {
     if (p.area === 'Planeamiento') add(E.requerimientos, E.plan);
     if (p.area === 'Técnica' || r.has('TECNICA')) add(E.validaciones);
     if (p.es_compras) {
-        add(E.plan, E.ordenes, E.proveedores, E.pagos);
+        add(E.plan, E.ordenes, E.requerimientos, E.proveedores, E.pagos);
         if (p.ambito !== 'nac') add(E.embarques);
     }
     if (aprobador) add(E.ordenes, E.cuadro, E.proyectos);

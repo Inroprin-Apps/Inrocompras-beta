@@ -112,10 +112,10 @@ export function RequerimientosView() {
                                     <tr className={T.headRow}>
                                         <th className={T.th}>Requerimiento</th>
                                         <th className={T.th}>Proyecto o motivo</th>
-                                        <th className={T.th}>Estado</th>
-                                        <th className={T.th}>Área emisora</th>
-                                        <th className={T.thNum}>Ítems</th>
-                                        <th className={T.thNum}>Creado</th>
+                                        <th className={`${T.th} hidden sm:table-cell`}>Estado</th>
+                                        <th className={`${T.th} hidden md:table-cell`}>Área emisora</th>
+                                        <th className={`${T.thNum} hidden sm:table-cell`}>Ítems</th>
+                                        <th className={`${T.thNum} hidden sm:table-cell`}>Creado</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -130,17 +130,20 @@ export function RequerimientosView() {
                                             <td className={T.td}>
                                                 <div className="font-medium">{r.numero || 'En proceso, sin número'}</div>
                                                 {r.rqSidige && <div className={T.sub}>RQ SIDIGE {r.rqSidige}</div>}
+                                                <div className="mt-1 sm:hidden">
+                                                    <Chip tone={tonoEstado(r.estado)}>{r.estado}</Chip>
+                                                </div>
                                             </td>
                                             <td className={T.td}>
                                                 <div className="max-w-80 truncate">{nombreProyecto(r.proyectoId) || r.motivo || '—'}</div>
                                                 {r.tipoCompra && <div className={T.sub}>{r.tipoCompra}</div>}
                                             </td>
-                                            <td className={T.td}>
+                                            <td className={`${T.td} hidden sm:table-cell`}>
                                                 <Chip tone={tonoEstado(r.estado)}>{r.estado}</Chip>
                                             </td>
-                                            <td className={T.td}>{r.areaEmisora}</td>
-                                            <td className={T.tdNum}>{r.nItems}</td>
-                                            <td className={T.tdNum}>{dmy(r.creado)}</td>
+                                            <td className={`${T.td} hidden md:table-cell`}>{r.areaEmisora}</td>
+                                            <td className={`${T.tdNum} hidden sm:table-cell`}>{r.nItems}</td>
+                                            <td className={`${T.tdNum} hidden sm:table-cell`}>{dmy(r.creado)}</td>
                                         </tr>
                                     ))}
                                 </tbody>

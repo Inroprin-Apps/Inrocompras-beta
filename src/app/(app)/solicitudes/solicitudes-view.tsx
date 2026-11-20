@@ -131,10 +131,10 @@ export function SolicitudesView() {
                                     <tr className={T.headRow}>
                                         <th className={T.th}>Solicitud</th>
                                         <th className={T.th}>Destino</th>
-                                        <th className={T.th}>Estado</th>
-                                        <th className={T.th}>Solicitante</th>
-                                        <th className={T.thNum}>Ítems</th>
-                                        <th className={T.thNum}>Creada</th>
+                                        <th className={`${T.th} hidden sm:table-cell`}>Estado</th>
+                                        <th className={`${T.th} hidden md:table-cell`}>Solicitante</th>
+                                        <th className={`${T.thNum} hidden sm:table-cell`}>Ítems</th>
+                                        <th className={`${T.thNum} hidden sm:table-cell`}>Creada</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -149,18 +149,21 @@ export function SolicitudesView() {
                                             <td className={T.td}>
                                                 <div className="font-medium">{s.numero || 'Borrador sin número'}</div>
                                                 <div className={`${T.sub} max-w-72 truncate`}>{s.sustento || 'Sin sustento'}</div>
+                                                <div className="mt-1 sm:hidden">
+                                                    <Chip tone={tonoEstado(s.estado)}>{s.estado}</Chip>
+                                                </div>
                                             </td>
                                             <td className={T.td}>
                                                 {s.tipo === 'Proyecto' ? nombreProyecto(s.proyectoId) || 'Proyecto' : 'Administrativa'}
                                                 {s.tipo === 'Administrativa' && s.jefeId && <div className={T.sub}>Libera {quien(s.jefeId)}</div>}
                                             </td>
-                                            <td className={T.td}>
+                                            <td className={`${T.td} hidden sm:table-cell`}>
                                                 <Chip tone={tonoEstado(s.estado)}>{s.estado}</Chip>
                                                 {porLiberar.has(s.id) && <div className="mt-1 text-caption font-medium text-primary-strong">Te toca liberar</div>}
                                             </td>
-                                            <td className={T.td}>{quien(s.solicitanteId) || <span className="text-ink-3">—</span>}</td>
-                                            <td className={T.tdNum}>{s.nItems}</td>
-                                            <td className={T.tdNum}>{dmy(s.creado)}</td>
+                                            <td className={`${T.td} hidden md:table-cell`}>{quien(s.solicitanteId) || <span className="text-ink-3">—</span>}</td>
+                                            <td className={`${T.tdNum} hidden sm:table-cell`}>{s.nItems}</td>
+                                            <td className={`${T.tdNum} hidden sm:table-cell`}>{dmy(s.creado)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
