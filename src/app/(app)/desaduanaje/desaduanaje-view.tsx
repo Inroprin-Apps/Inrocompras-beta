@@ -65,12 +65,12 @@ export function DesaduanajeView() {
 
     return (
         <>
-            <div className="flex items-start gap-3">
-                <div className="flex-1">
+            <div className="flex flex-wrap items-start gap-x-3">
+                <div className="min-w-0 flex-1">
                     <SectionTitle title="Desaduanaje" />
                 </div>
                 {perfil.es_compras && (
-                    <Button onClick={() => setCreando(true)}>
+                    <Button className="mb-3" onClick={() => setCreando(true)}>
                         <Plus size={16} /> Nuevo desaduanaje
                     </Button>
                 )}

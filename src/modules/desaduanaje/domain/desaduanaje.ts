@@ -397,3 +397,7 @@ export function leerNumero(t: string): number | null {
     const n = Number(norm);
     return Number.isFinite(n) ? n : null;
 }
+
+/** Hoy en America/Lima como «AAAA-MM-DD». */
+export const hoyLima = (ahora: Date = new Date()) =>
+    new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit' }).format(ahora);
