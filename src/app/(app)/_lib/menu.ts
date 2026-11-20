@@ -39,6 +39,7 @@ export function menuPara(p: Perfil): { title: string; items: EntradaMenu[] }[] {
     const add = (...xs: EntradaMenu[]) => xs.forEach((x) => trabajo.set(x.key, x));
 
     add(E.teToca, E.solicitudes);
+    if (['Comercial', 'Proyectos', 'Planeamiento', 'Control de Gestión', 'Gerencia'].includes(p.area)) add(E.proyectos);
     if (p.area === 'Planeamiento') add(E.requerimientos, E.plan);
     if (p.area === 'Técnica' || r.has('TECNICA')) add(E.validaciones);
     if (p.es_compras) {
