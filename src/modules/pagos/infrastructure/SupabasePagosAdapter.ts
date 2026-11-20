@@ -12,8 +12,7 @@ const sOrNull = (v: unknown) => (v == null || v === '' ? null : String(v));
 const uno = (v: unknown): Fila | null => (Array.isArray(v) ? ((v[0] as Fila) ?? null) : ((v as Fila) ?? null));
 
 const SELECT =
-    '*,ordenes!inner(numero,estatus,procedencia,proveedor_id,comprador_id,moneda,monto,monto_soles,proveedores(razon_social)),' +
-    'factura:documentos!pagos_factura_id_fkey(id,numero,fecha_doc,monto_doc,moneda)';
+    '*,ordenes!inner(numero,estatus,procedencia,proveedor_id,comprador_id,moneda,monto,monto_soles,proveedores(razon_social)),factura:documentos!pagos_factura_id_fkey(id,numero,fecha_doc,monto_doc,moneda)';
 
 function factura(v: unknown): FacturaPago | null {
     const f = uno(v);

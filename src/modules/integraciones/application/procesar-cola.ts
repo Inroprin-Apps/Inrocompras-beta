@@ -156,8 +156,12 @@ async function leerDocumento(d: Integraciones, t: Trabajo): Paso {
 export async function leer(d: Pick<Integraciones, 'lector'>, archivo: Uint8Array, mime: string) {
     const t = await d.lector.texto(archivo, mime);
     const texto = t.isOk() ? t.value : '';
-    const base = mime === 'application/pdf' ? extraerDeTexto(texto, rucValido, d.lector.rucsPropios) : { ...LECTURA_VACIA, avisos: ['No es un PDF: el lector gratuito no lo lee.'] };
-    if (t.isErr()) base.avisos.push(`No se pudo sacar el texto: ${t.error.mensaje}`);
+    const base =
+        mime !== 'application/pdf'
+            ? { ...LECTURA_VACIA, avisos: ['No es un PDF: el lector gratuito no lo lee.'] }
+            : t.isErr()
+              ? { ...LECTURA_VACIA, avisos: [`No se pudo sacar el texto del PDF (${t.error.mensaje}).`] }
+              : extraerDeTexto(texto, rucValido, d.lector.rucsPropios);
     if (bastaElTexto(base, texto)) return base;
     if (!d.lector.gemini) return sinGemini(base, 'falta GEMINI_API_KEY');
     const g = await d.lector.gemini(archivo, mime, d.lector.rucsPropios);

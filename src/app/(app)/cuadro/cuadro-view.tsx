@@ -21,6 +21,7 @@ import { toast } from '@/shared/ui/toaster.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
 import { catalogosStore } from '../_lib/stores.ts';
 import { urlState } from '../_lib/url-state.ts';
+import { PorFirmar } from './por-firmar.tsx';
 import { cuadroStore } from './store.ts';
 
 const vista$ = urlState(
@@ -69,9 +70,15 @@ export function CuadroView() {
     return (
         <>
             <SectionTitle title="Cuadro de aprobaciones" />
+            {aprobador && (
+                // En el celular, lo primero es lo que espera tu firma (criterio D: aprobar en 3 toques).
+                <section className="mb-6 md:hidden">
+                    <PorFirmar />
+                </section>
+            )}
             <div className="mb-3.5 flex flex-wrap items-center gap-2.5">
                 {aprobador && (
-                    <Link href="/cuadro/aprobar" className={buttonClass('primary')}>
+                    <Link href="/cuadro/aprobar" className={`${buttonClass('primary')} max-md:hidden`}>
                         <Smartphone size={16} /> Por firmar
                     </Link>
                 )}
