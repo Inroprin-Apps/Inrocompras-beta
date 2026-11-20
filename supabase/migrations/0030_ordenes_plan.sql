@@ -66,3 +66,37 @@ revoke all on function public.ac_oc_recalcular(uuid) from public, anon;
 grant execute on function public.ac_oc_recalcular(uuid) to authenticated;
 revoke all on function public.plan_compras(uuid, boolean) from public, anon;
 grant execute on function public.plan_compras(uuid, boolean) to authenticated;
+
+-- ───────────────────────── Saldo al editar líneas ─────────────────────────
+-- Hueco: ac_oc_crear valida cantidad ≤ saldo, pero RLS deja a Compras cambiar la cantidad de una línea (o agregar
+-- una) con un UPDATE/INSERT directo mientras la orden es editable, y así pedir más que el saldo sin pasar por demasía.
+-- Este disparador lo frena en cualquier camino (lo que exceda va como demasía, que decide la GOP).
+create or replace function app.oc_linea_saldo() returns trigger language plpgsql security definer set search_path = public as $$
+declare it public.requerimiento_items; otras numeric;
+begin
+  if new.es_demasia or new.item_id is null then return new; end if;
+  if tg_op = 'UPDATE' and new.cantidad <= old.cantidad and new.item_id is not distinct from old.item_id then return new; end if;
+  select * into it from public.requerimiento_items where id = new.item_id;
+  select coalesce(sum(l.cantidad), 0) into otras from public.oc_lineas l join public.ordenes o on o.id = l.orden_id
+   where l.item_id = new.item_id and not l.es_demasia and l.id <> new.id and o.estatus not in ('Anulada','Rechazada');
+  if new.cantidad > it.cantidad - otras + 0.0001 then
+    raise exception '«%»: pides % y el saldo es %. Lo que exceda va como demasía.', it.descripcion, trim_scale(new.cantidad), trim_scale(it.cantidad - otras)
+      using errcode = 'P0001';
+  end if;
+  return new;
+end $$;
+drop trigger if exists oc_linea_saldo on public.oc_lineas;
+create trigger oc_linea_saldo before insert or update of cantidad, item_id on public.oc_lineas
+  for each row execute function app.oc_linea_saldo();
+
+-- ───────────────────────── Qué se puede editar de una orden ─────────────────────────
+-- Para que la ficha muestre «Editar» y «＋ Demasía» solo cuando la base lo permite (sin repetir la regla en la UI):
+-- {"editar": motivo|null, "demasia": {"<linea>": motivo|null}}. motivo null = sí puede.
+create or replace function public.oc_edicion(p_id uuid) returns jsonb language sql stable security definer set search_path = public as $$
+  select case when not exists (select 1 from public.usuarios where id = auth.uid() and activo) then null else
+    jsonb_build_object('editar', app.p_oc_recalcular(p_id),
+                       'demasia', coalesce((select jsonb_object_agg(l.id, app.p_oc_demasia(l.id)) from public.oc_lineas l where l.orden_id = p_id), '{}'::jsonb))
+  end
+$$;
+revoke all on function public.oc_edicion(uuid) from public, anon;
+grant execute on function public.oc_edicion(uuid) to authenticated;
