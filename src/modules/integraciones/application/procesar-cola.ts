@@ -149,7 +149,7 @@ async function leerDocumento(d: Integraciones, t: Trabajo): Paso {
     const lectura = await leer(d, archivo.value, doc.value.mime);
     // Nunca se confirma solo: queda como propuesta (lectura_estado = 'Leído') para que la persona la revise.
     const g = await d.repo.guardarLectura(doc.value.id, lectura);
-    return g.isErr() ? err(g.error) : ok(hecho(`Leído (${lectura.fuente}).${lectura.avisos.length ? ' ' + lectura.avisos.join(' ') : ''}`));
+    return g.isErr() ? err(g.error) : ok(hecho(`${lectura.fuente === 'ninguna' ? 'Sin datos leídos: la persona los completa a mano.' : `Leído (${lectura.fuente}).`}${lectura.avisos.length ? ' ' + lectura.avisos.join(' ') : ''}`));
 }
 
 /** Paso 1 gratis (texto) y, si no basta y hay llave, paso 2 con Gemini. Si Gemini falla, queda la lectura gratuita. */

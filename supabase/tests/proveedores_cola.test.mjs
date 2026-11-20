@@ -23,7 +23,7 @@ await db.exec(`
 for (const f of ['0001_esquema.sql', '0002_seguridad.sql', '0003_acciones.sql']) await db.exec(leer('migrations/' + f));
 await db.exec(leer('seed.sql'));
 for (const f of ['0005_equipo.sql', '0006_correcciones_null.sql', '0007_permisos_supabase.sql', '0008_permisos_equipo.sql',
-                 '0020_proveedores.sql', '0021_cola.sql', '0022_configuracion.sql'])
+                 '0020_proveedores.sql', '0021_cola.sql', '0022_configuracion.sql', '0023_inropay.sql'])
   await db.exec(leer('migrations/' + f));
 await db.exec(`grant usage, select on all sequences in schema public to authenticated;
                grant all on all tables in schema public to service_role;`);
@@ -201,6 +201,21 @@ check((await adm(`select valor from public.config where clave = 'dias_alerta_pla
 await como('adm', `insert into public.tc_costeo (moneda, tc, comentario) values ('USD', 3.77, 'Cierre de mes')`);
 check((await adm(`select registrado_por from public.tc_costeo where comentario = 'Cierre de mes'`))[0].registrado_por === U.adm[0], 'El TC de costeo guarda quién lo registró');
 await falla('adm', `insert into public.tc_costeo (moneda, tc) values ('USD', -1)`, [], 'Un TC de costeo debe ser mayor que cero', /mayor que cero/);
+
+console.log('\n8. InroPay (webhook → inropay_actualizar, solo el servidor)');
+check((await adm(`select has_function_privilege('authenticated', 'public.inropay_actualizar(uuid, text, date, text, text)', 'execute') a`))[0].a === false, 'authenticated no la ejecuta');
+await falla('servidor', `select public.inropay_actualizar('00000000-0000-0000-0000-00000000dead', 'Pagado')`, [], 'Un pago que no existe falla (antes daba ok)', /No existe el pago/);
+const oc = (await adm(`insert into public.ordenes (proveedor_id, comprador_id, estatus) values ($1, $2, 'Borrador') returning id`, [prov.id, U.com[0]]))[0].id;
+const pago = (await adm(`insert into public.pagos (orden_id, tipo_pago, monto_pago) values ($1, 'Pago total', 100) returning id`, [oc]))[0].id;
+await falla('servidor', `select public.inropay_actualizar($1, 'Pagado')`, [pago], 'Un pago en Plan (no solicitado) no se paga desde InroPay', /está «Plan»/);
+await adm(`update public.pagos set estado_pago = 'Solicitado' where id = $1`, [pago]);
+await como('servidor', `select public.inropay_actualizar($1, 'Programado', '2026-12-01')`, [pago]);
+await como('servidor', `select public.inropay_actualizar($1, 'Pagado', '2026-12-02', 'OP-1', 'IP-9')`, [pago]);
+const gp = (await adm(`select estado_pago, n_operacion, inropay_ref from public.pagos where id = $1`, [pago]))[0];
+check(gp.estado_pago === 'Pagado' && gp.n_operacion === 'OP-1' && gp.inropay_ref === 'IP-9', 'Solicitado → Programado → Pagado, con operación y referencia');
+check((await uno('servidor', `select public.inropay_actualizar($1, 'Pagado') r`, [pago])).r.sin_cambio === true, 'El aviso repetido no cambia nada');
+await falla('servidor', `select public.inropay_actualizar($1, 'Programado')`, [pago], 'Pagado es final', /está «Pagado»/);
+await falla('servidor', `select public.inropay_actualizar($1, 'Anulado')`, [pago], 'Estado fuera del contrato', /Estado no válido/);
 
 console.log(`\n${ok} bien, ${mal} mal`);
 process.exit(mal ? 1 : 0);

@@ -67,6 +67,8 @@ export function PanelAcciones({
         setAbierta(null);
         toast.success(`${a.etiqueta}: listo.`);
         refrescar([...tocadas, 'acciones', 'te_toca', 'notificaciones']);
+        // La acción pudo encolar correos, PDF o Drive: se despierta la cola (en el plan Hobby el cron es diario).
+        void fetch('/api/cola/despertar', { method: 'POST' }).catch(() => {});
         onHecho?.(a, r.value);
         return null;
     }

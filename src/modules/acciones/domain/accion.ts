@@ -43,6 +43,9 @@ const ETIQUETAS: Record<string, string> = {
     p_tipo: 'Tipo',
     p_alcance: 'Alcance',
     p_rq: 'N° de RQ del SIDIGE',
+    p_nota: 'Nota',
+    p_agente: 'Agente de retención',
+    p_buen_contribuyente: 'Buen contribuyente',
 };
 export const etiquetaCampo = (c: Campo) => ETIQUETAS[c.campo] ?? c.campo.replace(/^p_/, '').replace(/_/g, ' ');
 

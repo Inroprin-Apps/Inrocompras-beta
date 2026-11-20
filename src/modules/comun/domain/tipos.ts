@@ -123,5 +123,8 @@ const NOMBRE_ACCION: Record<string, string> = {
     verificar_retencion: 'Verificó la retención',
     ganado: 'Marcó ganado',
     perdido: 'Marcó perdido',
+    pedir_evaluacion: 'Pidió la evaluación a Finanzas',
+    correo_enviado: 'Envió el correo',
+    correo_registrado: 'Correo registrado (no enviado)',
 };
 export const nombreAccion = (a: string) => NOMBRE_ACCION[a] ?? a.replace(/_/g, ' ');
