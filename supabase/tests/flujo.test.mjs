@@ -18,6 +18,7 @@ await db.exec(`
   create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('test.uid', true), '')::uuid $$;
   create role authenticated nologin; create role anon nologin;
   grant usage on schema public to authenticated;
+  grant usage on schema auth to authenticated;   -- como en Supabase: auth.uid() la puede llamar la sesión
 `);
 for (const f of ['0001_esquema.sql', '0002_seguridad.sql', '0003_acciones.sql']) await db.exec(mig(f));
 await db.exec(fs.readFileSync(path.join(aqui, '..', 'seed.sql'), 'utf8'));
@@ -25,6 +26,8 @@ await db.exec(mig('0005_equipo.sql'));
 await db.exec(mig('0006_correcciones_null.sql'));
 await db.exec(mig('0007_permisos_supabase.sql'));
 await db.exec(mig('0008_permisos_equipo.sql'));
+// Y todo lo que vino después (hitos y correcciones), en orden.
+for (const f of fs.readdirSync(path.join(aqui, '..', 'migrations')).filter((f) => f >= '0009').sort()) await db.exec(mig(f));
 await db.exec(`grant usage on schema public to authenticated; grant usage, select on all sequences in schema public to authenticated;`);
 
 // Personas de prueba (inventadas)
@@ -222,6 +225,22 @@ await como('jci', `select public.ac_des_reabrir($1, 'Multa de SUNAT que llegó d
 await como('con', `insert into public.des_gastos (desaduanaje_id, concepto, entra_costo, moneda, monto_sin_igv, registrado_por) values ($1,'Multa / gasto posterior',true,'PEN',100,$2)`, [des, U.con[0]]);
 const c2 = (await uno('imp', `select public.ac_des_cerrar_costeo($1) r`, [des])).r;
 check(c2.version === 2 && (await adm(`select count(distinct version)::int n from public.des_costeo_hist where desaduanaje_id = $1`, [des]))[0].n === 2, 'Reabierto y cerrado otra vez: versión 2 en el historial');
+
+console.log('\n8b. Pagos (0061)');
+const cuotas3 = await adm(`select id, n_cuota, tipo_pago from public.pagos where orden_id = $1 and estado_pago = 'Plan' order by n_cuota`, [oc3]);
+const saldo3 = cuotas3.find((c) => c.tipo_pago === 'Saldo');
+await como('imp', `select public.ac_pago_dividir($1, 100)`, [saldo3.id]);
+await como('imp', `select public.ac_pago_dividir($1, 50)`, [saldo3.id]);
+const partes = (await adm(`select n_cuota::text n from public.pagos where orden_id = $1 and floor(n_cuota) = floor($2::numeric) order by n_cuota`, [oc3, saldo3.n_cuota])).map((r) => r.n);
+check(new Set(partes).size === partes.length && partes.length === 3, 'Dividir dos veces da números distintos: ' + partes.join(', '));
+const adel3 = cuotas3.find((c) => c.tipo_pago === 'Adelanto');
+await como('imp', `select public.ac_pago_solicitar($1)`, [adel3.id]);
+await falla('fin', `select public.ac_pago_programar($1, current_date - 3)`, [adel3.id], 'No se programa con fecha pasada');
+await como('fin', `select public.ac_pago_programar($1, current_date + 1)`, [adel3.id]);
+const docAjeno = (await adm(`insert into public.documentos (orden_id, tipo_doc, nombre_archivo, subido_por) values ($1, 'Cotización', 'x.pdf', $2) returning id`, [oc3, U.imp[0]]))[0].id;
+await falla('fin', `select public.ac_pago_pagado($1, 'OP-1', $2)`, [adel3.id, docAjeno], 'El voucher tiene que ser un «Voucher de pago» de la orden');
+await como('fin', `select public.ac_pago_pagado($1, 'OP-2')`, [adel3.id]);
+check((await adm(`select estado_pago from public.pagos where id = $1`, [adel3.id]))[0].estado_pago === 'Pagado', 'Sin voucher, Finanzas paga igual');
 
 console.log('\n9. Historial');
 const h = await adm(`select count(*)::int n from public.historial`);

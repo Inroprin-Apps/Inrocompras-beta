@@ -226,3 +226,10 @@
         animation: none;
     }
 }
+
+/* La ficha lateral (src/shared/ui/ficha.tsx) ocupa 560 px a la derecha en escritorio: la página se corre para no quedar tapada. */
+@media (min-width: 768px) {
+    html.con-ficha main {
+        padding-right: calc(560px + 1rem);
+    }
+}

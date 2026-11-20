@@ -14,6 +14,11 @@ export function Ficha({ titulo, subtitulo, estado, onCerrar, children }: { titul
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
     }, [onCerrar]);
+    // En escritorio la lista se angosta para no quedar tapada por la ficha (globals.css: html.con-ficha).
+    useEffect(() => {
+        document.documentElement.classList.add('con-ficha');
+        return () => document.documentElement.classList.remove('con-ficha');
+    }, []);
     return (
         <aside
             aria-label="Ficha"
