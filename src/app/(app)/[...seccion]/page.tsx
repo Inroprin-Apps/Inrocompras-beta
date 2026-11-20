@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { Construction } from 'lucide-react';
-import { FECHA_HITO, TODAS } from '../../../lib/menu.ts';
-import { SectionTitle } from '../../../ui/bits.tsx';
+import { FECHA_HITO, TODAS } from '@/app/(app)/_lib/menu.ts';
+import { SectionTitle } from '@/shared/ui/bits.tsx';
 
 // Las secciones que aún no se construyen dicen en qué hito llegan, en vez de un 404.
 export default async function Pronto({ params }: { params: Promise<{ seccion: string[] }> }) {

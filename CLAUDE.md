@@ -47,10 +47,38 @@ App de Compras e Importaciones de INROPRIN. Reemplaza el AppSheet de Compras y l
 - Mejoras sobre el AppSheet: `docs/11_MEJORAS_SOBRE_APPSHEET.md`
 - Fórmulas originales: `referencia/appsheet/appsheet_v2_referencia.md`
 
+## Arquitectura (como INROCONTA: hexagonal + DDD)
+```
+src/
+  app/                              Next (presentación)
+    (app)/                          lo que pide sesión; layout = marco (menú, campana, perfil)
+      <pantalla>/                   page.tsx (servidor, solo monta la vista) + <pantalla>-view.tsx ('use client')
+                                    + store.ts (almacenes de esa pantalla) + ficha-*.tsx + form-*.tsx
+      _acciones/                    PanelAcciones («Lo que te toca»: acciones_disponibles + diálogo de `pide`) e Historial
+      _components/                  menú lateral, campana, PerfilProvider/usePerfil
+      _lib/                         resource.ts (resource/keyed + refrescar), url-state.ts, stores.ts, borrador.ts, menu.ts
+    api/                            rutas del servidor (cola, webhooks, PDF)
+  modules/<contexto>/               un bounded context (proyectos, solicitudes, ordenes…)
+    domain/                         PURO: tipos, filtros, orden, cálculos de pantalla (semáforo, criticidad, Excel)
+    application/ports/              interfaces (XPort) que devuelven Result<T, ErrorFuente> (neverthrow)
+    application/views.ts            lo que la presentación puede importar (re-exporta el dominio)
+    infrastructure/                 SupabaseXAdapter(db): mapea filas snake_case → entidades camelCase
+    composition.ts                  'use client'; crea el adaptador con supabaseNavegador(): lo único que llama src/app
+  shared/                           ui/ (componentes de la guía + dialog, ficha, lista-estado), supabase/, auth/, errores.ts, tipos.ts
+```
+- **Fronteras:** `pnpm depcruise` (`.dependency-cruiser.cjs`). src/app solo importa `composition.ts` o `application/views.ts`.
+- **Datos:** el navegador lee Supabase con la sesión de la persona (RLS decide). Cada lista es un `resource()` (una vez por pestaña);
+  cada ficha por id, `keyed()`. Tras una acción o un guardado: `refrescar(['tabla', ...])` recarga los almacenes con esas etiquetas.
+- **Acciones de estado:** NUNCA un update directo de estado. La ficha pone `<PanelAcciones tabla id tocadas />` y listo: los botones,
+  los campos a pedir y el error salen de la base. Edición de datos editables (columnas que permite `app.proteger`): update directo con RLS.
+- **Pantallas:** sin `loading.tsx`; la vista se pinta entera y solo los datos son huecos. Filtros, orden, página y la ficha abierta
+  van en la URL con `urlState` (`?ver=<id>` abre la ficha: así enlazan la bandeja y las notificaciones). Toda lista usa `<Lista>` (5 estados).
+- **Referencia completa:** `src/modules/proyectos` + `src/app/(app)/proyectos` (lista, filtros, ficha, acciones, formulario, borrador).
+- **Pruebas:** dominio en `tests/unit/modules/*.test.mts` (vitest); reglas en `supabase/tests` (PGlite). `pnpm check` corre todo.
+
 ## Estructura del repo
-- `src/app/`: la app. `(app)/` = pantallas con sesión (layout con menú); `login/` y `auth/` = acceso. `globals.css` es copia de la guía.
-- `src/ui/`: componentes copiados de `diseno/ui-guia/src/ui/` (si se mejoran aquí, devolverlos a la guía).
-- `src/lib/`: Supabase (`supabase/client.ts` navegador, `supabase/server.ts` servidor con la sesión), `sesion.ts` (`miPerfil()`), `menu.ts` (menú por perfil y hito de cada sección), `tipos.ts` (áreas, roles, `motivo()` para mostrar errores de la base).
+- `src/app/`: la app (ver Arquitectura). `globals.css` es copia de la guía.
+- `src/shared/ui/`: componentes copiados de `diseno/ui-guia/src/ui/` + los que faltaban en la guía (dialog, ficha, lista-estado).
 - `src/proxy.ts`: renueva la sesión y manda al login (Next 16 usa `proxy.ts` en vez de `middleware.ts`).
 - `supabase/tests/*.test.mjs`: pruebas de reglas en PGlite; `pnpm test:db` las corre todas y el CI las exige.
 - `ejemplos/integraciones/`: código base de Drive, correo, lector de PDF, PDF de la OC, cola y rutas; se mueve a `src/lib/` en el hito que lo use.

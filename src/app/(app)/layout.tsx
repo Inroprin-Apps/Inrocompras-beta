@@ -1,9 +1,15 @@
 import { LogOut } from 'lucide-react';
-import { miPerfil } from '../../lib/sesion.ts';
-import { menuPara } from '../../lib/menu.ts';
-import { supabaseServidor } from '../../lib/supabase/server.ts';
-import { rolLabel } from '../../lib/tipos.ts';
-import { MenuLateral } from './menu-lateral.tsx';
+import { miPerfil } from '@/shared/auth/sesion.ts';
+import { rolLabel } from '@/shared/tipos.ts';
+import { menuPara } from './_lib/menu.ts';
+import { Campana } from './_components/campana.tsx';
+import { MenuLateral } from './_components/menu-lateral.tsx';
+import { PerfilProvider } from './_components/perfil.tsx';
+
+// Toda pantalla con sesión pasa por aquí. El marco (menú) es un layout persistente: se monta una vez y
+// navegar solo cambia la página. Lo único que espera al servidor es el perfil (área y roles); los datos
+// los lee cada pantalla en el navegador, una vez por pestaña (_lib/resource.ts). Por persona: nunca estático.
+export const dynamic = 'force-dynamic';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
     const perfil = await miPerfil();
@@ -18,26 +24,26 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </main>
         );
     }
-    const supabase = await supabaseServidor();
-    const { count } = await supabase.rpc('te_toca', {}, { count: 'exact', head: true });
     const detalle = [perfil.area, ...perfil.roles.map(rolLabel)].join(' · ');
-
     return (
-        <div className="flex min-h-dvh flex-col bg-surface-2 md:flex-row">
-            <MenuLateral grupos={menuPara(perfil)} pendientes={count ?? 0} />
-            <div className="flex min-w-0 flex-1 flex-col">
-                <header className="flex items-center justify-end gap-3 px-4 pt-4 md:px-8">
-                    <div className="min-w-0 text-right">
-                        <div className="truncate text-ui font-medium">{perfil.nombre}</div>
-                        <div className="truncate text-small text-ink-2" title={detalle}>
-                            {detalle}
+        <PerfilProvider perfil={perfil}>
+            <div className="flex min-h-dvh flex-col bg-surface-2 md:flex-row">
+                <MenuLateral grupos={menuPara(perfil)} />
+                <div className="flex min-w-0 flex-1 flex-col">
+                    <header className="flex items-center justify-end gap-2 px-4 pt-4 md:px-8">
+                        <Campana />
+                        <div className="min-w-0 text-right">
+                            <div className="truncate text-ui font-medium">{perfil.nombre}</div>
+                            <div className="truncate text-small text-ink-2" title={detalle}>
+                                {detalle}
+                            </div>
                         </div>
-                    </div>
-                    <SalirBoton icono />
-                </header>
-                <main className="min-w-0 flex-1 px-4 pt-2 pb-10 md:px-8">{children}</main>
+                        <SalirBoton icono />
+                    </header>
+                    <main className="min-w-0 flex-1 px-4 pt-2 pb-10 md:px-8">{children}</main>
+                </div>
             </div>
-        </div>
+        </PerfilProvider>
     );
 }
 

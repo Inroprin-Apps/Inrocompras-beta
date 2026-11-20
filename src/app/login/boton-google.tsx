@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '../../ui/button.tsx';
-import { supabaseNavegador } from '../../lib/supabase/client.ts';
+import { Button } from '@/shared/ui/button.tsx';
+import { supabaseNavegador } from '@/shared/supabase/client.ts';
 
 const DOMINIO = process.env.NEXT_PUBLIC_DOMINIO ?? 'inroprin.com';
 

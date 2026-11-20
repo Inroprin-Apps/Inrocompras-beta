@@ -1,4 +1,4 @@
-import type { Perfil } from './tipos.ts';
+import type { Perfil } from '@/shared/tipos.ts';
 
 // El menú por perfil (docs/02_ROLES_Y_PERMISOS.md). Es comodidad, no seguridad: la ponen RLS y las funciones.
 // `hito`: en qué hito llega la pantalla (mientras no exista, la sección dice cuándo llega).

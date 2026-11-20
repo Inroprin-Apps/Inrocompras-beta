@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { supabaseServidor } from '../../../lib/supabase/server.ts';
+import { supabaseServidor } from '@/shared/supabase/server.ts';
 
 // Google vuelve aquí con un código; se cambia por la sesión (cookies). Si la base rechazó la cuenta
 // (otro dominio), Supabase vuelve con ?error=…: se pasa al login para que lo explique.

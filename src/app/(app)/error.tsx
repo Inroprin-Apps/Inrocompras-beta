@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '../../ui/button.tsx';
+import { Button } from '@/shared/ui/button.tsx';
 
 // El error de una pantalla: qué pasó y un botón para reintentar.
 export default function ErrorPantalla({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {

@@ -5,8 +5,9 @@ import {
     ShoppingCart, Table2, Users, Wallet, Waypoints,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { Sidebar, type SidebarGroup } from '../../ui/sidebar.tsx';
-import type { EntradaMenu, Icono } from '../../lib/menu.ts';
+import { Sidebar, type SidebarGroup } from '@/shared/ui/sidebar.tsx';
+import type { EntradaMenu, Icono } from '../_lib/menu.ts';
+import { teTocaStore } from '../_lib/stores.ts';
 
 const ICONOS: Record<Icono, React.ReactNode> = {
     bandeja: <Inbox size={18} />,
@@ -25,8 +26,10 @@ const ICONOS: Record<Icono, React.ReactNode> = {
     config: <Settings size={18} />,
 };
 
-export function MenuLateral({ grupos, pendientes }: { grupos: { title: string; items: EntradaMenu[] }[]; pendientes: number }) {
+export function MenuLateral({ grupos }: { grupos: { title: string; items: EntradaMenu[] }[] }) {
     const ruta = usePathname();
+    // El contador del menú sale de la bandeja: se lee una vez por pestaña y se recarga tras cada acción.
+    const pendientes = teTocaStore.use().data?.length ?? 0;
     const g: SidebarGroup[] = grupos.map((x) => ({
         title: x.title,
         items: x.items.map((it) => ({

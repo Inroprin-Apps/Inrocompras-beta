@@ -3,15 +3,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
-import { supabaseNavegador } from '../../../lib/supabase/client.ts';
-import { AMBITOS, AREAS, ROLES, motivo, rolLabel } from '../../../lib/tipos.ts';
-import { Button } from '../../../ui/button.tsx';
-import { Chip } from '../../../ui/card.tsx';
-import { FilterRow, SearchBox, T } from '../../../ui/bits.tsx';
-import { Checkbox, Field } from '../../../ui/field.tsx';
-import { SelectMenu } from '../../../ui/select-menu.tsx';
-import { dayTime, plain } from '../../../ui/format.ts';
-import { toast } from '../../../ui/toaster.tsx';
+import { supabaseNavegador } from '@/shared/supabase/client.ts';
+import { AMBITOS, AREAS, ROLES, motivo, rolLabel } from '@/shared/tipos.ts';
+import { Button } from '@/shared/ui/button.tsx';
+import { Chip } from '@/shared/ui/card.tsx';
+import { FilterRow, SearchBox, T } from '@/shared/ui/bits.tsx';
+import { Checkbox, Field } from '@/shared/ui/field.tsx';
+import { SelectMenu } from '@/shared/ui/select-menu.tsx';
+import { dayTime, plain } from '@/shared/ui/format.ts';
+import { toast } from '@/shared/ui/toaster.tsx';
 
 export interface Persona {
     id: string;

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import { miPerfil } from '../../../lib/sesion.ts';
-import { supabaseServidor } from '../../../lib/supabase/server.ts';
-import { Notice, SectionTitle } from '../../../ui/bits.tsx';
+import { miPerfil } from '@/shared/auth/sesion.ts';
+import { supabaseServidor } from '@/shared/supabase/server.ts';
+import { Notice, SectionTitle } from '@/shared/ui/bits.tsx';
 import { EquipoCliente, type Persona } from './equipo-cliente.tsx';
 
 export const metadata: Metadata = { title: 'Equipo' };

@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { supabaseServidor } from '../../../lib/supabase/server.ts';
+import { supabaseServidor } from '@/shared/supabase/server.ts';
 
 export async function POST(request: NextRequest) {
     const supabase = await supabaseServidor();

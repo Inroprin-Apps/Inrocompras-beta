@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Montserrat } from 'next/font/google';
-import { Toaster } from '../ui/toaster.tsx';
+import { Toaster } from '@/shared/ui/toaster.tsx';
 import './globals.css';
 
 // La fuente de la empresa: Montserrat, en los pesos de la escala (400, 500 y 600).

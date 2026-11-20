@@ -1,8 +1,8 @@
 import 'server-only';
 import { cache } from 'react';
 import { redirect } from 'next/navigation';
-import { supabaseServidor } from './supabase/server.ts';
-import type { Perfil } from './tipos.ts';
+import { supabaseServidor } from '@/shared/supabase/server.ts';
+import type { Perfil } from '@/shared/tipos.ts';
 
 // El perfil de quien mira (área, roles, si ve precios), una vez por petición.
 export const miPerfil = cache(async (): Promise<Perfil | null> => {

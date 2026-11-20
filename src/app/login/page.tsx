@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { CuboRombos } from '../../ui/marca.tsx';
+import { CuboRombos } from '@/shared/ui/marca.tsx';
 import { BotonGoogle } from './boton-google.tsx';
 
 export const metadata: Metadata = { title: 'Iniciar sesión' };
