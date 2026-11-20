@@ -24,6 +24,10 @@ for (const f of ['0001_esquema.sql', '0002_seguridad.sql', '0003_acciones.sql'])
 await db.exec(leer('seed.sql'));
 await db.exec(leer('migrations/0005_equipo.sql'));
 await db.exec(leer('migrations/0006_correcciones_null.sql'));
+// Como en Supabase: cada función y tabla de public queda con permisos para anon y authenticated por separado.
+await db.exec(`grant execute on all functions in schema public to anon, authenticated; grant all on all tables in schema public to anon;`);
+await db.exec(leer('migrations/0007_permisos_supabase.sql'));
+await db.exec(leer('migrations/0008_permisos_equipo.sql'));
 await db.exec(`create trigger alta_usuario after insert on auth.users for each row execute function app.alta_usuario();`);
 await db.exec(`grant usage, select on all sequences in schema public to authenticated;`);
 await db.exec(`insert into public.config (clave, valor) values ('admins_iniciales', '["jefa@inroprin.com"]')`);
@@ -94,6 +98,17 @@ await como(2, `select public.ac_equipo_guardar($1, 'Comercial', null, 'todas', t
 check((await como(4, `select * from public.acciones_disponibles('proyectos', $1)`, [proy])).length === 2, 'Con área Comercial, sí (ganado / perdido)');
 await como(2, `select public.ac_equipo_guardar($1, 'Comercial', null, 'todas', false, '{}')`, [id(4)]);
 check((await como(4, `select * from public.acciones_disponibles('proyectos', $1)`, [proy])).length === 0, 'Desactivada, ya no ve botones');
+
+console.log('\n2. Permisos (como en Supabase)');
+const priv = async (rol, fn) => (await adm(`select has_function_privilege($1, $2, 'execute') p`, [rol, fn]))[0].p;
+check(!(await priv('anon', 'public.inropay_actualizar(uuid, text, date, text, text)')), 'Sin sesión (anon) nadie marca pagos como pagados');
+check(!(await priv('authenticated', 'public.inropay_actualizar(uuid, text, date, text, text)')), 'Con sesión tampoco: solo el servidor');
+check(!(await priv('anon', 'public.ac_oc_aprobar_gop(uuid, boolean)')), 'anon no ejecuta acciones');
+check(await priv('authenticated', 'public.ac_oc_aprobar_gop(uuid, boolean)') && await priv('authenticated', 'public.mi_perfil()'), 'authenticated sí ejecuta las acciones y mi_perfil');
+check(!(await adm(`select has_table_privilege('anon', 'public.ordenes', 'select') p`))[0].p, 'anon no lee tablas');
+check(!(await priv('anon', 'public.mi_perfil()')) && !(await priv('anon', 'public.ac_equipo_guardar(uuid, text, uuid, text, boolean, text[])')) && !(await priv('anon', 'public.acciones_disponibles(text, uuid)')), 'Las funciones de Equipo tampoco quedan abiertas sin sesión');
+const abiertas = (await adm(`select count(*)::int n from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') and p.proname not like 'pglite%'`))[0].n;
+check(abiertas === 0, 'Ninguna función de public queda abierta a anon (' + abiertas + ')');
 
 console.log(`\n${ok} correctas, ${mal} con error`);
 process.exit(mal ? 1 : 0);

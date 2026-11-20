@@ -23,6 +23,8 @@ for (const f of ['0001_esquema.sql', '0002_seguridad.sql', '0003_acciones.sql'])
 await db.exec(fs.readFileSync(path.join(aqui, '..', 'seed.sql'), 'utf8'));
 await db.exec(mig('0005_equipo.sql'));
 await db.exec(mig('0006_correcciones_null.sql'));
+await db.exec(mig('0007_permisos_supabase.sql'));
+await db.exec(mig('0008_permisos_equipo.sql'));
 await db.exec(`grant usage on schema public to authenticated; grant usage, select on all sequences in schema public to authenticated;`);
 
 // Personas de prueba (inventadas)
