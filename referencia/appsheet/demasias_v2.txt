@@ -1,0 +1,17 @@
+OC_Schema :: _Demasia_Pend [Yes/No V] =(=COUNT(SELECT(Base de datos OC NAC[ID_Linea], AND([OC_Ref] = [_THISROW].[ID_OC], [Es_Demasia], [Demasia_Estado] = "Pendiente"))) > 0)
+OC_Schema :: _Demasia_Aviso [Text V] =(=CONCATENATE(" ⚠ Incluye demasía por ", TEXT(SUM(SELECT(Base de datos OC NAC[COSTO TOTAL], AND([OC_Ref] = [_THISROW].[ID_OC], [Es_Demasia], [Demasia_Estado] = "Pendiente")))), " – ", SUBSTITUTE(TEXT(SELECT(Base de datos OC NAC[Motivo_Demasia], AND([OC_Ref] = [_THISROW].[ID_OC], [Es_Demasia], [Demasia_Estado] = "Pendiente"))), " , ", " / "))) Show_If:"= [_Demasia_Pend]"
+Base de datos OC NAC_Schema :: Sustento_Exceso [Text] Show_If:"=AND(NOT([Es_Demasia]),[_Exceso] > 0)" Required_If:"=AND(NOT([Es_Demasia]),[_Exceso] > 0)"
+Base de datos OC NAC_Schema :: Es_Demasia [Yes/No] init(=FALSE) Show_If:"= [Es_Demasia]" Editable_If:"=FALSE"
+Base de datos OC NAC_Schema :: Motivo_Demasia [LongText] Show_If:"=[Es_Demasia]" Required_If:"= [Es_Demasia]"
+Base de datos OC NAC_Schema :: Demasia_Estado [Enum] init(=IF([Es_Demasia], "Pendiente", "")) Editable_If:"=FALSE" EnumValues:["Pendiente","Aprobada","Rechazada"] BaseType:"Text"
+Base de datos OC NAC_Schema :: Cant_Demasia_Solicitada [Number] Show_If:"= [Demasia_Estado] = \"Rechazada\"" Editable_If:"=FALSE"
+Base de datos OC NAC_Schema :: Demasia_Decidido_Por [Email] Show_If:"=ISNOT BLANK([_THIS])" Editable_If:"=FALSE"
+Base de datos OC NAC_Schema :: _Exceso [Decimal V] =(=[_Cant_Req] - [Cant_Cubre_Req])
+Base de datos OC NAC_Schema :: _Aviso_Exceso [Text V] =(=IF([_Exceso] > 0, " ⚠ Compras " & [_Exceso] & " " & [_UM_Req] & " más de lo pedido. Indica el sustento.", "")) Show_If:"=AND(NOT([Es_Demasia]),[_Exceso] > 0)"
+ACT Base | ＋ Demasía | =AND( NOT([Es_Demasia]), COUNT(SELECT(Base de datos OC NAC[ID_Linea], AND([OC_Ref] = [_THISROW].[OC_Ref], [Item_Req_Ref] = [_THISROW].[Item_Req_Ref], [Es_Demasia]))) = 0, OR(IN([OC_Ref].[Estatus Compra], LIST("Borrador", "En modificación")), STARTSWITH([OC_Ref].[Estatus Compra], "Observado")) )
+ACT Base | _Rechazar_Demasia | true
+ACT Base | _Aprobar_Demasia | true
+ACT Base | Compose Email (Demasia_Decidido_Por) | NOT(ISBLANK([Demasia_Decidido_Por]))
+ACT OC | _Aprobar_Demasias_OC | true
+ACT OC | _Rechazar_Demasias_OC | true
+ACT OC | Aprobar sin demasía | =AND([_Etapa] = "GERENCIA", IN("GOP", [_MisRoles]), [Aprobación GOP] <> "Aprobado", [Estado de Aprobación3] = "Falta Aprobación", [_Demasia_Pend])

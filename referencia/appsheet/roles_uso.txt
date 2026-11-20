@@ -1,0 +1,66 @@
+
+## LIDER_COMPRAS (1)
+column Aprobadores_OC_Schema | Rol | 
+
+## JEFE_COMPRAS_N (2)
+column OC_Schema | _Rol_Jefe | 
+column Aprobadores_OC_Schema | Rol | 
+
+## CONTABILIDAD (3)
+column Base de datos Proveedores_Schema | Es_Agente_Retencion | 
+column Base de datos Proveedores_Schema | Es_Buen_Contribuyente | 
+action Base | Verificar Retención | =AND([ORIGEN] <> "Extranjero", [Verificado_Contab] <> TRUE, IN("CONTABILIDAD", SELECT(Aprobadores_OC[Rol], AND(LOWER([Email]) = LOWER(USEREMAIL()), [Activo] = T
+
+## FINANZAS (1)
+action Pagos | Add | =IN("FINANZAS", SELECT(Aprobadores_OC[Rol], AND(LOWER([Email]) = LOWER(USEREMAIL()), [Activo])))
+
+## CONTROL_GESTION (5)
+column OC_Schema | Aprobación Ppto | 
+column Aprobadores_OC_Schema | Rol | 
+action OC | Validar presupuesto | =AND( [_Etapa] = "CG", IN("CONTROL_GESTION", [_MisRoles]), ISNOTBLANK([Aprobación Ppto]), NOT(IN([Aprobación Ppto], LIST("Observado", "Anular OC", "Subsanado"))
+action OC | Revocar aprobación | =AND( [Estado de Aprobación3] = "Aprobado para Compra", NOT(IN([Estatus Compra], LIST("Anulada","Anulación solicitada","En modificación","Saldo pendiente","Oc P
+action OC | Observar presupuesto (CG) | =AND([_Etapa] = "CG", IN("CONTROL_GESTION", [_MisRoles]))
+
+## "GAF" (6)
+column Aprobadores_OC_Schema | Rol | 
+action OC | Aprobar GAF | =AND( [_Etapa] = "GERENCIA", IN("GAF", [_MisRoles]), [Aprobación GAF] <> "Aprobado", [Estado de Aprobación3] = "Falta Aprobación" , NOT(AND([_Demasia_Pend], [Ti
+action OC | Observar OC (aprobación) | =AND( [_Etapa] = "GERENCIA", OR(IN("GOP", [_MisRoles]), IN("GAF", [_MisRoles])), NOT(STARTSWITH([Estado de Aprobación3], "Observado")) )
+action OC | Rechazar OC (aprobacion) | =AND( [_Etapa] = "GERENCIA", OR(IN("GOP", [_MisRoles]), IN("GAF", [_MisRoles])), NOT(STARTSWITH([Estado de Aprobación3], "Observado")) )
+action OC | Revocar aprobación | =AND( [Estado de Aprobación3] = "Aprobado para Compra", NOT(IN([Estatus Compra], LIST("Anulada","Anulación solicitada","En modificación","Saldo pendiente","Oc P
+action OC | Anular OC (Gerencia) | =AND( NOT(IN([Estatus Compra], LIST("Borrador","Anulada","Anulación solicitada","Saldo pendiente","Oc Pagada"))), OR(ISBLANK([Total_Pagado]), [Total_Pagado] = 0
+
+## "GOP" (8)
+column Aprobadores_OC_Schema | Rol | 
+action OC | _Aprobar_GOP_Base | =AND([_Etapa] = "GERENCIA", IN("GOP", [_MisRoles]), [Aprobación GOP] <> "Aprobado", [Estado de Aprobación3] = "Falta Aprobación")
+action OC | Observar OC (aprobación) | =AND( [_Etapa] = "GERENCIA", OR(IN("GOP", [_MisRoles]), IN("GAF", [_MisRoles])), NOT(STARTSWITH([Estado de Aprobación3], "Observado")) )
+action OC | Rechazar OC (aprobacion) | =AND( [_Etapa] = "GERENCIA", OR(IN("GOP", [_MisRoles]), IN("GAF", [_MisRoles])), NOT(STARTSWITH([Estado de Aprobación3], "Observado")) )
+action OC | Revocar aprobación | =AND( [Estado de Aprobación3] = "Aprobado para Compra", NOT(IN([Estatus Compra], LIST("Anulada","Anulación solicitada","En modificación","Saldo pendiente","Oc P
+action OC | Anular OC (Gerencia) | =AND( NOT(IN([Estatus Compra], LIST("Borrador","Anulada","Anulación solicitada","Saldo pendiente","Oc Pagada"))), OR(ISBLANK([Total_Pagado]), [Total_Pagado] = 0
+action OC | Aprobar GOP | =AND([_Etapa] = "GERENCIA", IN("GOP", [_MisRoles]), [Aprobación GOP] <> "Aprobado", [Estado de Aprobación3] = "Falta Aprobación")
+action OC | Aprobar sin demasía | =AND([_Etapa] = "GERENCIA", IN("GOP", [_MisRoles]), [Aprobación GOP] <> "Aprobado", [Estado de Aprobación3] = "Falta Aprobación", [_Demasia_Pend])
+
+## Jefe_Email (5)
+column Solicitudes_Schema | Motivo_Cancelacion | 
+column Solicitudes_Schema | _Aprobadores | 
+view  | Solicitudes_Detail | 
+action Solicitudes | Compose Email (Jefe_Email) | NOT(ISBLANK([Jefe_Email]))
+action Solicitudes | Action for Clonar cabecera | true
+
+## Aprobador_Etapa (0)
+
+
+## Importaciones (14)
+column Requerimientos_Schema | TIPO COMPRA | 
+action OC | Imprimir OC - Interna | =AND( [Estatus Compra] <> "Borrador", IN([_MiArea], LIST("Compras","Importaciones")) )
+action OC | Imprimir OC - Prov | =AND( [Estado de Aprobación3] = "Aprobado para Compra", NOT(IN([Estatus Compra], LIST("Anulada","Anulación solicitada","En modificación"))), IN([_MiArea], LIST(
+action Items | Sincronizar con Req | true
+action OC | Emitir OC | =AND( [Estatus Compra] = "Borrador", COUNT([Related Base de datos OC NACs]) > 0, [Monto] > 0, IN([_MiArea], LIST("Compras","Importaciones")), OR( CONTAINS([Form
+action OC | Solicitar anulación (Comprador) | =AND( IN([_MiArea], LIST("Compras","Importaciones")), NOT(IN([Estatus Compra], LIST("Borrador","Anulada","Anulación solicitada","En modificación","Saldo pendien
+action OC | Reenviar a aprobación (comprador) | =AND( IN([_MiArea], LIST("Compras", "Importaciones")), STARTSWITH([Estado de Aprobación3], "Observado") )
+action OC | Modificar OC | =AND( IN([_MiArea], LIST("Compras", "Importaciones")), [Estado de Aprobación3] = "Aprobado para Compra", NOT(IN([Estatus Compra], LIST("En modificación", "Anula
+action OC | Confirmar modificación | =AND([Estatus Compra] = "En modificación", IN([_MiArea], LIST("Compras", "Importaciones")))
+action OC | Editar OC | =AND( IN([_MiArea], LIST("Compras","Importaciones")), OR( IN([Estatus Compra], LIST("Borrador","En modificación")), STARTSWITH([Estatus Compra], "Observado"), A
+action Pagos | Solicitar pago 2 | =AND( [Estado_Pago] = "Plan", [OC Ref].[Estado de Aprobación3] = "Aprobado para Compra", IN([_MiArea], LIST("Compras","Importaciones")) )
+action OC | Agregar línea | =AND( IN([_MiArea], LIST("Compras","Importaciones")), OR( IN([Estatus Compra], LIST("Borrador","En modificación")), STARTSWITH([Estatus Compra], "Observado"), A
+action OC | Enviar al proveedor | =AND([Estado de Aprobación3] = "Aprobado para Compra", IN([_MiArea], LIST("Compras","Importaciones")), NOT(IN([Estatus Compra], LIST("Anulada","Anulación solici
+action OC | Nuevo desaduanaje | =AND( CONTAINS(LOWER([Procedencia]), "import"), [Estado de Aprobación3] = "Aprobado para Compra", IN(LOOKUP(USEREMAIL(), "Usuarios", "Email", "Área"), LIST("Com

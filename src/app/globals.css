@@ -1,0 +1,228 @@
+@import 'tailwindcss';
+
+/*
+ * Los tokens de las apps de INROPRIN (marca Roland Print), como utilidades de Tailwind 4:
+ * bg-primary, text-danger-strong, border-line, text-ui, rounded-card…
+ * Regla: un componente pinta con un ROL, nunca con un valor de marca, un hex suelto ni la paleta
+ * propia de Tailwind (nada de text-white ni gray-500), y escribe con un paso de la escala con
+ * nombre, nunca con text-[13px]. Este archivo es el que se copia a cada app.
+ * Origen: INROCONTA (src/app/globals.css, /dev/colores).
+ */
+/*
+ * REGLAS DE COLOR (las de GRAMA, aplicadas aquí). Se escribe UN color por rol y todo lo demás se CALCULA:
+ *
+ * 1. Derivados, nunca escritos a mano. hover = base al 92 % con negro, pulsado = 84 %. Más allá de ~85 %
+ *    el paso deja de leerse como «el mismo botón más oscuro» y parece otro color. Un -soft (fondo de chip
+ *    o aviso) es el base al 12 % con blanco y OPACO: un velo con alfa hereda lo que tenga detrás. Un
+ *    -strong (texto sobre su -soft) es el base mezclado con negro hasta pasar AA. Cambia la marca y todo
+ *    esto la sigue solo.
+ * 2. Las mezclas van en `oklab`, no en `srgb`: mezclar con negro en srgb apaga el tono además de la luz
+ *    (el azul se vuelve gris sucio antes de verse más oscuro).
+ * 3. Contraste: el texto pasa AA (4.5:1) sobre el fondo donde de verdad se pone, y para eso un color de
+ *    marca CLARO no sirve de texto (el amarillo da 1.3:1, el verde azulado 3.2:1): para texto va su
+ *    -strong. El -strong y el -soft de cada estado pasan AA juntos (≥5:1 con margen). El amarillo sólido
+ *    nunca lleva texto encima.
+ * 4. El borde de algo interactivo en reposo (input, select, botón secundario, segmentado) da ≥3:1 sobre
+ *    blanco (WCAG 1.4.11); el borde de una tarjeta o un divisor es decoración y usa `line`. Por eso hay
+ *    dos bordes distintos y no se intercambian.
+ * 5. Deshabilitado: contraste bajo A PROPÓSITO (WCAG lo exime); si se subiera, parecería pulsable. Gris
+ *    sin color, nunca con opacidad.
+ * 6. Tinta: tres grises SÓLIDOS salidos de `texto` + blanco, sin alfa (un text-ink/60 se lee distinto
+ *    sobre cada fondo). Si /dev/colores marca un par en rojo o en «solo grande», es un error de contraste.
+ * 7. Series ordenadas (mapa de calor): color-mix(in oklch, <color> N%, var(--color-surface)).
+ *
+ * Formato de las anotaciones (de aquí se arma /dev/colores, no hay otra lista que tocar):
+ *   / * @grupo <id> | <Título> | <pendiente|aprobado> | <nota> * /   abre un grupo
+ *   --color-x: <valor>; / * <para qué sirve> [| sobre <token>] * /      un token del grupo
+ * «sobre <token>» = este color lleva texto encima de <token>: /dev/colores mide ese contraste (4.5:1).
+ * «borde sobre <token>» = es un borde sobre <token>: se mide contra 3:1 (WCAG 1.4.11).
+ *
+ * `static`: Tailwind emite TODAS las variables, se usen o no en una clase. Sin él, un token nuevo
+ * o usado solo con var() no existe en la página y su color no sale.
+ */
+@theme static {
+    --font-sans: var(--font-montserrat), system-ui, sans-serif;
+    --font-mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
+
+    /* @grupo aprobados | Colores aprobados | aprobado | Los colores de la empresa que van sí o sí, con sus nombres. Los roles de abajo apuntan aquí en lugar de repetir el valor. */
+    --color-primary: #006db1; /* Azul principal: fondos de botones y bloques | sobre surface */
+    --color-borde-primary: #1785c9; /* Azul de bordes */
+    --color-secondary: #00a298; /* Verde azulado: acentos, texto destacado | sobre surface */
+    --color-texto: #1d1d1b; /* Texto principal (el más usado) | sobre surface */
+    --color-light: #f2f2f2; /* Fondo gris claro de secciones */
+    --color-borde-light: #e6e6e6; /* Bordes grises */
+    --color-brand-red: #e30613; /* Rojo del logo: error, riesgo */
+    --color-brand-yellow: #ffdd00; /* Amarillo del logo: aviso */
+
+    /* @grupo tarjeta | Tarjeta | pendiente | Blanca y sin sombra, con un borde fino de `texto` al 20 % con blanco (#cccccc), el mismo de los controles. Antes era tu `borde-light` (#e6e6e6), que sigue en los colores de la empresa pero ya no manda este borde. */
+    --color-surface: #ffffff; /* Tarjeta, control, menú, fondo de la app */
+    --color-line: color-mix(in oklab, var(--color-texto) 20%, white); /* Borde de tarjeta y de control (el mismo, #cccccc; antes `borde-light`) | borde sobre surface */
+
+    /* @grupo fila | Fila bajo el cursor y fila elegida | aprobado | Bajo el cursor, un gris apenas más oscuro que el blanco (3 % de `texto`). La fila elegida no cambia de fondo: lleva un borde azul fino. */
+    --color-surface-2: color-mix(in oklab, var(--color-texto) 3%, white); /* Fila bajo el cursor */
+
+    /* @grupo divisor | Divisor dentro de una tarjeta | aprobado | Un paso más marcado que el borde de la tarjeta (18 % de `texto`). */
+    --color-divider: color-mix(in oklab, var(--color-texto) 18%, white); /* Divisor entre filas dentro de una tarjeta */
+
+    /* @grupo divisor-cabecera | Línea bajo la cabecera de una tabla | pendiente | Más marcada que el divisor de las filas (18 %) y más suave que el borde de un control (60 %): 38 % de `texto` con blanco. */
+    --color-divider-strong: color-mix(in oklab, var(--color-texto) 38%, white); /* Línea entre la cabecera de una tabla y su primera fila */
+
+    /* @grupo superficies | Controles y pistas | pendiente | El borde de un CONTROL es el mismo de una tarjeta (`line`, `texto` al 20 % = #cccccc) y, con el cursor encima, un paso más (36 %). Antes era `texto` al 60 % y al 78 % para dar ≥3:1 (WCAG 1.4.11); este da cerca de 1.6:1 y la hoja lo marca. */
+    --color-surface-3: color-mix(in oklab, var(--color-texto) 7%, white); /* Pista de barra, pulsado */
+    --color-control: var(--color-line); /* Borde de input, select y botón secundario (igual al de la tarjeta; antes 60 % de `texto`) | borde sobre surface */
+    --color-control-hover: color-mix(in oklab, var(--color-texto) 36%, white); /* Ese mismo borde con el cursor encima (antes 78 % de `texto`) | borde sobre surface */
+
+    /* @grupo texto | Texto | pendiente | Tres grises sólidos salidos de `texto` con blanco: 100 %, 80 % y 70 %. Pasan AA también sobre surface-2 y surface-3. */
+    --color-ink: var(--color-texto); /* Texto principal, títulos, cifras | sobre surface */
+    --color-ink-2: color-mix(in oklab, var(--color-texto) 80%, white); /* Secundario: notas, sub-líneas | sobre surface-3 */
+    --color-ink-3: color-mix(in oklab, var(--color-texto) 70%, white); /* Tenue: etiquetas, cabeceras de tabla | sobre surface-3 */
+    --color-ink-hover: color-mix(in oklab, var(--color-ink) 88%, white); /* Acción del toast («Deshacer») con el cursor encima */
+
+    /* @grupo relleno | Texto sobre relleno | aprobado | Blanco sobre cualquier relleno de color. Nunca `text-white`. */
+    --color-on-fill: #ffffff; /* Texto sobre un relleno de color | sobre primary */
+
+    /* @grupo boton | Botón azul y foco de teclado | aprobado | Normal `primary`, encima 92 % y pulsado 84 % con negro (el pulsado está en Enlace). El foco de teclado es un contorno `primary` de 2 px, separado 2 px. */
+    --color-primary-hover: color-mix(in oklab, var(--color-primary) 92%, black); /* Botón encima */
+
+    /* @grupo primario | Primario (azul) | pendiente | Todo sale de `primary` (aprobado): fuerte 88 % con negro, suave 12 % con blanco y línea 22 % con blanco. */
+    --color-primary-strong: color-mix(in oklab, var(--color-primary) 88%, black); /* Texto sobre azul suave | sobre primary-soft */
+    --color-primary-soft: color-mix(in oklab, var(--color-primary) 12%, white); /* Chip informativo, filtro elegido, zona de arrastre y botón punteado encima */
+    --color-primary-line: color-mix(in oklab, var(--color-primary) 22%, white); /* Botón punteado pulsado (el azul suave, un poco más marcado) */
+
+    /* @grupo estados-solidos | Barras y colores sólidos de estado | aprobado | El color pleno de cada estado, para barras, puntos e insignias: rojo = error o riesgo, amarillo = aviso (nunca con texto encima), verde azulado = correcto. */
+    --color-danger: var(--color-brand-red); /* Error, riesgo (sólido) | sobre on-fill */
+    --color-warning: var(--color-brand-yellow); /* Aviso (sólido, nunca con texto encima) */
+    --color-success: var(--color-secondary); /* Correcto (sólido) */
+
+    /* @grupo enlace | Enlace | aprobado | Un texto azul (`primary`) que se subraya al pasar el cursor y se oscurece al pulsar. */
+    --color-primary-active: color-mix(in oklab, var(--color-primary) 84%, black); /* Enlace y botón azul pulsados (84 %) */
+
+    /* @grupo error-campo | Error de un campo | aprobado | El borde del campo en rojo y, debajo, el mensaje en rojo oscuro: dice qué está mal y cómo se arregla. */
+    --color-danger-strong: color-mix(in oklab, var(--color-danger) 88%, black); /* Mensaje de error de un campo, texto del chip de error y etiqueta de un KPI en riesgo | sobre danger-soft */
+
+    /* @grupo estados | Estados: texto y fondo | pendiente | Lo que sale de cada color de estado: fuerte (texto: 88 % rojo, 58 % amarillo, 76 % verde azulado, con negro) y suave (fondo, 12 % con blanco), más el hover y el pulsado del rojo. */
+    --color-danger-soft: color-mix(in oklab, var(--color-danger) 12%, white); /* Fondo del chip de error y de la pastilla de riesgo */
+    --color-danger-hover: color-mix(in oklab, var(--color-danger) 92%, black); /* Botón de borrar encima */
+    --color-danger-active: color-mix(in oklab, var(--color-danger) 84%, black); /* Botón de borrar pulsado */
+    --color-warning-strong: color-mix(in oklab, var(--color-warning) 58%, black); /* Texto del chip de advertencia e icono del aviso de advertencia | sobre warning-soft */
+    --color-warning-soft: color-mix(in oklab, var(--color-warning) 12%, white); /* Fondo del chip de advertencia */
+    --color-success-strong: var(--color-teal-strong); /* Texto de correcto | sobre success-soft */
+    --color-success-soft: var(--color-teal-soft); /* Fondo de correcto */
+
+    /* @grupo datos | Segundo color de datos | aprobado | Verde azulado (`secondary`): compras junto a ventas en azul, mapas de calor. Mismo valor que success, otro rol: success dice «está bien», teal dice «la otra serie». */
+    --color-teal: var(--color-secondary); /* Segunda serie de datos */
+    --color-teal-strong: color-mix(in oklab, var(--color-secondary) 76%, black); /* Texto verde azulado | sobre teal-soft */
+    --color-teal-soft: color-mix(in oklab, var(--color-secondary) 12%, white); /* Fondo verde azulado */
+
+    /* @grupo graficos-base | Gráficos: ventas y compras | aprobado | Las dos primeras series, tus colores: ventas en azul, compras en turquesa (verde azulado). */
+    --color-chart-1: var(--color-primary); /* Primera serie: ventas */
+    --color-chart-2: var(--color-secondary); /* Segunda serie: compras */
+
+    /* @grupo graficos | Colores de gráficos | aprobado | Series que se comparan entre sí. Violeta y magenta son tonos nuevos a la misma luminosidad, apartados del rojo y el amarillo, que son de estado. Tinta: una sola serie que no se compara. */
+    --color-chart-ink: var(--color-primary); /* Una sola serie que no se juzga (volumen, horarios) */
+    --color-chart-3: oklch(62% 0.15 305); /* Tercera serie: violeta */
+    --color-chart-4: oklch(62% 0.15 332); /* Cuarta serie: magenta */
+    --color-chart-5: var(--color-ink-3); /* Quinta serie: neutro («Otros») */
+
+    /* @grupo deshabilitado | Deshabilitado | aprobado | Gris sin color salido de `texto`, nunca con opacidad. El contraste es bajo a propósito (WCAG lo exime): subirlo lo haría parecer pulsable. */
+    --color-disabled: color-mix(in oklab, var(--color-texto) 8%, white); /* Relleno del control apagado */
+    --color-disabled-ink: color-mix(in oklab, var(--color-texto) 40%, white); /* Su texto */
+
+    /*
+     * Escala tipográfica con nombre. En INROCONTA había diez tamaños en px sueltos
+     * (13 / 13.5, 11 / 11.5 / 12…); aquí quedan ocho pasos. La equivalencia está en
+     * /fundamentos/tipografia.
+     */
+    --text-display: 24px;
+    --text-display--line-height: 1.2;
+    --text-title: 21px;
+    --text-title--line-height: 1.3;
+    --text-subtitle: 17px;
+    --text-subtitle--line-height: 1.35;
+    --text-heading: 15px;
+    --text-heading--line-height: 1.4;
+    --text-body: 14px;
+    --text-body--line-height: 1.55;
+    --text-ui: 13px;
+    --text-ui--line-height: 1.45;
+    --text-small: 12px;
+    --text-small--line-height: 1.45;
+    --text-caption: 11px;
+    --text-caption--line-height: 1.35;
+
+    /* Radios por rol: lo que va dentro de otra pieza lleva menos radio que ella. */
+    --radius-inner: 7px;
+    --radius-control: 9px;
+    --radius-card: 12px;
+
+    /* Solo lo que flota (toast, menú desplegable) lleva sombra; la tarjeta en la página no. */
+    --shadow-card: 0 2px 4px rgba(29, 29, 27, 0.05), 0 6px 16px rgba(29, 29, 27, 0.06);
+    --shadow-float: 0 4px 8px rgba(29, 29, 27, 0.06), 0 12px 32px rgba(29, 29, 27, 0.1);
+}
+
+@layer base {
+    body {
+        @apply bg-surface font-sans text-body text-ink antialiased;
+    }
+    a {
+        @apply text-primary;
+    }
+    /* Tailwind 4 ya no pone la mano a <button>: sin ella nada parece clicable. Una vez aquí. */
+    button:not(:disabled),
+    [role='button']:not([aria-disabled='true']),
+    summary,
+    select:not(:disabled),
+    label:has(> input:not(:disabled)) {
+        cursor: pointer;
+    }
+    button:disabled,
+    select:disabled,
+    [aria-disabled='true'] {
+        cursor: not-allowed;
+    }
+    code,
+    pre {
+        @apply font-mono;
+    }
+}
+
+/* Desplaza sin mostrar la barra (el menú lateral). */
+@utility no-scrollbar {
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* Texto largo que se desplaza hasta su final mientras su fila está bajo el cursor (ui/hover-marquee.tsx).
+   Solo se mueve un texto que desborda (`data-overflow`, medido en JS) y solo con el cursor o el foco en el host.
+   El span interior pasa a `inline-block` solo entonces, porque un transform no hace nada en una caja en línea, y
+   los puntos suspensivos pasan a `clip` porque taparían la caja atómica entera. El retardo de 0.15 s evita que un
+   cursor que solo cruza la lista ponga todas las filas en movimiento. */
+@keyframes marquee {
+    0%,
+    15% {
+        transform: none;
+    }
+    85%,
+    100% {
+        transform: translateX(var(--marquee-shift));
+    }
+}
+.marquee-host:is(:hover, :focus-within) .marquee[data-overflow] {
+    text-overflow: clip;
+}
+.marquee-host:is(:hover, :focus-within) .marquee[data-overflow] > span {
+    display: inline-block;
+    animation: marquee var(--marquee-duration) ease-in-out 0.15s infinite alternate;
+}
+/* Quien pidió menos movimiento no ve deslizar: el texto bajo el cursor se parte en líneas y se lee entero. */
+@media (prefers-reduced-motion: reduce) {
+    .marquee-host:is(:hover, :focus-within) .marquee[data-overflow] {
+        white-space: normal;
+    }
+    .marquee-host:is(:hover, :focus-within) .marquee[data-overflow] > span {
+        display: inline;
+        animation: none;
+    }
+}

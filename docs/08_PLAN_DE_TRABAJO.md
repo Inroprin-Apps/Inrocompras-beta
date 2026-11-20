@@ -1,0 +1,20 @@
+# 08 · Plan de trabajo (hasta el 01/01/2027)
+
+Cada hito termina con sus criterios de `09_CRITERIOS_ACEPTACION.md` en verde y desplegado en Vercel (preview). Las fechas son una referencia: hoy es 19/11/2026.
+
+| Hito | Contenido | Termina con | Ref. |
+|---|---|---|---|
+| **0. Base** (2–3 días) | Repo GitHub, Next 16 + Tailwind v4 + tokens y componentes de la guía. Proyecto Supabase (dev y prod), migraciones 0001–0004 + seed. **Login con Google, solo con la cuenta de la empresa** (`hd` + disparador de dominio). Layout con barra lateral, «Equipo» para que el administrador asigne área y roles. Vercel con las variables y el cron | Entrar con la cuenta de la empresa; una cuenta de fuera es rechazada; el administrador da roles | 23/11 |
+| **1. Solicitudes y requerimientos** | Solicitudes con ítems y carga Excel; liberar, rechazar, cancelar, rehacer, reenviar. Requerimientos: editar, emitir, observar, RQ del SIDIGE, SKU, anulaciones. Validación técnica. «Te toca» v1. Notificaciones en la app | Criterios A | 29/11 |
+| **2. Proveedores y documentos** | Proveedores (alta por RUC, evaluación de Finanzas, retención de Contabilidad). Subida a Storage → Drive. Lector de PDF (texto + Gemini) con pantalla de confirmación | Criterios B | 3/12 |
+| **3. Plan de compras y Generar OC** | Vista del plan por proyecto (saldo, semáforo, filtros). Carrito → borrador → editar → demasía → emitir. PDF de la OC. Carpeta de Drive | Criterios C | 8/12 |
+| **4. Aprobación** | CG, GOP y GAF desde la ficha y desde el celular; observar, reenviar, rechazar, revocar; aprobar sin demasía. Cuadro de aprobaciones exportable. Correos | Criterios D | 12/12 |
+| **5. Legajo y pagos** | Envío al proveedor por correo. Cuotas, solicitud automática con la factura, retención, observación de Finanzas, programar y pagar. Webhook de InroPay (si existe). Modificación y anulación | Criterios E | 17/12 |
+| **6. Desaduanaje** | Crear, checklist, ciclo, gastos (con lectura de comprobantes), costeo, cierre, reapertura, historial | Criterios F | 20/12 |
+| **7. Piloto** | Datos reales de 1 proyecto, cargados desde su Excel de plan. Prueba con Compras, CG, GOP, GAF y Finanzas. Ajustes | Lista de hallazgos cerrada | 28/12 |
+| **8. Salida** | Migración de los catálogos (43 conceptos, proveedores) y de las OC abiertas. Capacitación corta. Corte del AppSheet | Go-live 01/01 | 31/12 |
+
+## Pruebas
+- **Base:** `node supabase/tests/flujo.test.mjs` en cada PR (GitHub Actions). Cada regla nueva lleva su prueba.
+- **Front:** Playwright con los flujos A–F de `09`, iniciando sesión como usuarios de prueba (en dev, con un proveedor de auth de prueba o tokens sembrados).
+- **Integraciones:** una carpeta de Drive y un remitente de prueba; Gemini con 5 cotizaciones reales anonimizadas.

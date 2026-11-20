@@ -1,0 +1,34 @@
+{
+  "name": "ui-guia",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Guía UI/UX de las apps de INROPRIN: tokens, componentes, patrones y reglas, con ejemplos vivos",
+  "packageManager": "pnpm@11.4.0",
+  "scripts": {
+    "dev": "next dev --port 3100",
+    "build": "next build",
+    "start": "next start --port 3100",
+    "typecheck": "tsc --noEmit",
+    "descargas": "node --no-warnings scripts/generar-descargas.mjs"
+  },
+  "dependencies": {
+    "echarts": "6.1.0",
+    "echarts-for-react": "3.0.6",
+    "gsap": "^3.15.1",
+    "lenis": "^1.3.27",
+    "lucide-react": "^1.59.0",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-day-picker": "^10.0.2",
+    "react-dom": "19.3.0",
+    "sonner": "^2.0.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "^5"
+  }
+}
