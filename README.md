@@ -38,6 +38,6 @@ pnpm dev          # necesita .env.local (copia .env.example)
 
 ## Verificado
 
-- `pnpm test:db`: el flujo completo del AppSheet (57 verificaciones) y el acceso y Equipo del Hito 0 (25).
+- `pnpm test:db`: el flujo completo del AppSheet (57 verificaciones) y el acceso y Equipo del Hito 0 (25) y los cierres de huecos por NULL (26).
 - Build de producción y la pantalla de login en escritorio y celular.
-- Correcciones de seguridad sobre el paquete original en `supabase/migrations/0005_equipo.sql` (ver los comentarios del archivo).
+- Correcciones de seguridad sobre el paquete original en `supabase/migrations/0005_equipo.sql` y `0006_correcciones_null.sql` (ver los comentarios de cada archivo).

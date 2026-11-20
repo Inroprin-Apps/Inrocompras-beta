@@ -23,6 +23,7 @@ await db.exec(`
 for (const f of ['0001_esquema.sql', '0002_seguridad.sql', '0003_acciones.sql']) await db.exec(leer('migrations/' + f));
 await db.exec(leer('seed.sql'));
 await db.exec(leer('migrations/0005_equipo.sql'));
+await db.exec(leer('migrations/0006_correcciones_null.sql'));
 await db.exec(`create trigger alta_usuario after insert on auth.users for each row execute function app.alta_usuario();`);
 await db.exec(`grant usage, select on all sequences in schema public to authenticated;`);
 await db.exec(`insert into public.config (clave, valor) values ('admins_iniciales', '["jefa@inroprin.com"]')`);

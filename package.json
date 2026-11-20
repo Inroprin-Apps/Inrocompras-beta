@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test:db": "node supabase/tests/flujo.test.mjs && node supabase/tests/equipo.test.mjs"
+    "test:db": "node supabase/tests/flujo.test.mjs && node supabase/tests/equipo.test.mjs && node supabase/tests/null.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
