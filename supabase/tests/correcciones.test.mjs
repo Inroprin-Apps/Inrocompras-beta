@@ -73,5 +73,16 @@ await como('pcp', `select public.ac_item_sku($1, ' me001 ')`, [it]);
 check((await adm(`select codigo_sidige from public.requerimiento_items where id = $1`, [it]))[0].codigo_sidige === 'ME001', 'Al ítem vivo sí, en mayúsculas');
 await falla('tec', `select public.ac_item_sku($1, 'ME002')`, [it], 'Técnica no asigna SKU');
 
+console.log('\n4. Te toca con desaduanajes (0062)');
+const imp = '44444444-0000-0000-0000-000000000009';
+await adm(`insert into public.usuarios (id, email, nombre, area) values ($1, 'imp@inroprin.com', 'Imp', 'Importaciones')`, [imp]);
+const prov = (await adm(`insert into public.proveedores (razon_social, origen, pais) values ('Ext', 'Extranjero', 'China') returning id`))[0].id;
+const oc = (await adm(`insert into public.ordenes (procedencia, tipo_impuesto, proveedor_id, comprador_id, estatus) values ('Importación', 'Sin IGV', $1, $2, 'Legajo incompleto') returning id`, [prov, imp]))[0].id;
+await adm(`insert into public.desaduanajes (numero, empresa_id, orden_duena_id, tipo, creado_por) values ('DES-T-1', 'INROPRIN', $1, 'Marítimo', $2)`, [oc, imp]);
+await db.exec(`reset role; select set_config('test.uid', '${imp}', false); set role authenticated;`);
+const bandeja = (await db.query(`select tabla, paso from public.te_toca()`)).rows; await db.exec('reset role');
+check(bandeja.some((r) => r.tabla === 'desaduanajes' && r.paso === 'Completar documentos de importación'), 'Importaciones ve el desaduanaje en su bandeja');
+check((await como('pcp', `select * from public.te_toca() where tabla = 'desaduanajes'`)).length === 0, 'Planeamiento no');
+
 console.log(`\n${ok} correctas, ${mal} con error`);
 process.exit(mal ? 1 : 0);
