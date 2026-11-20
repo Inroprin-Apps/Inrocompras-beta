@@ -240,7 +240,7 @@ function Ocs({ f, verOc }: { f: FilaPlan; verOc: boolean }) {
                     ) : (
                         <span className="font-medium">{o.numero ?? 'Borrador'}</span>
                     )}
-                    <span className="text-ink-2"> · {o.estatus}</span>
+                    {o.numero && <span className="text-ink-2"> · {o.estatus}</span>}
                 </div>
             ))}
             {f.pagado && <Chip tone="ok">Pagado</Chip>}

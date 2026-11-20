@@ -45,6 +45,8 @@ export function SelectMenu({
 }) {
     const [open, setOpen] = useState(false);
     const [upward, setUpward] = useState(false);
+    // Dentro de un diálogo (que recorta lo que desborda) la lista se abre en línea, empujando el contenido.
+    const [enLinea, setEnLinea] = useState(false);
     const rootRef = useRef<HTMLDivElement>(null);
     const selected = options.find((o) => o.value === value);
 
@@ -56,6 +58,7 @@ export function SelectMenu({
         if (!open && rootRef.current) {
             const box = rootRef.current.getBoundingClientRect();
             const below = window.innerHeight - box.bottom;
+            setEnLinea(!!rootRef.current.closest('dialog'));
             setUpward(below < LIST_HEIGHT && box.top > below);
         }
         setOpen((o) => !o);
@@ -81,7 +84,7 @@ export function SelectMenu({
             {open && (
                 <div
                     role="listbox"
-                    className={`absolute left-0 z-20 max-h-60 w-full overflow-auto rounded-control border border-line bg-surface p-1 shadow-float ${upward ? 'bottom-full mb-1' : 'mt-1'}`}
+                    className={`${enLinea ? 'relative mt-1' : `absolute left-0 z-20 ${upward ? 'bottom-full mb-1' : 'mt-1'}`} max-h-60 w-full overflow-auto rounded-control border border-line bg-surface p-1 shadow-float`}
                 >
                     {options.map((o) => (
                         <button

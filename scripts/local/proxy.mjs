@@ -29,7 +29,7 @@ function verificar(t) {
 const CORS = {
     'access-control-allow-origin': '*',
     'access-control-allow-methods': 'GET,POST,PATCH,PUT,DELETE,OPTIONS,HEAD',
-    'access-control-allow-headers': 'authorization,apikey,content-type,x-client-info,prefer,accept-profile,content-profile,range,x-supabase-api-version',
+    'access-control-allow-headers': 'authorization,apikey,content-type,x-client-info,prefer,accept-profile,content-profile,range,x-supabase-api-version,x-upsert,cache-control',
     'access-control-expose-headers': 'content-range,content-location',
 };
 
