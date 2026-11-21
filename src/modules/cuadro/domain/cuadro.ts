@@ -107,11 +107,27 @@ export const distintos = (filas: FilaCuadro[], t: TituloCuadro) =>
 
 // ── Presentación ──
 const num = new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-/** Cómo se ve una celda en la tabla de la pantalla. */
-export function textoCelda(c: ColumnaCuadro, v: Valor): string {
+const SIMBOLOS: Record<string, string> = { PEN: 'S/', USD: 'US$', EUR: '€' };
+/** La moneda de una columna de montos: «Monto en Soles» en PEN; «Monto» en su «Moneda original». */
+export function monedaDe(c: ColumnaCuadro, valores?: Partial<Record<TituloCuadro, Valor>>): string | null {
+    if (c.tipo !== 'moneda') return null;
+    if (c.titulo === 'Monto en Soles') return 'PEN';
+    return txt(valores?.['Moneda original'] ?? null) || null;
+}
+/**
+ * Cómo se ve una celda en la tabla de la pantalla. Con la fila (`valores`), cada monto lleva su moneda
+ * («US$ 1,234.50», «-S/ 20.00»): la tabla mezcla monedas (guía, «Tablas»).
+ */
+export function textoCelda(c: ColumnaCuadro, v: Valor, valores?: Partial<Record<TituloCuadro, Valor>>): string {
     if (v == null || v === '') return '';
     if (c.tipo === 'si_no') return v === true ? 'Sí' : v === false ? 'No' : String(v);
-    if (c.tipo === 'moneda') return num.format(Number(v));
+    if (c.tipo === 'moneda') {
+        const n = Number(v);
+        const m = monedaDe(c, valores);
+        if (!m) return num.format(n);
+        const cifra = num.format(Math.abs(n));
+        return `${n < 0 && cifra !== '0.00' ? '-' : ''}${SIMBOLOS[m] ?? m} ${cifra}`;
+    }
     if (c.tipo === 'pct') return `${Math.round(Number(v) * 10000) / 100} %`;
     if (c.tipo === 'fecha') {
         const [y, m, d] = String(v).slice(0, 10).split('-');

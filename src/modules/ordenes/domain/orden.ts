@@ -219,14 +219,14 @@ export function lateral(o: { estatus: string }): string | null {
     return null;
 }
 
-const dinero = (moneda: string) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: moneda, minimumFractionDigits: 2 });
-/** «S/ 1,234.56», «US$ 10.00» con Intl es-PE. */
+const SIMBOLOS: Record<string, string> = { PEN: 'S/', USD: 'US$', EUR: '€' };
+/** El símbolo de la moneda: «S/», «US$», «€»; las demás, su código (GBP). */
+export const simbolo = (moneda: string) => SIMBOLOS[moneda] ?? moneda;
+/** «S/ 1,234.56», «US$ 10.00», «-S/ 5.00»: coma de miles, punto y dos decimales, el signo menos delante (guía, «Formatos»). */
 export function monto(n: number, moneda = 'PEN'): string {
-    try {
-        return dinero(moneda).format(n);
-    } catch {
-        return `${moneda} ${n.toFixed(2)}`;
-    }
+    const [entero, dec] = Math.abs(n).toFixed(2).split('.');
+    const signo = n < 0 && Number(`${entero}.${dec}`) !== 0 ? '-' : '';
+    return `${signo}${simbolo(moneda)} ${entero.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}.${dec}`;
 }
 export const cantidad = (n: number) => new Intl.NumberFormat('es-PE', { maximumFractionDigits: 3 }).format(n);
 

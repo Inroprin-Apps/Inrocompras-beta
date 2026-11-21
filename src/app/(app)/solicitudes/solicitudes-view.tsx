@@ -16,9 +16,10 @@ import {
     type OrdenSolicitud,
     type Pestana,
 } from '@/modules/solicitudes/application/views.ts';
-import { FilterRow, SearchBox, SectionTitle, T } from '@/shared/ui/bits.tsx';
+import { FilterRow, SearchBox, T } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
@@ -37,6 +38,9 @@ const ORDENES: { value: OrdenSolicitud; label: string }[] = [
     { value: 'antiguas', label: 'Más antiguas' },
     { value: 'numero', label: 'Número' },
 ];
+
+/** La fila abre la ficha: se toca entera, se ve el foco del teclado. */
+const FILA = 'cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary';
 
 const vista$ = urlState(
     { ...FILTROS_SOLICITUD, orden: 'recientes' as OrdenSolicitud, page: '1', ver: '' },
@@ -73,27 +77,38 @@ export function SolicitudesView() {
         return proyectos.filter((p) => ids.has(p.id));
     }, [estado.data, proyectos]);
 
-    const vacia =
-        v.pestana === 'liberar' ? (
+    const conFiltros = !!(v.texto || v.estado || v.tipo || v.proyecto);
+    const quitarFiltros = () => vista$.set({ texto: '', estado: '', tipo: '', proyecto: '' });
+    const vacia = conFiltros ? (
+        <ListaVacia titulo="Ninguna solicitud coincide">
+            Prueba con otra búsqueda o quita los filtros.
+            <div className="mt-4">
+                <Button variant="secondary" onClick={quitarFiltros}>
+                    Quitar filtros
+                </Button>
+            </div>
+        </ListaVacia>
+    ) : v.pestana === 'liberar' ? (
             <ListaVacia titulo="Nada por liberar">Aquí aparecen las solicitudes de las etapas que apruebas o de las personas a tu cargo.</ListaVacia>
         ) : v.pestana === 'mias' && !(estado.data ?? []).some((s) => s.solicitanteId === perfil.id) ? (
             <ListaVacia titulo="Aún no tienes solicitudes">
                 Crea una con «Nueva solicitud»: eliges el proyecto o a tu jefe, escribes el sustento y agregas los ítems.
             </ListaVacia>
         ) : (
-            <ListaVacia titulo="Ninguna solicitud coincide">Prueba con otra búsqueda o quita los filtros.</ListaVacia>
+            <ListaVacia titulo="No hay solicitudes">Las solicitudes que puedes ver aparecen aquí en cuanto alguien las crea.</ListaVacia>
         );
 
     return (
         <>
-            <div className="flex items-start gap-3">
-                <div className="flex-1">
-                    <SectionTitle title="Solicitudes" />
-                </div>
-                <Button onClick={() => setCreando(true)}>
-                    <Plus size={16} /> Nueva solicitud
-                </Button>
-            </div>
+            <Encabezado
+                titulo="Solicitudes"
+                actualizado={estado.actualizado}
+                accion={
+                    <Button onClick={() => setCreando(true)}>
+                        <Plus size={16} /> Nueva solicitud
+                    </Button>
+                }
+            />
             <BarraPestanas
                 activa={v.pestana}
                 onCambiar={(pestana) => vista$.set({ pestana })}
@@ -131,6 +146,9 @@ export function SolicitudesView() {
             <Lista estado={{ data: estado.data ? lista : null, error: estado.error }} onReintentar={() => void solicitudesStore.retry()} vacia={vacia}>
                 {() => (
                     <>
+                        <p className="mb-2 text-small text-ink-3">
+                            {lista.length} {lista.length === 1 ? 'solicitud' : 'solicitudes'}
+                        </p>
                         <div className="overflow-x-auto">
                             <table className={T.table}>
                                 <thead>
@@ -139,8 +157,8 @@ export function SolicitudesView() {
                                         <th className={T.th}>Destino</th>
                                         <th className={`${T.th} hidden sm:table-cell`}>Estado</th>
                                         <th className={`${T.th} hidden md:table-cell`}>Solicitante</th>
-                                        <th className={`${T.thNum} hidden sm:table-cell`}>Ítems</th>
-                                        <th className={`${T.thNum} hidden sm:table-cell`}>Creada</th>
+                                        <th className={`${T.thNum} hidden text-right sm:table-cell`}>Ítems</th>
+                                        <th className={`${T.thNum} hidden text-right sm:table-cell`}>Creada</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -148,7 +166,7 @@ export function SolicitudesView() {
                                         <tr
                                             key={s.id}
                                             tabIndex={0}
-                                            className={`${T.row} cursor-pointer ${v.ver === s.id ? 'bg-primary-soft' : ''}`}
+                                            className={`${T.row} ${FILA} ${v.ver === s.id ? 'bg-primary-soft' : ''}`}
                                             onClick={() => vista$.set({ ver: s.id })}
                                             onKeyDown={(e) => e.key === 'Enter' && vista$.set({ ver: s.id })}
                                         >
@@ -172,8 +190,8 @@ export function SolicitudesView() {
                                             <td className={`${T.td} hidden md:table-cell`}>
                                                 {quien(s.solicitanteId) || <span className="text-ink-3">—</span>}
                                             </td>
-                                            <td className={`${T.tdNum} hidden sm:table-cell`}>{s.nItems}</td>
-                                            <td className={`${T.tdNum} hidden sm:table-cell`}>{dmy(s.creado)}</td>
+                                            <td className={`${T.tdNum} hidden text-right sm:table-cell`}>{s.nItems}</td>
+                                            <td className={`${T.tdNum} hidden text-right sm:table-cell`}>{dmy(s.creado)}</td>
                                         </tr>
                                     ))}
                                 </tbody>

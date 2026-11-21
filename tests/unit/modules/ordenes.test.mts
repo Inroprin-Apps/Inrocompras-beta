@@ -115,6 +115,11 @@ describe('órdenes', () => {
         expect(leerNumero('12,5')).toBe(12.5);
         expect(leerNumero('x')).toBeNull();
         expect(leerNumero(' ')).toBeNull();
-        expect(monto(3894)).toMatch(/S\/\s?3,894\.00/);
+        expect(monto(3894)).toBe('S/ 3,894.00');
+        expect(monto(1234567.5, 'USD')).toBe('US$ 1,234,567.50');
+        expect(monto(-1250.5)).toBe('-S/ 1,250.50');
+        expect(monto(0.001, 'EUR')).toBe('€ 0.00');
+        expect(monto(-0.001)).toBe('S/ 0.00');
+        expect(monto(10, 'GBP')).toBe('GBP 10.00');
     });
 });

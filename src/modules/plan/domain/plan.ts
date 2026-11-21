@@ -110,8 +110,9 @@ export function criticidad(plazoDias: number | null): Criticidad {
     if (plazoDias >= 30) return 'Normal';
     return 'Sencillo';
 }
-export const tonoCriticidad = (c: Criticidad): 'danger' | 'warn' | 'info' | 'muted' =>
-    c === 'Fuera de plazo' || c === 'Muy crítico' ? 'danger' : c === 'Crítico' ? 'warn' : c === 'Sin plazo' ? 'muted' : 'info';
+/** Rojo lo que ya es un problema, ámbar lo crítico; Normal, Sencillo y Sin plazo no piden nada: gris (guía, «Color»). */
+export const tonoCriticidad = (c: Criticidad): 'danger' | 'warn' | 'muted' =>
+    c === 'Fuera de plazo' || c === 'Muy crítico' ? 'danger' : c === 'Crítico' ? 'warn' : 'muted';
 
 /** Por qué no se puede comprar la línea (en palabras), o null. `padre`: la descripción del equipo que la incluye. */
 export function bloqueo(l: LineaPlan, c: Pick<ConfigPlan, 'exigirValidacion'>, padre?: string): string | null {

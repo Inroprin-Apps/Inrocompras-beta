@@ -66,6 +66,9 @@ describe('cuadro de aprobaciones', () => {
         const col = (t: TituloCuadro) => COLUMNAS_CUADRO.find((c) => c.titulo === t)!;
         expect(textoCelda(col('VB C. GESTION'), true)).toBe('Sí');
         expect(textoCelda(col('Monto'), 1234.5)).toBe('1,234.50');
+        expect(textoCelda(col('Monto'), 1234.5, { 'Moneda original': 'USD' })).toBe('US$ 1,234.50');
+        expect(textoCelda(col('Monto'), -20, { 'Moneda original': 'PEN' })).toBe('-S/ 20.00');
+        expect(textoCelda(col('Monto en Soles'), 4567.891, { 'Moneda original': 'USD' })).toBe('S/ 4,567.89');
         expect(textoCelda(col('% adelanto'), 0.3)).toBe('30 %');
         expect(textoCelda(col('Fecha'), '2026-11-02')).toBe('02/11/2026');
         expect(valorExcel(col('Monto'), '10.5')).toBe(10.5);

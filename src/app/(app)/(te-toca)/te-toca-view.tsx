@@ -4,8 +4,9 @@
 // lo que espera más de 3 días en rojo. Cada fila lleva a su ficha.
 import Link from 'next/link';
 import { agruparPorPaso, diasDesde, rutaDe } from '@/modules/comun/application/views.ts';
-import { Notice, SectionTitle } from '@/shared/ui/bits.tsx';
+import { Notice } from '@/shared/ui/bits.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
@@ -19,7 +20,7 @@ export function TeTocaView() {
     const sinArea = perfil.area === 'Sin área' && !perfil.roles.length;
     return (
         <>
-            <SectionTitle title="Te toca" />
+            <Encabezado titulo="Te toca" actualizado={estado.actualizado} />
             {sinArea && (
                 <Notice tone="info" cerrable={false}>
                     Tu cuenta aún no tiene área ni roles. Pide al administrador que te los asigne en Equipo; mientras tanto puedes crear solicitudes.
