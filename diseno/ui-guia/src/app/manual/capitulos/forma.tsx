@@ -38,21 +38,8 @@ export function Forma() {
 
         // --- Espaciado: cada barra mide lo que dice su paso ---
         gsap.set(q('.e-barra'), { transformOrigin: 'left center' });
-        gsap.from(q('.e-fila'), {
-            x: -30,
-            opacity: 0,
-            stagger: 0.12,
-            duration: 0.6,
-            ease: 'power2.out',
-            scrollTrigger: { trigger: q('#espaciado')[0], start: 'top 65%', toggleActions: 'play none none reverse' },
-        });
-        gsap.from(q('.e-barra'), {
-            scaleX: 0,
-            stagger: 0.12,
-            duration: 0.8,
-            ease: 'power3.out',
-            scrollTrigger: { trigger: q('#espaciado')[0], start: 'top 65%', toggleActions: 'play none none reverse' },
-        });
+        gsap.from(q('.e-fila'), { x: -30, opacity: 0, stagger: 0.12, duration: 0.6, ease: 'power2.out', scrollTrigger: { trigger: q('#espaciado')[0], start: 'top 65%', toggleActions: 'play none none reverse' } });
+        gsap.from(q('.e-barra'), { scaleX: 0, stagger: 0.12, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: q('#espaciado')[0], start: 'top 65%', toggleActions: 'play none none reverse' } });
     });
 
     return (
@@ -66,8 +53,7 @@ export function Forma() {
                                 Esquinas moderadas, de dentro hacia fuera
                             </h2>
                             <p className="text-ink-2" style={SUBTITULAR}>
-                                Cuanto más grande la pieza, más redonda; y lo que va dentro de otra lleva menos radio que ella. Tres radios tienen nombre
-                                propio.
+                                Cuanto más grande la pieza, más redonda; y lo que va dentro de otra lleva menos radio que ella. Tres radios tienen nombre propio.
                             </p>
                         </div>
                         <div className="flex flex-col gap-5">
@@ -104,8 +90,7 @@ export function Forma() {
                                 Un solo borde; la sombra, solo para lo que flota
                             </h2>
                             <p className="text-ink-2" style={SUBTITULAR}>
-                                Las tarjetas y los controles comparten el mismo gris fino y no llevan sombra: viven en la página. Lo que se abre encima, como un
-                                panel o un aviso que sale, sí la lleva.
+                                Las tarjetas y los controles comparten el mismo gris fino y no llevan sombra: viven en la página. Lo que se abre encima, como un panel o un aviso que sale, sí la lleva.
                             </p>
                         </div>
                         <div className="grid gap-5 md:grid-cols-3">
@@ -113,9 +98,7 @@ export function Forma() {
                                 <div className="rounded-card border border-line bg-surface p-5">
                                     <p className="text-ui font-semibold">En la página</p>
                                     <p className="mt-1 text-small text-ink-2">Borde fino, sin sombra.</p>
-                                    <div className="mt-4 rounded-control border border-control bg-surface px-3 py-2 text-ui text-ink-3">
-                                        Un campo, el mismo borde
-                                    </div>
+                                    <div className="mt-4 rounded-control border border-control bg-surface px-3 py-2 text-ui text-ink-3">Un campo, el mismo borde</div>
                                 </div>
                                 <code className="text-small text-ink-2">line · texto al 20 % · #cccccc</code>
                             </div>

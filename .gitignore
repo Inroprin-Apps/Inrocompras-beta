@@ -9,3 +9,7 @@ out/
 next-env.d.ts
 supabase/.temp/
 supabase/.branches/
+
+# Playwright
+/test-results/
+/playwright-report/

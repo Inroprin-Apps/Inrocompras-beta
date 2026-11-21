@@ -69,10 +69,7 @@ export default function Tarjetas() {
                 <Rules
                     items={[
                         ['De 2 a 4 KPI por fila, y solo los que se miran todos los días.', 'Si todo es KPI, nada destaca.'],
-                        [
-                            'La etiqueta roja y la pastilla de riesgo solo cuando hay algo que corregir.',
-                            'Una cifra que solo resta (notas de crédito) no es una alerta.',
-                        ],
+                        ['La etiqueta roja y la pastilla de riesgo solo cuando hay algo que corregir.', 'Una cifra que solo resta (notas de crédito) no es una alerta.'],
                         ['No se anidan tarjetas.', 'Dentro de una tarjeta se separa con border-line o surface-2.'],
                     ]}
                 />

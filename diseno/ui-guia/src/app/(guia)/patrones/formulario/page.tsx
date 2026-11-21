@@ -88,7 +88,9 @@ const show = (k) => ((sent || touched[k]) && errors[k]) || undefined;
                     <Card title="Nueva orden de compra" className="mx-auto max-w-2xl">
                         <form onSubmit={submit} noValidate className="flex flex-col gap-4">
                             {sent && count > 0 && (
-                                <Notice tone="danger">Revisa {count === 1 ? 'el campo marcado' : `los ${count} campos marcados`} en rojo.</Notice>
+                                <Notice tone="danger">
+                                    Revisa {count === 1 ? 'el campo marcado' : `los ${count} campos marcados`} en rojo.
+                                </Notice>
                             )}
                             <div className="grid gap-4 sm:grid-cols-[12rem_1fr]">
                                 <Field label="RUC" hint="11 dígitos." error={show('ruc')}>
@@ -172,10 +174,7 @@ const show = (k) => ((sent || touched[k]) && errors[k]) || undefined;
                 <Rules
                     items={[
                         ['Los campos en el orden en que el usuario tiene los datos (normalmente, el del documento en papel).', ''],
-                        [
-                            'Al enviar con errores: un aviso arriba con cuántos hay, y cada error junto a su campo.',
-                            'El aviso dice que hay algo; el campo dice qué.',
-                        ],
+                        ['Al enviar con errores: un aviso arriba con cuántos hay, y cada error junto a su campo.', 'El aviso dice que hay algo; el campo dice qué.'],
                         ['El botón principal abajo a la derecha, «Cancelar» a su izquierda.', ''],
                         ['Mientras guarda: el botón deshabilitado y diciendo «Guardando…».', 'Nada de doble envío.'],
                         ['Al guardar, un toast que nombra lo guardado, y el formulario limpio o la pantalla del registro nuevo.', ''],

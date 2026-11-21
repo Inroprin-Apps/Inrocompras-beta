@@ -16,7 +16,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@google/genai": "2.32.0",
@@ -41,6 +42,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
@@ -50,6 +52,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.14.0",
+    "playwright": "1.63.0",
     "prettier": "^3.10.1",
     "tailwindcss": "4.3.3",
     "typescript": "^5",

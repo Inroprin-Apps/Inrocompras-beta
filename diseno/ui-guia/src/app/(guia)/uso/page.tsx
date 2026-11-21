@@ -26,16 +26,8 @@ pnpm add lucide-react sonner`}</code>
                 <DocTable
                     head={['De la guía', 'A la app', 'Qué es']}
                     rows={[
-                        [
-                            <Code key="a">src/app/globals.css</Code>,
-                            <Code key="b">src/app/globals.css</Code>,
-                            'Todos los tokens: color, escala tipográfica, radios, sombras, y la base (cursor, fuente).',
-                        ],
-                        [
-                            <Code key="a">src/ui/</Code>,
-                            <Code key="b">src/shared/ui/</Code>,
-                            'Los componentes: button, card, bits, field, hueco, pager, period-picker, toaster, format.',
-                        ],
+                        [<Code key="a">src/app/globals.css</Code>, <Code key="b">src/app/globals.css</Code>, 'Todos los tokens: color, escala tipográfica, radios, sombras, y la base (cursor, fuente).'],
+                        [<Code key="a">src/ui/</Code>, <Code key="b">src/shared/ui/</Code>, 'Los componentes: button, card, bits, field, hueco, pager, period-picker, toaster, format.'],
                         [<Code key="a">public/IconRoland.png</Code>, <Code key="b">public/</Code>, 'El icono de la pestaña.'],
                     ]}
                 />
@@ -66,10 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Section title="Al cambiar algo">
                 <Rules
                     items={[
-                        [
-                            'Primero en la guía, luego en las apps.',
-                            'La guía es la fuente: si un componente cambia en una app y no aquí, la próxima app copia el viejo.',
-                        ],
+                        ['Primero en la guía, luego en las apps.', 'La guía es la fuente: si un componente cambia en una app y no aquí, la próxima app copia el viejo.'],
                         ['Un token nuevo va con su rol y su ejemplo.', 'Si no se puede decir para qué sirve en una frase, probablemente sobra.'],
                         ['Nada de valores sueltos en las apps.', 'Un text-[13px] o un #006db1 en una app es una señal de que falta algo en la guía.'],
                     ]}

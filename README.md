@@ -8,18 +8,22 @@ Lee primero `CLAUDE.md` (reglas del repo) y `docs/` (alcance, roles, estados, pl
 
 ## Estado
 
-| Hito                                                          | Estado                                                                              |
-| ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| 0. Base: login con Google, menú por perfil, «Te toca», Equipo | Código listo y probado en local. Falta conectarlo a Supabase y Vercel (pasos abajo) |
-| 1–8                                                           | Pendientes (`docs/08_PLAN_DE_TRABAJO.md`)                                           |
+Hitos 1–6 construidos y publicados (ver `docs/ESTADO.md`): solicitudes, requerimientos y validaciones, plan de compras, órdenes y cuadro comparativo, pagos, desaduanaje, legajo en Drive, correo, lector de PDF e InroPay. Lo pendiente de configurar está en `docs/ESTADO.md`.
 
 ## Desarrollo
 
 ```bash
 pnpm install
-pnpm test:db      # reglas de la base en PGlite (sin Docker)
-pnpm typecheck
 pnpm dev          # necesita .env.local (copia .env.example)
+pnpm check        # tipos, lint, fronteras (depcruise), formato, dominio (vitest) y reglas de la base (PGlite)
+```
+
+Pruebas en navegador (Playwright) contra un Supabase local con 14 personas inventadas (`scripts/local/README.md`):
+
+```bash
+bash scripts/local/levantar.sh   # Postgres, PostgREST y Storage en Docker + datos de prueba
+pnpm build
+pnpm test:e2e                     # cada pantalla por perfil, en escritorio y celular, y el alta de una solicitud
 ```
 
 ## Puesta en marcha (una vez por ambiente: dev y prod)
@@ -35,9 +39,3 @@ pnpm dev          # necesita .env.local (copia .env.example)
 3. **Google OAuth** (Google Cloud de la empresa): pantalla de consentimiento **Interna**; cliente OAuth «Aplicación web» con la URL de callback que muestra Supabase (`https://<proyecto>.supabase.co/auth/v1/callback`). Copia el ID y el secreto en Supabase → Authentication → Providers → Google. Apaga el login por correo.
 4. **Supabase → Authentication → URL Configuration**: Site URL = la URL de Vercel; Redirect URLs = `https://<app>.vercel.app/auth/callback` y `http://localhost:3000/auth/callback`.
 5. **Vercel**: importa este repo; variables de `.env.example` (al menos `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`).
-
-## Verificado
-
-- `pnpm test:db`: el flujo completo del AppSheet (57 verificaciones) y el acceso, Equipo y permisos como en Supabase (32) y los cierres de huecos por NULL (26).
-- Build de producción y la pantalla de login en escritorio y celular.
-- Correcciones de seguridad sobre el paquete original en `supabase/migrations/0005_equipo.sql` y `0006_correcciones_null.sql`, `0007_permisos_supabase.sql` y `0008_permisos_equipo.sql` (ver los comentarios de cada archivo).

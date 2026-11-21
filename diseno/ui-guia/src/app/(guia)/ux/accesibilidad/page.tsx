@@ -58,10 +58,7 @@ export default function Accesibilidad() {
             <Section title="Tamaño y zoom">
                 <Rules
                     items={[
-                        [
-                            'Las pantallas funcionan al 200 % de zoom y a 360 px de ancho.',
-                            'Sin desplazamiento horizontal de la página; las tablas se desplazan dentro de su tarjeta.',
-                        ],
+                        ['Las pantallas funcionan al 200 % de zoom y a 360 px de ancho.', 'Sin desplazamiento horizontal de la página; las tablas se desplazan dentro de su tarjeta.'],
                         ['Lo que se toca en móvil mide al menos 36 px de alto.', 'Los botones md ya miden eso.'],
                     ]}
                 />

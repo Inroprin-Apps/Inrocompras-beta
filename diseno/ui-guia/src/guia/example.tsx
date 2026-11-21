@@ -7,7 +7,17 @@ import { useState, type ReactNode } from 'react';
 import { Check, Code2, Copy } from 'lucide-react';
 import { CARD } from '../ui/card.tsx';
 
-export function Example({ title, code, children, padded = true }: { title?: string; code?: string; children: ReactNode; padded?: boolean }) {
+export function Example({
+    title,
+    code,
+    children,
+    padded = true,
+}: {
+    title?: string;
+    code?: string;
+    children: ReactNode;
+    padded?: boolean;
+}) {
     const [show, setShow] = useState(false);
     const [copied, setCopied] = useState(false);
     const copy = async () => {

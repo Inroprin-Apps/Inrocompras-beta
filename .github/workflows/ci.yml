@@ -16,10 +16,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Reglas de la base (PGlite)
-        run: pnpm test:db
-      - name: Tipos
-        run: pnpm typecheck
+      - name: Tipos, lint, fronteras, formato, dominio y reglas de la base (PGlite)
+        run: pnpm check
       - name: Build
         run: pnpm build
         env:

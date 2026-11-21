@@ -92,8 +92,7 @@ export function Color() {
                                 Un color por rol; el resto, derivado
                             </h2>
                             <p className="text-ink-2" style={SUBTITULAR}>
-                                Del azul salen sus estados con una regla fija: se mezcla con negro para oscurecer y con blanco para aclarar. Nunca se escribe un
-                                hex nuevo para un hover.
+                                Del azul salen sus estados con una regla fija: se mezcla con negro para oscurecer y con blanco para aclarar. Nunca se escribe un hex nuevo para un hover.
                             </p>
                         </div>
                         <div className="flex flex-col gap-6">
@@ -132,8 +131,7 @@ export function Color() {
                                 Un texto se lee sobre su fondo
                             </h2>
                             <p className="text-ink-2" style={SUBTITULAR}>
-                                El texto pide 4.5 a 1 contra su fondo. Un color claro de la marca no sirve de texto: para eso están sus versiones «fuertes». El
-                                amarillo nunca lleva texto.
+                                El texto pide 4.5 a 1 contra su fondo. Un color claro de la marca no sirve de texto: para eso están sus versiones «fuertes». El amarillo nunca lleva texto.
                             </p>
                         </div>
                         <div className="flex flex-col gap-3">
@@ -156,11 +154,7 @@ export function Color() {
                                                     style={{ width: `${Math.min(100, (r / MAXIMO) * 100)}%` }}
                                                 />
                                                 {/* La raya del mínimo: 4.5 a 1 */}
-                                                <span
-                                                    aria-hidden
-                                                    className="absolute top-[-4px] bottom-[-4px] w-px bg-ink"
-                                                    style={{ left: `${(4.5 / MAXIMO) * 100}%` }}
-                                                />
+                                                <span aria-hidden className="absolute top-[-4px] bottom-[-4px] w-px bg-ink" style={{ left: `${(4.5 / MAXIMO) * 100}%` }} />
                                             </div>
                                         </div>
                                         <b className="w-16 text-right text-ui font-semibold tabular-nums">{r ? r.toFixed(1) : '…'}:1</b>

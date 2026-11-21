@@ -21,30 +21,9 @@ const REFERENCIA = [
 export function Descargas() {
     const lista = useMemo(() => piezas('/IconRoland.png'), []);
     const raiz = useAnimacion((q) => {
-        gsap.from(q('.dl-cabeza > *'), {
-            y: 40,
-            opacity: 0,
-            stagger: 0.14,
-            duration: 0.7,
-            ease: 'power2.out',
-            scrollTrigger: { trigger: q('#descargas')[0], start: 'top 70%', toggleActions: 'play none none reverse' },
-        });
-        gsap.from(q('.dl-pieza'), {
-            y: 70,
-            opacity: 0,
-            stagger: 0.12,
-            duration: 0.8,
-            ease: 'power3.out',
-            scrollTrigger: { trigger: q('.dl-rejilla')[0], start: 'top 80%', toggleActions: 'play none none reverse' },
-        });
-        gsap.from(q('.ci-bloque > *'), {
-            y: 36,
-            opacity: 0,
-            stagger: 0.14,
-            duration: 0.7,
-            ease: 'power2.out',
-            scrollTrigger: { trigger: q('.ci-bloque')[0], start: 'top 80%', toggleActions: 'play none none reverse' },
-        });
+        gsap.from(q('.dl-cabeza > *'), { y: 40, opacity: 0, stagger: 0.14, duration: 0.7, ease: 'power2.out', scrollTrigger: { trigger: q('#descargas')[0], start: 'top 70%', toggleActions: 'play none none reverse' } });
+        gsap.from(q('.dl-pieza'), { y: 70, opacity: 0, stagger: 0.12, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: q('.dl-rejilla')[0], start: 'top 80%', toggleActions: 'play none none reverse' } });
+        gsap.from(q('.ci-bloque > *'), { y: 36, opacity: 0, stagger: 0.14, duration: 0.7, ease: 'power2.out', scrollTrigger: { trigger: q('.ci-bloque')[0], start: 'top 80%', toggleActions: 'play none none reverse' } });
     });
 
     return (
@@ -58,8 +37,7 @@ export function Descargas() {
                                 La papelería, lista para usar
                             </h2>
                             <p className="text-ink-2" style={SUBTITULAR}>
-                                Cada pieza en PDF, a tamaño real y lista para una papelería, y en Word, para escribir nombre y cargo encima. O todo junto en un
-                                solo archivo.
+                                Cada pieza en PDF, a tamaño real y lista para una papelería, y en Word, para escribir nombre y cargo encima. O todo junto en un solo archivo.
                             </p>
                             <div>
                                 <a href="/descargas/papeleria-roland-print.zip" download className={buttonClass('primary')}>
@@ -71,14 +49,7 @@ export function Descargas() {
                             {lista.map((p) => (
                                 <article key={p.id} className="dl-pieza flex min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                        src={`/descargas/${p.slug}/vista-previa.png`}
-                                        alt={`Vista previa: ${p.titulo}`}
-                                        width={1200}
-                                        height={630}
-                                        loading="lazy"
-                                        className="block h-auto w-full border-b border-divider bg-surface-2"
-                                    />
+                                    <img src={`/descargas/${p.slug}/vista-previa.png`} alt={`Vista previa: ${p.titulo}`} width={1200} height={630} loading="lazy" className="block h-auto w-full border-b border-divider bg-surface-2" />
                                     <div className="flex flex-1 flex-col gap-3 p-4">
                                         <div>
                                             <h3 className="text-heading font-semibold">{p.titulo}</h3>
@@ -114,10 +85,7 @@ export function Descargas() {
                     <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                         {REFERENCIA.map((r) => (
                             <li key={r.href}>
-                                <Link
-                                    href={r.href}
-                                    className="flex h-full flex-col gap-1 rounded-card border border-line bg-surface p-5 no-underline transition-colors hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-primary"
-                                >
+                                <Link href={r.href} className="flex h-full flex-col gap-1 rounded-card border border-line bg-surface p-5 no-underline transition-colors hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-primary">
                                     <b className="text-heading font-semibold text-ink">{r.titulo} →</b>
                                     <span className="text-small text-ink-2">{r.texto}</span>
                                 </Link>

@@ -117,10 +117,7 @@ function Ratio({ value, border = false }: { value: number; border?: boolean }) {
     if (border) {
         // Un borde de control pide 3:1 (WCAG 1.4.11), no 4.5.
         return (
-            <span
-                className={`text-caption font-medium tabular-nums ${value >= 3 ? 'text-success-strong' : 'text-danger-strong'}`}
-                title="Contraste de borde (WCAG 1.4.11)"
-            >
+            <span className={`text-caption font-medium tabular-nums ${value >= 3 ? 'text-success-strong' : 'text-danger-strong'}`} title="Contraste de borde (WCAG 1.4.11)">
                 {value.toFixed(1)}:1 · {value >= 3 ? 'borde OK' : 'borde no'}
             </span>
         );
@@ -276,9 +273,7 @@ export function ColorReview({ groups }: { groups: ColorGroup[] }) {
             {approvedColors.length + approvedParts.length === 0 && (
                 <p className={`${CARD} px-5 py-4 text-ui text-ink-2`}>Todavía nada. Lo que apruebes sube aquí.</p>
             )}
-            {approvedColors.map((g) =>
-                g.id === 'aprobados' ? <SwatchBlock key={g.id} g={g} colors={colors} /> : <RoleBlock key={g.id} g={g} colors={colors} />,
-            )}
+            {approvedColors.map((g) => (g.id === 'aprobados' ? <SwatchBlock key={g.id} g={g} colors={colors} /> : <RoleBlock key={g.id} g={g} colors={colors} />))}
             {approvedParts.map((c) => (
                 <Entry key={c.id} c={c} />
             ))}

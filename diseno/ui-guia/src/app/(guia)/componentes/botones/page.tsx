@@ -11,10 +11,7 @@ export const metadata = { title: 'Botones y enlaces' };
 const ring = 'outline-2 outline-offset-2 outline-primary';
 const grey = 'bg-disabled text-disabled-ink';
 const STATES: { variant: string; states: string[] }[] = [
-    {
-        variant: 'primary',
-        states: ['bg-primary text-on-fill', 'bg-primary-hover text-on-fill', 'bg-primary-active text-on-fill', `bg-primary text-on-fill ${ring}`, grey],
-    },
+    { variant: 'primary', states: ['bg-primary text-on-fill', 'bg-primary-hover text-on-fill', 'bg-primary-active text-on-fill', `bg-primary text-on-fill ${ring}`, grey] },
     {
         variant: 'secondary',
         states: [
@@ -26,10 +23,7 @@ const STATES: { variant: string; states: string[] }[] = [
         ],
     },
     { variant: 'ghost', states: ['text-ink-2', 'bg-surface-2 text-ink', 'bg-surface-3 text-ink', `text-ink-2 ${ring}`, 'text-disabled-ink'] },
-    {
-        variant: 'danger',
-        states: ['bg-danger text-on-fill', 'bg-danger-hover text-on-fill', 'bg-danger-active text-on-fill', `bg-danger text-on-fill ${ring}`, grey],
-    },
+    { variant: 'danger', states: ['bg-danger text-on-fill', 'bg-danger-hover text-on-fill', 'bg-danger-active text-on-fill', `bg-danger text-on-fill ${ring}`, grey] },
 ];
 const HEADS = ['normal', 'encima', 'pulsado', 'foco (Tab)', 'deshabilitado'];
 
@@ -160,14 +154,8 @@ export default function Botones() {
             <Section title="Reglas">
                 <Rules
                     items={[
-                        [
-                            'El texto del botón es un verbo con su objeto: «Guardar orden», «Exportar Excel».',
-                            'Nunca «OK», «Aceptar» o «Sí» sueltos: el usuario tiene que saber qué va a pasar sin leer el resto.',
-                        ],
-                        [
-                            'Mientras la acción viaja, el botón se deshabilita y dice qué hace: «Guardando…».',
-                            'Así nadie hace doble clic y se crean dos registros.',
-                        ],
+                        ['El texto del botón es un verbo con su objeto: «Guardar orden», «Exportar Excel».', 'Nunca «OK», «Aceptar» o «Sí» sueltos: el usuario tiene que saber qué va a pasar sin leer el resto.'],
+                        ['Mientras la acción viaja, el botón se deshabilita y dice qué hace: «Guardando…».', 'Así nadie hace doble clic y se crean dos registros.'],
                         ['La acción principal va a la derecha; la de cancelar, a su izquierda.', 'En formularios y diálogos, en todas las apps.'],
                         ['Si navega, es un enlace (<a>, Link); si hace algo, es un <button>.', 'Un botón que navega no se puede abrir en otra pestaña.'],
                     ]}

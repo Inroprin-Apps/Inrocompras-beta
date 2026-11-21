@@ -8,10 +8,7 @@ import { Escena, FIJA, MARGEN, Rotulo, SUBTITULAR, TITULAR_M, anunciarPaso, gsap
 
 const ZONAS = [
     { titulo: 'Menú lateral', texto: 'Las secciones en grupos, a la izquierda. Mide 252 px y se contrae a 62, solo con los iconos; recuerda cómo lo dejaste.' },
-    {
-        titulo: 'Quién entró',
-        texto: 'Arriba a la derecha, un círculo con su inicial; al pulsarlo salen su nombre, su correo y la salida. No ocupa sitio en el menú.',
-    },
+    { titulo: 'Quién entró', texto: 'Arriba a la derecha, un círculo con su inicial; al pulsarlo salen su nombre, su correo y la salida. No ocupa sitio en el menú.' },
     { titulo: 'Título y filtros', texto: 'El título de la sección y, debajo, los filtros que valen para toda la pantalla: período, estado y buscador.' },
     { titulo: 'Avisos', texto: 'Lo que afecta a toda la pantalla y sigue siendo cierto va antes del contenido, con su equis para cerrarlo.' },
     { titulo: 'KPI', texto: 'De dos a cuatro por fila, solo los que se miran todos los días. Cada uno dice su cifra, su estado y adónde lleva.' },
@@ -27,11 +24,7 @@ export function Pantalla() {
     const raiz = useAnimacion((q) => {
         setAnimado(true);
         const anillo = (el: Element, t: number, dura = 0.9) => {
-            tl.to(el, { boxShadow: `inset 0 0 0 3px ${HEX.azul}`, duration: 0.25 }, t).to(
-                el,
-                { boxShadow: `inset 0 0 0 0px ${HEX.azul}`, duration: 0.25 },
-                t + dura,
-            );
+            tl.to(el, { boxShadow: `inset 0 0 0 3px ${HEX.azul}`, duration: 0.25 }, t).to(el, { boxShadow: `inset 0 0 0 0px ${HEX.azul}`, duration: 0.25 }, t + dura);
         };
         const inicios = [0.5, 2.4, 3.4, 4.4, 5.4, 6.4]; // dónde empieza cada zona en la línea de tiempo
         const tl = gsap.timeline({
@@ -86,9 +79,7 @@ export function Pantalla() {
                             {/* El esquema */}
                             <div className="pm-ventana relative aspect-[16/10] w-full max-w-2xl overflow-hidden rounded-card border border-line bg-surface">
                                 <div className="flex h-full">
-                                    <aside
-                                        className={`pm-menu pm-zona flex w-[120px] flex-none flex-col gap-3 overflow-hidden border-r border-line bg-surface p-2.5 ${REGION}`}
-                                    >
+                                    <aside className={`pm-menu pm-zona flex w-[120px] flex-none flex-col gap-3 overflow-hidden border-r border-line bg-surface p-2.5 ${REGION}`}>
                                         <div className="flex items-center gap-2">
                                             <span className="size-5 flex-none rounded-inner bg-primary" />
                                             <span className={`pm-etiqueta ${fila('h-2.5 w-14')}`} />
@@ -97,14 +88,9 @@ export function Pantalla() {
                                             <div key={g} className="flex flex-col gap-1.5">
                                                 <span className={`pm-etiqueta ${fila('h-1.5 w-10')}`} />
                                                 {[0, 1, 2].map((r) => (
-                                                    <div
-                                                        key={r}
-                                                        className={`flex items-center gap-1.5 rounded-inner p-1 ${g === 0 && r === 1 ? 'bg-primary' : ''}`}
-                                                    >
+                                                    <div key={r} className={`flex items-center gap-1.5 rounded-inner p-1 ${g === 0 && r === 1 ? 'bg-primary' : ''}`}>
                                                         <span className={`size-3 flex-none rounded-sm ${g === 0 && r === 1 ? 'bg-on-fill' : 'bg-surface-3'}`} />
-                                                        <span
-                                                            className={`pm-etiqueta h-2 w-14 rounded-inner ${g === 0 && r === 1 ? 'bg-primary-line' : 'bg-surface-3'}`}
-                                                        />
+                                                        <span className={`pm-etiqueta h-2 w-14 rounded-inner ${g === 0 && r === 1 ? 'bg-primary-line' : 'bg-surface-3'}`} />
                                                     </div>
                                                 ))}
                                             </div>
@@ -152,15 +138,8 @@ export function Pantalla() {
                             {ZONAS.map((z, i) => {
                                 const sel = !animado || activa === i;
                                 return (
-                                    <li
-                                        key={z.titulo}
-                                        className={`pm-zona-item flex gap-3 rounded-control border px-4 py-2.5 transition-colors ${sel ? 'border-line bg-surface' : 'border-transparent'}`}
-                                    >
-                                        <span
-                                            className={`mt-0.5 grid size-6 flex-none place-items-center rounded-full text-small font-semibold ${sel ? 'bg-primary text-on-fill' : 'bg-surface-3 text-ink-2'}`}
-                                        >
-                                            {i + 1}
-                                        </span>
+                                    <li key={z.titulo} className={`pm-zona-item flex gap-3 rounded-control border px-4 py-2.5 transition-colors ${sel ? 'border-line bg-surface' : 'border-transparent'}`}>
+                                        <span className={`mt-0.5 grid size-6 flex-none place-items-center rounded-full text-small font-semibold ${sel ? 'bg-primary text-on-fill' : 'bg-surface-3 text-ink-2'}`}>{i + 1}</span>
                                         <div>
                                             <b className={`text-ui font-semibold ${sel ? 'text-ink' : 'text-ink-3'}`}>{z.titulo}</b>
                                             {sel && <p className="mt-0.5 text-small text-ink-2">{z.texto}</p>}

@@ -4,11 +4,10 @@ Fuente: `Application Documentation v2.pdf` (17/11/2026), app «prueba más impor
 El texto viene de un PDF: algunas palabras traen un espacio partido (p. ej. «Bas eType»). Las fórmulas son AppSheet tal cual.
 Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la documentación.
 
-## Tabla `Listas` · ALL_CHANGES
+## Tabla `Listas`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura · CLAVE
+- **_RowNumber** [Number] · solo lectura · CLAVE
 - **Estatus Compra** [Text]
 - **Procedencia** [Text]
 - **Unidad de negocio** [Text]
@@ -23,16 +22,14 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Conceptos** [Text]
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 
-## Tabla `OC` · ADDS_AND_UPDATES
+## Tabla `OC`  ·  ADDS_AND_UPDATES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **VB C. GESTION** [Yes/No] · Show_If: =IN([_MiArea], LIST("Control de Gestión
 - **OC** [Text] · fórmula =LOOKUP([_THISROW].[ID_OC], "OC_Docs", "ID_OC", "N_OC") Read-Only No Hidden No Label No Formula version 0
 - **Estatus Compra** [Enum] · inicial ="Borrador"
@@ -145,46 +142,45 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Penalidad_Pct_Dia** [Decimal] · inicial =0.5 · Show_If: =[Procedencia] = "Importación · Editable_If: =[Estatus Compra] = "Borrador
 - **Penalidad_Tope_Pct** [Decimal] · inicial =10 · Show_If: =[Procedencia] = "Importación · Editable_If: =[Estatus Compra] = "Borrador
 - **Referencia_Prov** [Text] · Show_If: =[Procedencia] = "Importación · Editable_If: =[Estatus Compra] = "Borrador
-- **\_MiArea** [Text] · fórmula =LOOKUP(USEREMAIL(), "Usuarios", "Email", "Área") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_MiArea** [Text] · fórmula =LOOKUP(USEREMAIL(), "Usuarios", "Email", "Área") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Related Pagos** [List] · ref→Pagos · fórmula =SELECT(Pagos[ID_Pago], AND([OC Ref] = [_THISROW].[ID_OC], [Estado_Pago] <> "Anulado")) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: = [Estatus Compra] <> "Borrador · solo lectura
-- **\_Etiqueta_OC** [Text] · fórmula =CONCATENATE([OC], " - ", IF(ISBLANK([Proveedor]), "?", [Proveedor]), " - ", IF(ISBLANK([Proyecto]), "?", [Proyecto]), " - ", IF(ISBLANK([Unidad de negocio]), "?", [Unidad de negocio])) Read-Only Yes Hidden No Label Yes Formula version 0 · solo lectura
+- **_Etiqueta_OC** [Text] · fórmula =CONCATENATE([OC], " - ", IF(ISBLANK([Proveedor]), "?", [Proveedor]), " - ", IF(ISBLANK([Proyecto]), "?", [Proyecto]), " - ", IF(ISBLANK([Unidad de negocio]), "?", [Unidad de negocio])) Read-Only Yes Hidden No Label Yes Formula version 0 · solo lectura
 - **Total_Pagado** [Decimal] · fórmula =SUM(SELECT(Pagos[Monto_Pago], AND([OC Ref] = [_THISROW].[ID_OC], [Estado_Pago] = "Pagado"))) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =NOT(IN([Estatus Compra], LIST("Borrador · solo lectura
 - **Saldo** [Decimal] · fórmula =[Monto] - [Total_Pagado] Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =NOT(IN([Estatus Compra], LIST("Borrador · solo lectura
 - **Related Base de datos OC NACs** [List] · ref→Base de datos OC NAC · fórmula =REF_ROWS("Base de datos OC NAC", "OC_Ref") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Subtotal** [Decimal] · fórmula =SUM(SELECT(Base de datos OC NAC[COSTO TOTAL], [OC_Ref]=[_THISROW].[ID_OC])) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Subtotal** [Decimal] · fórmula =SUM(SELECT(Base de datos OC NAC[COSTO TOTAL], [OC_Ref]=[_THISROW].[ID_OC])) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Monto_Programado** [Decimal] · fórmula =SUM(SELECT(Pagos[Monto_Pago], AND([OC Ref] = [_THISROW].[ID_OC], IN([Estado_Pago], LIST("Solicitado","Programado","Pagado"))))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Saldo_por_Programar** [Decimal] · fórmula =[Monto] - [Monto_Programado] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Semaforo_Programacion** [Text] · fórmula =IFS( [Monto_Programado]=0, " 🔴 Sin programar", [Saldo_por_Programar]<=0, " 🟢 Programada", TRUE, " 🟡 Parcial" ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =NOT(IN([Estatus Compra], LIST("Borrador · solo lectura
-- **\_Pagos_Sin_Factura** [Number] · fórmula =COUNT(SELECT(Pagos[ID_Pago], AND([OC Ref] = [_THISROW]. [ID_OC], [Estado_Pago] = "Pagado", NOT([Factura_Subida])))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Alerta_Factura** [Text] · fórmula =IFS( IN([Estatus Compra], LIST("Borrador","Pendiente de aprobación","Anulada","Anulación solicitada","En modificación")), "", STARTSWITH([Estatus Compra], "Observado"), "", COUNT(SELECT([Related Pagos][ID_Pago], [Estado_Pago] = "Pagado")) = 0, "", [_Pagos_Sin_Factura] > 0, CONCATENATE(" ⚠ ", [_Pagos_Sin_Factura], " pago(s) sin factura"), TRUE, " ✓ Facturas completas" ) Read-Only Yes Hidden No Lab · Show_If: =NOT(IN([Estatus Compra], LIST("Borrador · solo lectura
-- **\_Empresa** [Ref] · ref→Empresas · fórmula =[Unidad de negocio] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Total_OC** [Decimal] · fórmula =(SUM([Related Base de datos OC NACs][COSTO TOTAL]) - [Descuento]) * 1.18 Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Estado_Carpeta** [Text] · fórmula =LOOKUP([_THISROW].[ID_OC], "OC_Docs", "ID_OC", "Mensaje") Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =ISNOTBLANK([_Estado_Carpeta]) · solo lectura
-- **\_Tipo_Compra** [Text] · fórmula =IF([Procedencia] = "Importación", "Importación", LOOKUP( LOOKUP(ANY([Reqs_Lista]), "Requerimientos", "ID_Req", "Solicitud_Ref"), "Solicitudes", "ID_Solicitud", "Tipo_Solicitud")) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_MisRoles** [EnumList] · fórmula =SELECT(Aprobadores_OC[Rol], AND(LOWER([Email]) = LOWER(USEREMAIL()), [Activo])) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Etapa** [Text] · fórmula =IFS( [Estatus Compra] <> "Pendiente de aprobación", "", OR(ISBLANK([CG_Por]), [Aprobación Ppto] = "Subsanado"), "CG", TRUE, "GERENCIA" ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_PDF_Interna** [Url] · fórmula =LOOKUP([_THISROW].[ID_OC], "OC_Docs", "ID_OC", "PDF_Interna") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_PDF_Proveedor** [Url] · fórmula =LOOKUP([_THISROW].[ID_OC], "OC_Docs", "ID_OC", "PDF_Proveedor") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Rol_Jefe** [Text] · fórmula =IF([Procedencia] = "Importación", "JEFE_COMPRAS_I", "JEFE_COMPRAS_N") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Requiere_Reaprob** [Yes/No] · fórmula =OR([Monto] > [Monto_Antes_Mod], [Moneda original] <> [Moneda_Antes_Mod], [Forma de pago] <> [FormaPago_Antes_Mod]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Pagos_Sin_Factura** [Number] · fórmula =COUNT(SELECT(Pagos[ID_Pago], AND([OC Ref] = [_THISROW]. [ID_OC], [Estado_Pago] = "Pagado", NOT([Factura_Subida])))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Alerta_Factura** [Text] · fórmula =IFS( IN([Estatus Compra], LIST("Borrador","Pendiente de aprobación","Anulada","Anulación solicitada","En modificación")), "", STARTSWITH([Estatus Compra], "Observado"), "", COUNT(SELECT([Related Pagos][ID_Pago], [Estado_Pago] = "Pagado")) = 0, "", [_Pagos_Sin_Factura] > 0, CONCATENATE(" ⚠ ", [_Pagos_Sin_Factura], " pago(s) sin factura"), TRUE, " ✓ Facturas completas" ) Read-Only Yes Hidden No Lab · Show_If: =NOT(IN([Estatus Compra], LIST("Borrador · solo lectura
+- **_Empresa** [Ref] · ref→Empresas · fórmula =[Unidad de negocio] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Total_OC** [Decimal] · fórmula =(SUM([Related Base de datos OC NACs][COSTO TOTAL]) - [Descuento]) * 1.18 Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Estado_Carpeta** [Text] · fórmula =LOOKUP([_THISROW].[ID_OC], "OC_Docs", "ID_OC", "Mensaje") Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =ISNOTBLANK([_Estado_Carpeta]) · solo lectura
+- **_Tipo_Compra** [Text] · fórmula =IF([Procedencia] = "Importación", "Importación", LOOKUP( LOOKUP(ANY([Reqs_Lista]), "Requerimientos", "ID_Req", "Solicitud_Ref"), "Solicitudes", "ID_Solicitud", "Tipo_Solicitud")) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_MisRoles** [EnumList] · fórmula =SELECT(Aprobadores_OC[Rol], AND(LOWER([Email]) = LOWER(USEREMAIL()), [Activo])) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Etapa** [Text] · fórmula =IFS( [Estatus Compra] <> "Pendiente de aprobación", "", OR(ISBLANK([CG_Por]), [Aprobación Ppto] = "Subsanado"), "CG", TRUE, "GERENCIA" ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_PDF_Interna** [Url] · fórmula =LOOKUP([_THISROW].[ID_OC], "OC_Docs", "ID_OC", "PDF_Interna") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_PDF_Proveedor** [Url] · fórmula =LOOKUP([_THISROW].[ID_OC], "OC_Docs", "ID_OC", "PDF_Proveedor") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Rol_Jefe** [Text] · fórmula =IF([Procedencia] = "Importación", "JEFE_COMPRAS_I", "JEFE_COMPRAS_N") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Requiere_Reaprob** [Yes/No] · fórmula =OR([Monto] > [Monto_Antes_Mod], [Moneda original] <> [Moneda_Antes_Mod], [Forma de pago] <> [FormaPago_Antes_Mod]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Related Documentos_OCs** [List] · ref→Documentos_OC · solo lectura
-- **\_Falta_Para_Emitir** [Text] · fórmula =IF([Estatus Compra] <> "Borrador", "", IFS( COUNT([Related Base de datos OC NACs]) = 0, " ⚠ Agrega al menos una línea", [Monto] <= 0, " ⚠ Pulsa Editar → Save para calcular el monto", AND(NOT(CONTAINS([Forma de pago], "Tarjeta")), COUNT(FILTER("Documentos_OC", AND([OC_Ref] = [_THISROW].[ID_OC], [Tipo_Doc] = "Cotización"))) = 0), " ⚠ Sube la cotización en Documentos", TRUE, " ✅ Lista para emitir" ) · Show_If: =[Estatus Compra] = "Borrador · solo lectura
-- **\_EC_Titulo** [Show] · fórmula ="Estado de cuenta" Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_EC_Facturado** [Decimal] · fórmula =SUM(SELECT(Documentos_OC[Monto_Doc], AND([OC_Ref] = [_THISROW].[ID_OC], [Tipo_Doc] = "Factura"))) - SUM(SELECT(Documentos_OC[Monto_Doc], AND([OC_Ref] = [_THISROW].[ID_OC], [Tipo_Doc] = "Nota de crédito"))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_EC_Por_Facturar** [Decimal] · fórmula =[Monto] - [_EC_Facturado] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_EC_En_Proceso** [Decimal] · fórmula =SUM(SELECT(Pagos[Monto_Pago], AND([OC Ref] = [_THISROW].[ID_OC], IN([Estado_Pago], LIST("Solicitado", "Observado Finanzas", "Programado"))))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_EC_Pagado** [Decimal] · fórmula =SUM(SELECT(Pagos[Monto_Pago], AND([OC Ref] = [_THISROW].[ID_OC], [Estado_Pago] = "Pagado"))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_EC_Saldo** [Decimal] · fórmula =[Monto] - [_EC_Pagado] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_EC_Proxima** [Text] · fórmula =IF( ISBLANK(ANY(SELECT(Pagos[ID_Pago], AND([OC Ref] = [_THISROW].[ID_OC], [Estado_Pago] = "Plan")))), "—", CONCATENATE( LOOKUP(ANY(ORDERBY(SELECT(Pagos[ID_Pago], AND([OC Ref] = [_THISROW].[ID_OC], [Estado_Pago] = "Plan")), [N_Cuota])), "Pagos", "ID_Pago", "Tipo_Pago"), " · ", TEXT(LOOKUP(ANY(ORDERBY(SELECT(Pagos[ID_Pago], AND([OC Ref] = [_THISROW].[ID_OC], [Estado_Pago] = "Plan")), [N_Cuota])), " · solo lectura
-- **\_Demasia_Pend** [Yes/No] · fórmula =COUNT(SELECT(Base de datos OC NAC[ID_Linea], AND([OC_Ref] = [_THISROW].[ID_OC], [Es_Demasia], [Demasia_Estado] = "Pendiente"))) > 0 Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_Demasia_Aviso** [Text] · fórmula =CONCATENATE(" ⚠ Incluye demasía por ", TEXT(SUM(SELECT(Base de datos OC NAC[COSTO TOTAL], AND([OC_Ref] = [_THISROW].[ID_OC], [Es_Demasia], [Demasia_Estado] = "Pendiente")))), " – ", SUBSTITUTE(TEXT(SELECT(Base de datos OC NAC[Motivo_Demasia], AND([OC_Ref] = [_THISROW].[ID_OC], [Es_Demasia], [Demasia_Estado] = "Pendiente"))), " , ", " / ")) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: = [_Demasia_Pend] · solo lectura
-- **\_Aviso_Sync** [Text] · fórmula =IF( AND(ISNOTBLANK([OC]), COUNT([Related Pagos]) = 0, [Forma de pago] <> "Caja chica"), " ⏳ Generando cuotas y PDF… sincroniza en 1–2 minutos", "" ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =ISNOTBLANK([_Aviso_Sync]) · solo lectura
+- **_Falta_Para_Emitir** [Text] · fórmula =IF([Estatus Compra] <> "Borrador", "", IFS( COUNT([Related Base de datos OC NACs]) = 0, " ⚠ Agrega al menos una línea", [Monto] <= 0, " ⚠ Pulsa Editar → Save para calcular el monto", AND(NOT(CONTAINS([Forma de pago], "Tarjeta")), COUNT(FILTER("Documentos_OC", AND([OC_Ref] = [_THISROW].[ID_OC], [Tipo_Doc] = "Cotización"))) = 0), " ⚠ Sube la cotización en Documentos", TRUE, " ✅ Lista para emitir" ) · Show_If: =[Estatus Compra] = "Borrador · solo lectura
+- **_EC_Titulo** [Show] · fórmula ="Estado de cuenta" Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_EC_Facturado** [Decimal] · fórmula =SUM(SELECT(Documentos_OC[Monto_Doc], AND([OC_Ref] = [_THISROW].[ID_OC], [Tipo_Doc] = "Factura"))) - SUM(SELECT(Documentos_OC[Monto_Doc], AND([OC_Ref] = [_THISROW].[ID_OC], [Tipo_Doc] = "Nota de crédito"))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_EC_Por_Facturar** [Decimal] · fórmula =[Monto] - [_EC_Facturado] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_EC_En_Proceso** [Decimal] · fórmula =SUM(SELECT(Pagos[Monto_Pago], AND([OC Ref] = [_THISROW].[ID_OC], IN([Estado_Pago], LIST("Solicitado", "Observado Finanzas", "Programado"))))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_EC_Pagado** [Decimal] · fórmula =SUM(SELECT(Pagos[Monto_Pago], AND([OC Ref] = [_THISROW].[ID_OC], [Estado_Pago] = "Pagado"))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_EC_Saldo** [Decimal] · fórmula =[Monto] - [_EC_Pagado] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_EC_Proxima** [Text] · fórmula =IF( ISBLANK(ANY(SELECT(Pagos[ID_Pago], AND([OC Ref] = [_THISROW].[ID_OC], [Estado_Pago] = "Plan")))), "—", CONCATENATE( LOOKUP(ANY(ORDERBY(SELECT(Pagos[ID_Pago], AND([OC Ref] = [_THISROW].[ID_OC], [Estado_Pago] = "Plan")), [N_Cuota])), "Pagos", "ID_Pago", "Tipo_Pago"), " · ", TEXT(LOOKUP(ANY(ORDERBY(SELECT(Pagos[ID_Pago], AND([OC Ref] = [_THISROW].[ID_OC], [Estado_Pago] = "Plan")), [N_Cuota])), " · solo lectura
+- **_Demasia_Pend** [Yes/No] · fórmula =COUNT(SELECT(Base de datos OC NAC[ID_Linea], AND([OC_Ref] = [_THISROW].[ID_OC], [Es_Demasia], [Demasia_Estado] = "Pendiente"))) > 0 Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Demasia_Aviso** [Text] · fórmula =CONCATENATE(" ⚠ Incluye demasía por ", TEXT(SUM(SELECT(Base de datos OC NAC[COSTO TOTAL], AND([OC_Ref] = [_THISROW].[ID_OC], [Es_Demasia], [Demasia_Estado] = "Pendiente")))), " – ", SUBSTITUTE(TEXT(SELECT(Base de datos OC NAC[Motivo_Demasia], AND([OC_Ref] = [_THISROW].[ID_OC], [Es_Demasia], [Demasia_Estado] = "Pendiente"))), " , ", " / ")) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: = [_Demasia_Pend] · solo lectura
+- **_Aviso_Sync** [Text] · fórmula =IF( AND(ISNOTBLANK([OC]), COUNT([Related Pagos]) = 0, [Forma de pago] <> "Caja chica"), " ⏳ Generando cuotas y PDF… sincroniza en 1–2 minutos", "" ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =ISNOTBLANK([_Aviso_Sync]) · solo lectura
 - **Related Des_Gastos** [List] · ref→Des_Gastos · solo lectura
 - **Related Des_Productos** [List] · ref→Des_Productos · solo lectura
 - **Related Desaduanajes** [List] · ref→Desaduanajes · Show_If: =CONT AINS(LOWER([Procedencia]), "import") · solo lectura
 
 ### Acciones
-
 - **Edit** (EDIT_RECORD Only if this condition is true =FALSE) — si: `=FALSE`
 - **Open Url (Link de la carpeta OC)** (NAVIGATE_URL) — si: `NOT(ISBLANK([Link de la carpeta OC]))`
 - **Add** (ADD_RECORD)
@@ -193,7 +189,7 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Observar OC** (SET_COLUMN_VALUE) — si: `=AND([_MiArea] = "Finanzas", IN([Estatus Compra], LIST("Pago pendiente", "Adelanto pendiente", "Crédito", "Legajo incompleto")))` — pone: Estado_Previo_Obs== [Estatus Compra]; Estatus Compra==\"Observado Por Finanzas\"; Observación finanzas==\"Observado\"; Criterio de observación finanzas==[_INPUT].[MotivoObs]; Fecha_Observacion==TO DAY()
 - **Subsanar OC** (SET_COLUMN_VALUE) — si: `=AND([_MiArea] = "Finanzas", [Estatus Compra] = "Observado Por Finanzas")` — pone: Estatus Compra==[Estado_Previo_Obs]; Observación finanzas==\"Subsanado\"; Fecha_Subsanacion==TO DAY()
 - **Action for Regresar al estado anterior a la obs** (SET_COLUMN_VALUE) — si: `true` — pone: Estatus Compra==[Estado_Previo_Obs]; Observación finanzas==\"Subsanado\"; Fecha_Subsanacion==TO DAY()
-- **\_ActualizarEstadoPago** (SET_COLUMN_VALUE) — si: `true` — pone: Estatus Compra==IFS(\n OR(\n [Estado de Aprobación3] <> \"Aprobado para Compra\",\n IN([Estatus Compra], LIST(\"Anulada\",\"Anulación solicitada\",\"En modificación\")),\n STA; LEGAJO PARA PAGO==OR([LEGAJO PARA PAGO], COUNT(SELECT([Related Pagos][ID_Pago], IN([Estado_Pago], LIST(\"Solicitado\",\"Programado\",\"Pagado\")))) > 0)
+- **_ActualizarEstadoPago** (SET_COLUMN_VALUE) — si: `true` — pone: Estatus Compra==IFS(\n OR(\n [Estado de Aprobación3] <> \"Aprobado para Compra\",\n IN([Estatus Compra], LIST(\"Anulada\",\"Anulación solicitada\",\"En modificación\")),\n STA; LEGAJO PARA PAGO==OR([LEGAJO PARA PAGO], COUNT(SELECT([Related Pagos][ID_Pago], IN([Estado_Pago], LIST(\"Solicitado\",\"Programado\",\"Pagado\")))) > 0)
 - **View Ref (Proveedor_Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([Proveedor_Ref]))`
 - **View Ref (Req_Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([Req_Ref]))`
 - **Crear pago automático** (ADD_RECORD_TO Only if this condition is true =FALSE) — si: `=FALSE` — pone: OC Ref==[ID_OC]; Estado_Pago==\"Solicita do\"; Comentario==\"Generado automático al completar legajo\"; Monto_Pago==IFS(\n [Forma de pago]=\"Adelanto\", [Monto]*[% adelanto],\n AND(IN([Forma de pago], LIST(\"Contra Entrega\",\"Crédito\",\"Letra\")), [Entrega_Total]=FALSE), [; Tipo_Pago==IFS(\n [Forma de pago]=\"Adelanto\", \"Adelanto\",\n AND(IN([Forma de pago], LIST(\"Contra Entrega\",\"Crédito\",\"Letra\")), [Entrega_Total]=FALSE), \"Pago pa; Fecha_Limite_Pago==IFS (IN([Forma de pago], LIST(\"Crédito\",\"Letra\")), [Fecha_Limite_Pago], TRUE, TODAY())
@@ -203,23 +199,23 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Action for Volver al estado anterior** (SET_COLUMN_VALUE) — si: `true` — pone: Estatus Compra==\"Pendiente de aprobación\"; Fecha_Aprobacion==\"\"
 - **Action for Estatus** (SET_COLUMN_VALUE) — si: `true` — pone: Estatus Compra==IFS(\n STARTSWITH([Estado de Aprobación3],\"Observado por\"), [Estado de Aprobación3],\n [Estado de Aprobación3]=\"Aprobado para Compra\",\n IF([LEGAJO PARA PA; Fecha_Aprobacion==IF([E stado de Aprobación3]=\"Aprobado para Compra\", TODAY(), \"\")
 - **New step Action - 2** (REF_ACTION Only if this condition is true true) — si: `true`
-- **View Ref (\_Empresa)** (NAVIGATE_APP) — si: `NOT(ISBLANK([_Empresa]))`
-- **Imprimir OC - Interna** (SET_COLUMN_VALUE) — si: `=AND( [Estatus Compra] <> "Borrador", IN([_MiArea], LIST("Compras","Importaciones")) )` — pone: PDF_Interna_TS==NOW()
+- **View Ref (_Empresa)** (NAVIGATE_APP) — si: `NOT(ISBLANK([_Empresa]))`
+- **Imprimir OC - Interna** (SET_COLUMN_VALUE) — si: `=AND( [Estatus Compra] <> "Borrador", IN([_MiArea], LIST("Compras","Importaciones")) )` — pone: PDF_Interna_TS==NOW() 
 - **Imprimir OC - Prov** (SET_COLUMN_VALUE) — si: `=AND( [Estado de Aprobación3] = "Aprobado para Compra", NOT(IN([Estatus Compra], LIST("Anulada","Anulación solicitada","En modificación"))), IN([_MiArea], LIST("Compras","Importaciones")) )` — pone: PDF_Proveedor_TS==NO W()
-- **\_Recalcular OC** (SET_COLUMN_VALUE) — si: `true`
-- **Emitir OC** (SET_COLUMN_VALUE) — si: `=AND( [Estatus Compra] = "Borrador", COUNT([Related Base de datos OC NACs]) > 0, [Monto] > 0, IN([_MiArea], LIST("Compras","Importaciones")), OR( CONTAINS([Forma de pago], "Tarjeta"), COUNT(FILTER("Documentos_OC", AND([OC_Ref] = [_THISROW].[ID_OC], [Tipo_Doc] = "Cotización"))) > 0 ) )` — pone: Estatus Compra==\"Pendiente de aprobación\"; Fecha_Emision==NOW(); Emitido_Por==USEREMAI L(); PDF_Interna_TS==NOW()
+- **_Recalcular OC** (SET_COLUMN_VALUE) — si: `true`
+- **Emitir OC** (SET_COLUMN_VALUE) — si: `=AND( [Estatus Compra] = "Borrador", COUNT([Related Base de datos OC NACs]) > 0, [Monto] > 0, IN([_MiArea], LIST("Compras","Importaciones")), OR( CONTAINS([Forma de pago], "Tarjeta"), COUNT(FILTER("Documentos_OC", AND([OC_Ref] = [_THISROW].[ID_OC], [Tipo_Doc] = "Cotización"))) > 0 ) )` — pone: Estatus Compra==\"Pendiente de aprobación\"; Fecha_Emision==NOW(); Emitido_Por==USEREMAI L(); PDF_Interna_TS==NOW() 
 - **Compose Email (Emitido_Por)** (EMAIL) — si: `NOT(ISBLANK([Emitido_Por]))`
 - **Compose Email (CG_Por)** (EMAIL) — si: `NOT(ISBLANK([CG_Por]))`
 - **Compose Email (GOP_Por)** (EMAIL) — si: `NOT(ISBLANK([GOP_Por]))`
 - **Compose Email (GAF_Por)** (EMAIL) — si: `NOT(ISBLANK([GAF_Por]))`
 - **Validar presupuesto** (SET_COLUMN_VALUE) — si: `=AND( [_Etapa] = "CG", IN("CONTROL_GESTION", [_MisRoles]), ISNOTBLANK([Aprobación Ppto]), NOT(IN([Aprobación Ppto], LIST("Observado", "Anular OC", "Subsanado"))) )` — pone: CG_Por==USEREMAIL(); CG_Fecha==NOW()
-- **Open Url (\_PDF_Interna)** (NAVIGATE_URL) — si: `NOT(ISBLANK([_PDF_Interna]))`
-- **\_Aprobar_GOP_Base** (SET_COLUMN_VALUE) — si: `=AND([_Etapa] = "GERENCIA", IN("GOP", [_MisRoles]), [Aprobación GOP] <> "Aprobado", [Estado de Aprobación3] = "Falta Aprobación")` — pone: Aprobación GOP==\"Aprobado\"; GOP_Por==USEREMAIL() ; GOP_Fecha==NOW() — confirma: « CONCATENATE(»
+- **Open Url (_PDF_Interna)** (NAVIGATE_URL) — si: `NOT(ISBLANK([_PDF_Interna]))`
+- **_Aprobar_GOP_Base** (SET_COLUMN_VALUE) — si: `=AND([_Etapa] = "GERENCIA", IN("GOP", [_MisRoles]), [Aprobación GOP] <> "Aprobado", [Estado de Aprobación3] = "Falta Aprobación")` — pone: Aprobación GOP==\"Aprobado\"; GOP_Por==USEREMAIL() ; GOP_Fecha==NOW() — confirma: « CONCATENATE(»
 - **Aprobar GAF** (SET_COLUMN_VALUE) — si: `=AND( [_Etapa] = "GERENCIA", IN("GAF", [_MisRoles]), [Aprobación GAF] <> "Aprobado", [Estado de Aprobación3] = "Falta Aprobación" , NOT(AND([_Demasia_Pend], [Tipo de aprobación] = "Aprobación Única")) )` — pone: Aprobación GAF==\"Aprobado\"; GAF_Por==USEREMAIL(); GAF_Fecha==NOW()
-- **Open Url (\_PDF_Proveedor)** (NAVIGATE_URL) — si: `NOT(ISBLANK([_PDF_Proveedor]))`
+- **Open Url (_PDF_Proveedor)** (NAVIGATE_URL) — si: `NOT(ISBLANK([_PDF_Proveedor]))`
 - **Solicitar anulación (Comprador)** (SET_COLUMN_VALUE) — si: `=AND( IN([_MiArea], LIST("Compras","Importaciones")), NOT(IN([Estatus Compra], LIST("Borrador","Anulada","Anulación solicitada","En modificación","Saldo pendiente","Oc Pagada"))), OR(ISBLANK([Total_Pagado]), [Total_Pagado] = 0) )` — pone: Estado_Previo_Anul== [Estatus Compra]; Estatus Compra==\"Anulación solicitada\"; Anul_Motivo==[_INPUT]. [Motivo]; Anul_Solicitada_Por==US EREMAIL(); Anul_Fecha_Sol==NOW()
-- **Aprobar anulación (jefe de Compras)** (SET_COLUMN_VALUE) — si: `=AND([Estatus Compra] = "Anulación solicitada", IN([_Rol_Jefe], [_MisRoles]))` — pone: Estatus Compra==\"Anulada\"; Anul_Aprobada_Por==US EREMAIL(); Anul_Fecha_Apr==NOW()
-- **Rechazar anulación (Jefe de compras)** (SET_COLUMN_VALUE) — si: `=AND([Estatus Compra] = "Anulación solicitada", IN([_Rol_Jefe], [_MisRoles]))` — pone: Estatus Compra==[Estado_Previo_Anul]; Anul_Aprobada_Por==US EREMAIL(); Anul_Fecha_Apr==NOW()
+- **Aprobar anulación (jefe de Compras)** (SET_COLUMN_VALUE) — si: `=AND([Estatus Compra] = "Anulación solicitada", IN([_Rol_Jefe], [_MisRoles]))` — pone: Estatus Compra==\"Anulada\"; Anul_Aprobada_Por==US EREMAIL(); Anul_Fecha_Apr==NOW() 
+- **Rechazar anulación (Jefe de compras)** (SET_COLUMN_VALUE) — si: `=AND([Estatus Compra] = "Anulación solicitada", IN([_Rol_Jefe], [_MisRoles]))` — pone: Estatus Compra==[Estado_Previo_Anul]; Anul_Aprobada_Por==US EREMAIL(); Anul_Fecha_Apr==NOW() 
 - **Observar OC (aprobación)** (SET_COLUMN_VALUE) — si: `=AND( [_Etapa] = "GERENCIA", OR(IN("GOP", [_MisRoles]), IN("GAF", [_MisRoles])), NOT(STARTSWITH([Estado de Aprobación3], "Observado")) )` — pone: Aprobación Ppto==IF([_Etapa] = \"CG\", \"Observado\", [Aprobación Ppto]); Aprobación GOP==IF(AND([_Etapa] = \"GERENCIA\", IN(\"GOP\", [_MisRoles]), [Aprobación GOP] <> \"Aprobado\"), \"Observado\", [Aprobación GOP]); Aprobación GAF==IF(AND([_Etapa] = \"GERENCIA\", IN(\"GAF\", [_MisRoles]), [Aprobación GAF] <> \"Aprobado\", NOT(AND(IN(\"GOP\", [_MisRoles]), [Aprobación GOP] <> \"Aprobado\"); Motivo_Aprob==[_INPUT]. [Motivo]
 - **Rechazar OC (aprobacion)** (SET_COLUMN_VALUE) — si: `=AND( [_Etapa] = "GERENCIA", OR(IN("GOP", [_MisRoles]), IN("GAF", [_MisRoles])), NOT(STARTSWITH([Estado de Aprobación3], "Observado")) )` — pone: Aprobación Ppto==IF([_Etapa] = \"CG\", \"Anular OC\", [Aprobación Ppto]); Aprobación GOP==IF(AND([_Etapa] = \"GERENCIA\", IN(\"GOP\", [_MisRoles])), \"Rechazado\", [Aprobación GOP]); Aprobación GAF==IF(AND([_Etapa] = \"GERENCIA\", IN(\"GAF\", [_MisRoles]), NOT(IN(\"GOP\", [_MisRoles]))), \"Rechazado\", [Aprobación GAF]); Estatus Compra==\"Anulada\"; Motivo_Aprob==[_INPUT]. [Motivo]
 - **Reenviar a aprobación (comprador)** (SET_COLUMN_VALUE) — si: `=AND( IN([_MiArea], LIST("Compras", "Importaciones")), STARTSWITH([Estado de Aprobación3], "Observado") )` — pone: Aprobación Ppto==IF([Aprobación Ppto] = \"Observado\", \"Subsanado\", [Aprobación Ppto]); Aprobación GOP==IF([Aprobación GOP] = \"Observado\", \"\", [Aprobación GOP]); Aprobación GAF==IF([Aprobación GAF] = \"Observado\", \"\", [Aprobación GAF]); Estatus Compra==\"Pendiente de aprobación\"
@@ -235,65 +231,58 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Legajo completo** (SET_COLUMN_VALUE) — si: `=FALSE` — pone: LEGAJO PARA PAGO==TRUE
 - **Action for Actualizar Estado** (REF_ACTION Only if this condition is true true) — si: `true`
 - **Action for Envio correo** (SET_COLUMN_VALUE) — si: `true` — pone: Correo_Envio==IF(ISBLA NK([Correo_Envio]), LOOKUP([Proveedor], \"Base de datos Proveedores\", \"RAZON SOCIAL\", \"CORREO\"), [Correo_Envio])
-- **Enviar al proveedor** (SET_COLUMN_VALUE) — si: `=AND([Estado de Aprobación3] = "Aprobado para Compra", IN([_MiArea], LIST("Compras","Importaciones")), NOT(IN([Estatus Compra], LIST("Anulada","Anulación solicitada"))))` — pone: Correo_Envio==[_INPUT]. [Correo]; Envio_Solicitado==NOW()
+- **Enviar al proveedor** (SET_COLUMN_VALUE) — si: `=AND([Estado de Aprobación3] = "Aprobado para Compra", IN([_MiArea], LIST("Compras","Importaciones")), NOT(IN([Estatus Compra], LIST("Anulada","Anulación solicitada"))))` — pone: Correo_Envio==[_INPUT]. [Correo]; Envio_Solicitado==NOW() 
 - **Compose Email (Correo_Envio)** (EMAIL) — si: `NOT(ISBLANK([Correo_Envio]))`
-- **\_Aprobar_Demasias_OC** (REF_ACTION Only if this condition is true true) — si: `true`
+- **_Aprobar_Demasias_OC** (REF_ACTION Only if this condition is true true) — si: `true`
 - **Aprobar GOP** (COMPOSITE Only if this condition is true =AND([_Etapa] = "GE) — si: `=AND([_Etapa] = "GERENCIA", IN("GOP", [_MisRoles]), [Aprobación GOP] <> "Aprobado", [Estado de Aprobación3] = "Falta Aprobación")` — ejecuta: _Aprobar_Demasias_OC, _Aprobar_GOP_Base — confirma: « »
-- **\_Rechazar_Demasias_OC** (REF_ACTION Only if this condition is true true) — si: `true`
+- **_Rechazar_Demasias_OC** (REF_ACTION Only if this condition is true true) — si: `true`
 - **Aprobar sin demasía** (COMPOSITE Only if this condition is true =AND([_Etapa] = "GE) — si: `=AND([_Etapa] = "GERENCIA", IN("GOP", [_MisRoles]), [Aprobación GOP] <> "Aprobado", [Estado de Aprobación3] = "Falta Aprobación", [_Demasia_Pend])` — ejecuta: _Rechazar_Demasias_OC, _Aprobar_GOP_Base — confirma: «= »
 - **Nuevo desaduanaje** (NAVIGATE_APP) — si: `=AND( CONTAINS(LOWER([Procedencia]), "import"), [Estado de Aprobación3] = "Aprobado para Compra", IN(LOOKUP(USEREMAIL(), "Usuarios", "Email", "Área"), LIST("Compras", "Importaciones")) )`
 
-## Tabla `Tipo_Cambio` · ALL_CHANGES
+## Tabla `Tipo_Cambio`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **Moneda** [Text] · CLAVE
 - **Tasa_a_Soles** [Decimal]
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 
-## Tabla `Usuarios` · ALL_CHANGES
+## Tabla `Usuarios`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **Email** [Email] · CLAVE
 - **Nombre** [Text]
 - **Área** [Text]
 - **Jefe** [Email]
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Compose Email (Email)** (EMAIL) — si: `NOT(ISBLANK([Email]))`
 - **Add** (ADD_RECORD)
 - **Compose Email (Jefe)** (EMAIL) — si: `NOT(ISBLANK([Jefe]))`
 
-## Tabla `Conceptos_Pagos` · ALL_CHANGES
+## Tabla `Conceptos_Pagos`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **Tipo_Pago** [Text] · CLAVE
 - **Related Pagos** [List] · ref→Pagos · solo lectura
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 
-## Tabla `Pagos` · ADDS_AND_UPDATES
+## Tabla `Pagos`  ·  ADDS_AND_UPDATES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Pago** [Text] · inicial ="P" & UNIQUEID() · solo lectura · CLAVE
 - **OC Ref** [Ref] · ref→OC
 - **Monto_Pago** [Decimal] · Valid_If: =AND([_THIS] > 0, [_THIS] <= [OC Ref]. [Saldo]) · Editable_If: =[_MiArea] = "Finanzas
@@ -327,21 +316,20 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Aplica_Retencion** [Yes/No]
 - **Monto_Retencion** [Decimal]
 - **Neto_Referencial** [Decimal]
-- **\_Moneda_Ref** [Text] · fórmula =[OC Ref].[Moneda original] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Monto_OC** [Decimal] · fórmula =[OC Ref].[Monto] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Saldo_OC** [Decimal] · fórmula =[OC Ref].[Saldo] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Alerta_Saldo** [Text] · fórmula =IF([Monto_Pago] > [_Saldo_OC], " ⚠ _ESTE PAGO SUPERA EL SALDO PENDIENTE (" & [\_Saldo_OC] & "). Verifica antes de guardar._", "") Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =[Monto_Pago] > [_Saldo_OC] · solo lectura
-- **\_MiArea** [Text] · fórmula =LOOKUP(USEREMAIL(), "Usuarios", "Email", "Área") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Moneda_Ref** [Text] · fórmula =[OC Ref].[Moneda original] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Monto_OC** [Decimal] · fórmula =[OC Ref].[Monto] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Saldo_OC** [Decimal] · fórmula =[OC Ref].[Saldo] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Alerta_Saldo** [Text] · fórmula =IF([Monto_Pago] > [_Saldo_OC], " ⚠ *ESTE PAGO SUPERA EL SALDO PENDIENTE (" & [_Saldo_OC] & "). Verifica antes de guardar.*", "") Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =[Monto_Pago] > [_Saldo_OC] · solo lectura
+- **_MiArea** [Text] · fórmula =LOOKUP(USEREMAIL(), "Usuarios", "Email", "Área") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Es_Credito** [Text] · fórmula =IF(IN([OC Ref].[Forma de pago], LIST("Crédito","Letra")), "SÍ", "") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Semaforo_Vencimiento** [Text] · fórmula =IFS( [Estado_Pago]="Pagado", "", ISBLANK([Fecha_Limite_Pago]), "", [Fecha_Limite_Pago] < TODAY(), " ⚫ Vencido", [Fecha_Limite_Pago] <= TODAY()+7, " 🔴 Urgente", [Fecha_Limite_Pago] <= TODAY()+15, " 🟠 Pronto", [Fecha_Limite_Pago] <= TODAY()+30, " 🟡 Atención", TRUE, " 🟢 Holgado" ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Facturas_Libres** [List] · ref→Documentos_OC · fórmula =SELECT(Documentos_OC[ID_Doc], AND( [OC_Ref] = [_THISROW].[OC Ref], [Tipo_Doc] = "Factura", NOT(IN([ID_Doc], SELECT(Pagos[Factura_Ref], AND([Estado_Pago] <> "Anulado", [ID_Pago] <> [_THISROW].[ID_Pago])))) )) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_Retencion** [Decimal] · fórmula =IF( AND( ISNOTBLANK([Factura_Ref]), [Factura_Ref]. [Monto_Doc] > 700, [_Prov].[Es_Agente_Retencion] <> TRUE, [_Prov].[Es_Buen_Contribuyente] <> TRUE ), ROUND([Monto_Pago] * 3) / 100.0, 0 ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Neto** [Decimal] · fórmula =[Monto_Pago] - [_Retencion] Read-Only Yes Hidden No Label No Formula version 0 · Valid_If: =AND([_THIS] > 0, [_THIS] <= [OC Ref]. [Saldo]) · solo lectura
-- **\_Alerta_Retencion** [Text] · fórmula =IFS( ISBLANK([_Prov]), " ⚠ Proveedor no encontrado", [_Prov]. [Verificado_Contab] <> TRUE, " ⚠ Proveedor sin verificar", [_Retencion] > 0, "Retener 3%", TRUE, "Sin retención" ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Prov** [Ref] · ref→Base de datos Proveedores · fórmula =ANY(SELECT(Base de datos Proveedores[RUC], [RAZON SOCIAL] = [_THISROW].[OC Ref].[Proveedor])) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Facturas_Libres** [List] · ref→Documentos_OC · fórmula =SELECT(Documentos_OC[ID_Doc], AND( [OC_Ref] = [_THISROW].[OC Ref], [Tipo_Doc] = "Factura", NOT(IN([ID_Doc], SELECT(Pagos[Factura_Ref], AND([Estado_Pago] <> "Anulado", [ID_Pago] <> [_THISROW].[ID_Pago])))) )) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Retencion** [Decimal] · fórmula =IF( AND( ISNOTBLANK([Factura_Ref]), [Factura_Ref]. [Monto_Doc] > 700, [_Prov].[Es_Agente_Retencion] <> TRUE, [_Prov].[Es_Buen_Contribuyente] <> TRUE ), ROUND([Monto_Pago] * 3) / 100.0, 0 ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Neto** [Decimal] · fórmula =[Monto_Pago] - [_Retencion] Read-Only Yes Hidden No Label No Formula version 0 · Valid_If: =AND([_THIS] > 0, [_THIS] <= [OC Ref]. [Saldo]) · solo lectura
+- **_Alerta_Retencion** [Text] · fórmula =IFS( ISBLANK([_Prov]), " ⚠ Proveedor no encontrado", [_Prov]. [Verificado_Contab] <> TRUE, " ⚠ Proveedor sin verificar", [_Retencion] > 0, "Retener 3%", TRUE, "Sin retención" ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Prov** [Ref] · ref→Base de datos Proveedores · fórmula =ANY(SELECT(Base de datos Proveedores[RUC], [RAZON SOCIAL] = [_THISROW].[OC Ref].[Proveedor])) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 
 ### Acciones
-
 - **Edit** (EDIT_RECORD Only if this condition is true =FALSE) — si: `=FALSE`
 - **Add** (ADD_RECORD Only if this condition is true =IN("FINANZAS", SE) — si: `=IN("FINANZAS", SELECT(Aprobadores_OC[Rol], AND(LOWER([Email]) = LOWER(USEREMAIL()), [Activo])))`
 - **View Ref (OC Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([OC Ref]))`
@@ -349,24 +337,23 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Actualizar OC Action - 1** (REF_ACTION Only if this condition is true true) — si: `true`
 - **Programar pago** (SET_COLUMN_VALUE) — si: `=AND([Estado_Pago]="Solicitado", [_MiArea]="Finanzas", [Monto_Pago] > 0)` — pone: Estado_Pago==\"Progra mado\"
 - **Pagado** (SET_COLUMN_VALUE) — si: `=[Estado_Pago]="Programado"` — pone: Estado_Pago==\"Pagado \"; Fecha_Pago==NOW()
-- **\_Sincronizar_Estado_Pago** (SET_COLUMN_VALUE) — si: `true` — pone: Estado_Pago==IFS(\n AND(\n [OC Ref].[Estatus Compra] = \"Anulada\",\n IN([Estado_Pago], LIST(\"Plan\",\"Solicitado\",\"Observado Finanzas\",\"Programado\"))\n ), \"Anulado\
+- **_Sincronizar_Estado_Pago** (SET_COLUMN_VALUE) — si: `true` — pone: Estado_Pago==IFS(\n AND(\n [OC Ref].[Estatus Compra] = \"Anulada\",\n IN([Estado_Pago], LIST(\"Plan\",\"Solicitado\",\"Observado Finanzas\",\"Programado\"))\n ), \"Anulado\
 - **View Ref (Factura_Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([Factura_Ref]))`
 - **View Ref (Voucher_Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([Voucher_Ref]))`
 - **Compose Email (Aprobado_Fin_Por)** (EMAIL) — si: `NOT(ISBLANK([Aprobado_Fin_Por]))`
 - **Compose Email (Ejecutado_Por)** (EMAIL) — si: `NOT(ISBLANK([Ejecutado_Por]))`
-- **\_Marcar_Solicitado** (SET_COLUMN_VALUE) — si: `true` — pone: Estado_Pago==\"Solicita do\"; Factura_Subida==ISNOTB LANK([Factura_Ref]); Fecha_Factura== [Factura_Ref].[Fecha_Doc]; Fecha_Limite_Pago==IF(\ n AND(ISNOTBLANK([Factura_Ref].[Fecha_Doc]), [Dias_Credito] > 0),\n [Factura_Ref].[Fecha_Doc] + [Dias_Credito],\n [Fecha_Limite_Pago]\n)
+- **_Marcar_Solicitado** (SET_COLUMN_VALUE) — si: `true` — pone: Estado_Pago==\"Solicita do\"; Factura_Subida==ISNOTB LANK([Factura_Ref]); Fecha_Factura== [Factura_Ref].[Fecha_Doc]; Fecha_Limite_Pago==IF(\ n AND(ISNOTBLANK([Factura_Ref].[Fecha_Doc]), [Dias_Credito] > 0),\n [Factura_Ref].[Fecha_Doc] + [Dias_Credito],\n [Fecha_Limite_Pago]\n)
 - **Solicitar pago 2** (NAVIGATE_APP) — si: `=AND( [Estado_Pago] = "Plan", [OC Ref].[Estado de Aprobación3] = "Aprobado para Compra", IN([_MiArea], LIST("Compras","Importaciones")) )`
 - **New step Action - 5** (ADD_RECORD_TO Only if this condition is true true) — si: `true` — pone: OC Ref==[OC Ref]; Monto_Pago== [_THISROW_BEFORE].[Monto_Pago] - [_THISROW_AFTER]. [Monto_Pago]; Tipo_Pago==\"Saldo\"; Estado_Pago==\"Plan\"; Hito==[Hito]; N_Cuota==[N_Cuota] + 0.1; Dias_Credito== [Dias_Credito]; Es_Letra==[Es_Letra]; Comentario==\"Remanen te de la cuota \" & [N_Cuota]
-- **\_Vincular_Factura** (SET_COLUMN_VALUE) — si: `true` — pone: Factura_Ref==IF(\n ISNOTBLANK(ANY(SELECT(Documentos_OC[ID_Doc], AND(IN([ID_Doc], [_THISROW].[_Facturas_Libres]), ABS([Monto_Doc] - [_THISROW].[Monto_Pago]) < 1)))),\n ANY(S; Factura_Subida==ISNOTB LANK(ANY([_Facturas_Libres]))
-- **\_Solicitar_Auto** (SET_COLUMN_VALUE) — si: `true` — pone: Estado_Pago==\"Solicita do\"; Factura_Ref==IF(\n ISNOTBLANK(ANY(SELECT(Documentos_OC[ID_Doc], AND(IN([ID_Doc], [_THISROW].[_Facturas_Libres]), ABS([Monto_Doc] - [_THISROW].[Monto_Pago]) < 1)))),\n ANY(S; Factura_Subida==ISNOTB LANK(ANY([_Facturas_Libres])); Comentario==\"Solicitado automáticamente al subir factura\"
-- **\_Fechas_Factura** (SET_COLUMN_VALUE) — si: `true` — pone: Fecha_Factura== [Factura_Ref].[Fecha_Doc]; Fecha_Limite_Pago==IF(\ n AND(ISNOTBLANK([Factura_Ref].[Fecha_Doc]), [Dias_Credito] > 0),\n [Factura_Ref].[Fecha_Doc] + [Dias_Credito],\n [Fecha_Limite_Pago]\n)
-- **View Ref (\_Prov)** (NAVIGATE_APP) — si: `NOT(ISBLANK([_Prov]))`
+- **_Vincular_Factura** (SET_COLUMN_VALUE) — si: `true` — pone: Factura_Ref==IF(\n ISNOTBLANK(ANY(SELECT(Documentos_OC[ID_Doc], AND(IN([ID_Doc], [_THISROW].[_Facturas_Libres]), ABS([Monto_Doc] - [_THISROW].[Monto_Pago]) < 1)))),\n ANY(S; Factura_Subida==ISNOTB LANK(ANY([_Facturas_Libres]))
+- **_Solicitar_Auto** (SET_COLUMN_VALUE) — si: `true` — pone: Estado_Pago==\"Solicita do\"; Factura_Ref==IF(\n ISNOTBLANK(ANY(SELECT(Documentos_OC[ID_Doc], AND(IN([ID_Doc], [_THISROW].[_Facturas_Libres]), ABS([Monto_Doc] - [_THISROW].[Monto_Pago]) < 1)))),\n ANY(S; Factura_Subida==ISNOTB LANK(ANY([_Facturas_Libres])); Comentario==\"Solicitado automáticamente al subir factura\"
+- **_Fechas_Factura** (SET_COLUMN_VALUE) — si: `true` — pone: Fecha_Factura== [Factura_Ref].[Fecha_Doc]; Fecha_Limite_Pago==IF(\ n AND(ISNOTBLANK([Factura_Ref].[Fecha_Doc]), [Dias_Credito] > 0),\n [Factura_Ref].[Fecha_Doc] + [Dias_Credito],\n [Fecha_Limite_Pago]\n)
+- **View Ref (_Prov)** (NAVIGATE_APP) — si: `NOT(ISBLANK([_Prov]))`
 
-## Tabla `Items` · UPDATES_ONLY
+## Tabla `Items`  ·  UPDATES_ONLY
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Req** [Ref] · ref→Requerimientos
 - **FECHA/ HR EMISIÓN** [Date] · inicial TODAY()
 - **RAZON SOCIAL** [Text] · Valid_If: =Empresas[Unidad de negocio] · Show_If: =[ID_Req]. [Estado_Req] <> "En Proceso
@@ -414,26 +401,25 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Fecha_Deshabilitado** [Text]
 - **Anulacion_Ref** [Text]
 - **Concepto_Sugerido** [Text]
-- **\_ID_Item** [Text] · fórmula =CONCATENATE([ID_Req], "-", [N° ITEM]) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =FALSE · solo lectura
+- **_ID_Item** [Text] · fórmula =CONCATENATE([ID_Req], "-", [N° ITEM]) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =FALSE · solo lectura
 - **Descripción** [Text] · fórmula =IF(ISNOTBLANK([DESCRIPCIÓN CLIENTE]),[DESCRIPCIÓN CLIENTE],[DESCRIPCIÓN SIDIGE]) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
 - **Estatus_Item** [Text] · fórmula =IFS( [ESTADO DE VISUALIZACIÓN] = "Deshabilitado", " ⛔ ", OR([CANTIDAD COMPRADA] >= [CANTIDAD REQUERIDA], ISNOTBLANK([Related Caja_Chicas])), " 🟢 ", [CANTIDAD COMPRADA] > 0, " 🟡 ", TRUE, " 🔴 " ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =AND(\n CONTEXT("ViewType") <> "Form · solo lectura
 - **Related Caja_Chicas** [List] · ref→Caja_Chica · solo lectura
-- **\_Es_CajaChica** [Yes/No] · fórmula =IN([_ID_Item], Caja_Chica[Item_Ref]) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_OC_Mostrar** [Text] · fórmula =IF( [_Es_CajaChica], "Caja Chica", IF(AND(ISNOTBLANK([N° OC]), NOT(IN([N° OC], LIST("-","0","#N/A")))), [N° OC], "") ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =AND(\n CONTEXT("ViewType") <> "Form · solo lectura
-- **\_Comprador_Final** [Enum] · fórmula =IF( [_Es_CajaChica], LOOKUP([_ID_Item], "Caja_Chica", "Item_Ref", "Comprador"), [COMPRADOR] ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Es_CajaChica** [Yes/No] · fórmula =IN([_ID_Item], Caja_Chica[Item_Ref]) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_OC_Mostrar** [Text] · fórmula =IF( [_Es_CajaChica], "Caja Chica", IF(AND(ISNOTBLANK([N° OC]), NOT(IN([N° OC], LIST("-","0","#N/A")))), [N° OC], "") ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =AND(\n CONTEXT("ViewType") <> "Form · solo lectura
+- **_Comprador_Final** [Enum] · fórmula =IF( [_Es_CajaChica], LOOKUP([_ID_Item], "Caja_Chica", "Item_Ref", "Comprador"), [COMPRADOR] ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Related Base de datos OC NACs** [List] · ref→Base de datos OC NAC · solo lectura
-- **\_Etiqueta_Item** [Text] · fórmula =CONCATENATE([ID_Req].[N° RC], " · It. ", [N° ITEM], " · ", [descripción]) Read-Only Yes Hidden No Label Yes Formula version 0 · Show_If: =FALSE · solo lectura
+- **_Etiqueta_Item** [Text] · fórmula =CONCATENATE([ID_Req].[N° RC], " · It. ", [N° ITEM], " · ", [descripción]) Read-Only Yes Hidden No Label Yes Formula version 0 · Show_If: =FALSE · solo lectura
 - **Estado del Item** [Text] · fórmula =IFS( [ESTADO DE VISUALIZACIÓN] = "Deshabilitado", " ⛔ Deshabilitado", COUNT([_OC_Activas]) > 0, LOOKUP(INDEX([_OC_Activas], 1), "OC", "ID_OC", "Estatus Compra"), ISNOTBLANK([N° OC]), [ESTADO DE COMPRA], TRUE, " ⚪ Sin OC" ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =CONTEXT("ViewType") <> "Form · solo lectura
-- **\_Concepto_OK** [Yes/No] · fórmula =OR(ISNOTBLANK([CONCEPTO]), ISNOTBLANK([Concepto_Sugerido]), ISNOTBLANK([ID_Req]. [Concepto_General])) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Orden_Concepto** [Number] · fórmula =IF([_Concepto_OK], 1, 0) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Concepto_Previsto** [Text] · fórmula =IFS( ISNOTBLANK([CONCEPTO]), [CONCEPTO], ISNOTBLANK([ID_Req].[Concepto_General]), IF(AND(ISNOTBLANK([ID_Req].[Concepto_Secundario]), FIND(".", [CÓDIGO CLIENTE]) > 1), [ID_Req]. [Concepto_Secundario], [ID_Req].[Concepto_General]), TRUE, [Concepto_Sugerido] ) Read-Only Yes Hidden No Label No Formula version 0 · Valid_If: =Conceptos_Item[Con cepto] · solo lectura
-- **\_Cant_OC** [Decimal] · fórmula =SUM(SELECT(Base de datos OC NAC[Cant_Cubre_Req], AND( [Item_Req_Ref] = [_THISROW].[ID_Item], [OC_Ref].[Estatus Compra] <> "Anulada" ))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Cant_Pendiente** [Decimal] · fórmula =[CANTIDAD REQUERIDA] - [_Cant_OC] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Avance** [Text] · fórmula =IFS( [ESTADO DE VISUALIZACIÓN] = "Deshabilitado", "", ISNOTBLANK([Related Caja_Chicas]), " 🟢 Caja chica", [CANTIDAD COMPRADA] >= [CANTIDAD REQUERIDA], " 🟢 Atendido · " & [CANTIDAD COMPRADA] & "/" & [CANTIDAD REQUERIDA], [CANTIDAD COMPRADA] > 0, " 🟡 Parcial · " & [CANTIDAD COMPRADA] & "/" & [CANTIDAD REQUERIDA], TRUE, " 🔴 Pendiente" ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_OC_Activas** [List] · ref→OC · fórmula =SELECT(Base de datos OC NAC[OC_Ref], AND( [Item_Req_Ref] = [_THISROW].[ID_Item], [OC_Ref].[Estatus Compra] <> "Anulada" )) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Concepto_OK** [Yes/No] · fórmula =OR(ISNOTBLANK([CONCEPTO]), ISNOTBLANK([Concepto_Sugerido]), ISNOTBLANK([ID_Req]. [Concepto_General])) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Orden_Concepto** [Number] · fórmula =IF([_Concepto_OK], 1, 0) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Concepto_Previsto** [Text] · fórmula =IFS( ISNOTBLANK([CONCEPTO]), [CONCEPTO], ISNOTBLANK([ID_Req].[Concepto_General]), IF(AND(ISNOTBLANK([ID_Req].[Concepto_Secundario]), FIND(".", [CÓDIGO CLIENTE]) > 1), [ID_Req]. [Concepto_Secundario], [ID_Req].[Concepto_General]), TRUE, [Concepto_Sugerido] ) Read-Only Yes Hidden No Label No Formula version 0 · Valid_If: =Conceptos_Item[Con cepto] · solo lectura
+- **_Cant_OC** [Decimal] · fórmula =SUM(SELECT(Base de datos OC NAC[Cant_Cubre_Req], AND( [Item_Req_Ref] = [_THISROW].[ID_Item], [OC_Ref].[Estatus Compra] <> "Anulada" ))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Cant_Pendiente** [Decimal] · fórmula =[CANTIDAD REQUERIDA] - [_Cant_OC] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Avance** [Text] · fórmula =IFS( [ESTADO DE VISUALIZACIÓN] = "Deshabilitado", "", ISNOTBLANK([Related Caja_Chicas]), " 🟢 Caja chica", [CANTIDAD COMPRADA] >= [CANTIDAD REQUERIDA], " 🟢 Atendido · " & [CANTIDAD COMPRADA] & "/" & [CANTIDAD REQUERIDA], [CANTIDAD COMPRADA] > 0, " 🟡 Parcial · " & [CANTIDAD COMPRADA] & "/" & [CANTIDAD REQUERIDA], TRUE, " 🔴 Pendiente" ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_OC_Activas** [List] · ref→OC · fórmula =SELECT(Base de datos OC NAC[OC_Ref], AND( [Item_Req_Ref] = [_THISROW].[ID_Item], [OC_Ref].[Estatus Compra] <> "Anulada" )) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 
 ### Acciones
-
 - **View Ref (ID_Req)** (NAVIGATE_APP) — si: `NOT(ISBLANK([ID_Req]))`
 - **Marcar Caja Chica** (NAVIGATE_APP) — si: `=AND( [ID_Req].[Estado_Req] = "Emitido", LOOKUP(USEREMAIL(), "Usuarios", "Email", "Área") = "Compras", NOT(IN([_ID_Item], Caja_Chica[Item_Ref])), OR(ISBLANK([N° OC]), IN([N° OC], LIST("-", "0", "#N/A"))) )`
 - **Desmarcar Caja Chica** (REF_ACTION Only if this condition is true =IN([_ID_Item], Ca) — si: `=IN([_ID_Item], Caja_Chica[Item_Ref])`
@@ -444,11 +430,10 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Open Url (Referencia_Link)** (NAVIGATE_URL) — si: `NOT(ISBLANK([Referencia_Link]))`
 - **Open Url (ESPECIFICACION TECNICA)** (NAVIGATE_URL) — si: `NOT(ISBLANK([ESPECIFICACION TECNICA]))`
 
-## Tabla `Requerimientos` · UPDATES_ONLY
+## Tabla `Requerimientos`  ·  UPDATES_ONLY
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Req** [Text] · inicial UNIQUEID() · CLAVE
 - **RAZON SOCIAL** [Text] · Valid_If: =Empresas[Unidad de negocio]
 - **N° RC** [Text] · Show_If: =CONTEXT("ViewType") <> "Form · Editable_If: =ISBLANK([N° RC])
@@ -472,21 +457,20 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Concepto_Secundario** [Enum]
 - **Related Items** [List] · ref→Items · solo lectura
 - **Estatus_General** [Enum] · enum [" 🔴 Pendiente"," 🟡 Parcial"," 🟢 Atendido"] · fórmula =IFS( [Estado_Req]="Anulado", " ⛔ Anulado", COUNT(SELECT(Anulaciones[ID_Anulacion], AND([ID_Req]= [_THISROW].[ID_Req], [Estado]="Aprobada")))>0, " ⏳ Procesando anulación", [_Anulacion_Pendiente], " 🟠 Anulación en trámite", [Estado_Req]="En Proceso", " ⚪ En Proceso", [_Items_Atendidos]=0, " 🔴 Pendiente", [_Items_Atendidos]>=COUNT(SELECT(Items[ID_Item], AND([ID_Req]=[_THISROW].[ID_Req], [ESTADO DE V · solo lectura
-- **\_Items_Atendidos** [Number] · fórmula =COUNT( SELECT(Items[_ID_Item], AND( [ID_Req] = [_THISROW].[ID_Req], [Estatus_Item] = " 🟢 ", [ESTADO DE VISUALIZACIÓN] <> "Deshabilitado" ) ) ) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_Etiqueta_Req** [Text] · fórmula =CONCATENATE( IF(ISBLANK([N° RC]), [Solicitud_Ref]. [N_Solicitud], [N° RC]), IF(ISBLANK([RAZON SOCIAL]), "", " · " & [RAZON SOCIAL]), " · ", [MOTIVO O PROYECTO], IF(ISBLANK([Solicitud_Ref].[Etapa_Ref]), "", " · " & [Solicitud_Ref]. [Etapa_Ref].[Nombre_Etapa]) ) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Items_Atendidos** [Number] · fórmula =COUNT( SELECT(Items[_ID_Item], AND( [ID_Req] = [_THISROW].[ID_Req], [Estatus_Item] = " 🟢 ", [ESTADO DE VISUALIZACIÓN] <> "Deshabilitado" ) ) ) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Etiqueta_Req** [Text] · fórmula =CONCATENATE( IF(ISBLANK([N° RC]), [Solicitud_Ref]. [N_Solicitud], [N° RC]), IF(ISBLANK([RAZON SOCIAL]), "", " · " & [RAZON SOCIAL]), " · ", [MOTIVO O PROYECTO], IF(ISBLANK([Solicitud_Ref].[Etapa_Ref]), "", " · " & [Solicitud_Ref]. [Etapa_Ref].[Nombre_Etapa]) ) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
 - **Related OCs** [List] · ref→OC · solo lectura
 - **N_RC_Num** [Number] · fórmula =IF(ISBLANK([N° RC]), 0, NUMBER(RIGHT([N° RC], 4))) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
 - **Solicitante** [Text] · fórmula =[Solicitud_Ref].[Solicitante] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Etapa** [Text] · fórmula =[Solicitud_Ref].[Etapa_Ref].[Nombre_Etapa] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Aviso_Emitir** [Text] · fórmula =IF( AND( ISBLANK([Concepto_General]), COUNT(SELECT(Items[ID_Item], AND([ID_Req] = [_THISROW]. [ID_Req], ISBLANK([CONCEPTO])))) > 0 ), " ⚠ Elige un Concepto general o completa el concepto de " & COUNT(SELECT(Items[ID_Item], AND([ID_Req] = [_THISROW]. [ID_Req], ISBLANK([CONCEPTO])))) & " ítems", "" ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =ISNOTBLANK([_Aviso_Emitir]) · solo lectura
-- **\_Items** [List] · ref→Items_En_Proceso · fórmula =FILTER("Items_En_Proceso", [ID_Req] = [_THISROW].[ID_Req]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Anulacion_Pendiente** [Yes/No] · fórmula =COUNT(SELECT(Anulaciones[ID_Anulacion], AND([ID_Req] = [_THISROW].[ID_Req], IN([Estado], LIST("Pendiente", "Aprobada"))))) > 0 Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Aviso_Emitir** [Text] · fórmula =IF( AND( ISBLANK([Concepto_General]), COUNT(SELECT(Items[ID_Item], AND([ID_Req] = [_THISROW]. [ID_Req], ISBLANK([CONCEPTO])))) > 0 ), " ⚠ Elige un Concepto general o completa el concepto de " & COUNT(SELECT(Items[ID_Item], AND([ID_Req] = [_THISROW]. [ID_Req], ISBLANK([CONCEPTO])))) & " ítems", "" ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =ISNOTBLANK([_Aviso_Emitir]) · solo lectura
+- **_Items** [List] · ref→Items_En_Proceso · fórmula =FILTER("Items_En_Proceso", [ID_Req] = [_THISROW].[ID_Req]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Anulacion_Pendiente** [Yes/No] · fórmula =COUNT(SELECT(Anulaciones[ID_Anulacion], AND([ID_Req] = [_THISROW].[ID_Req], IN([Estado], LIST("Pendiente", "Aprobada"))))) > 0 Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
 - **Related Anulaciones** [List] · ref→Anulaciones · solo lectura
-- **\_Items_Seg** [List] · ref→Items_Seguimiento · fórmula =FILTER("Items_Seguimiento", [ID_Req] = [_THISROW].[ID_Req]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Anulaciones** [List] · ref→Anulaciones_RO · fórmula =FILTER("Anulaciones_RO", [ID_Req] = [_THISROW].[ID_Req]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Items_Seg** [List] · ref→Items_Seguimiento · fórmula =FILTER("Items_Seguimiento", [ID_Req] = [_THISROW].[ID_Req]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Anulaciones** [List] · ref→Anulaciones_RO · fórmula =FILTER("Anulaciones_RO", [ID_Req] = [_THISROW].[ID_Req]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 
 ### Acciones
-
 - **Edit** (EDIT_RECORD Only if this condition is true =AND( [Estado_Req) — si: `=AND( [Estado_Req] = "En Proceso", LOOKUP(USEREMAIL(), "Usuarios", "Email", "Área") = [AREA EMISORA] )`
 - **View Ref (Solicitud_Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([Solicitud_Ref]))`
 - **Emitir Requerimiento** (SET_COLUMN_VALUE) — si: `=AND( [Estado_Req] = "En Proceso", ISBLANK([N° RC]), LOOKUP(USEREMAIL(), "Usuarios", "Email", "Área") = [AREA EMISORA], ISNOTBLANK([RAZON SOCIAL]), ISNOTBLANK([TIPO COMPRA]), ISNOTBLANK([DESTINO]), COUNT(SELECT(Items[ID_Item], [ID_Req] = [_THISROW]. [ID_Req])) > 0, OR( ISNOTBLANK([Concepto_General]), COUNT(SELECT(Items[ID_Item], AND([ID_Req] = [_THISROW]. [ID_Req], ISBLANK([CONCEPTO])))) = 0 ), NOT([_Anulacion_Pendiente]) )` — pone: Estado_Req==\"Emitido\ "; Emisor==LOOKUP(USERE MAIL(), \"Usuarios\", \"Email\", \"Nombre\")
@@ -501,11 +485,10 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Solicitar anulación** (NAVIGATE_APP) — si: `=AND( IN([Estado_Req], LIST("En Proceso", "Emitido")), NOT([_Anulacion_Pendiente]), OR( LOOKUP(USEREMAIL(), "Usuarios", "Email", "Área") = [AREA EMISORA], TRIM(LOWER(USEREMAIL())) = TRIM(LOWER([Solicitud_Ref]. [Email_Solicitante])) ) )`
 - **Solicitar rehabilitación** (NAVIGATE_APP) — si: `=AND( IN([Estado_Req], LIST("En Proceso", "Emitido")), NOT([_Anulacion_Pendiente]), COUNT(SELECT(Items[ID_Item], AND([ID_Req] = [_THISROW].[ID_Req], [ESTADO DE VISUALIZACIÓN] = "Deshabilitado"))) > 0, OR( LOOKUP(USEREMAIL(), "Usuarios", "Email", "Área") = [AREA EMISORA], TRIM(LOWER(USEREMAIL())) = TRIM(LOWER([Solicitud_Ref].[Email_Solicitante])) ) )`
 
-## Tabla `Caja_Chica` · ALL_CHANGES
+## Tabla `Caja_Chica`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_CC** [Text] · inicial UNIQUEID() · CLAVE
 - **Item_Ref** [Ref] · ref→Items · Show_If: =CONTEXT("ViewType") <> "Form
 - **Comentario** [Text]
@@ -517,17 +500,15 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Moneda** [Enum] · inicial ="PEN"
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 - **View Ref (Item_Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([Item_Ref]))`
 
-## Tabla `Base de datos OC NAC` · ADDS_AND_UPDATES
+## Tabla `Base de datos OC NAC`  ·  ADDS_AND_UPDATES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **FECHA** [Date] · fórmula =[OC_Ref].[Fecha] Read-Only No Hidden No Label Yes Formula version 0
 - **MES** [Text]
 - **EMPRESA** [Text] · fórmula =[OC_Ref].[Unidad de negocio] Read-Only No Hidden No Label No Formula version 0
@@ -572,17 +553,16 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Demasia_Estado** [Enum] · enum ["Pendiente","Aprobada","Rechazada"] · inicial =IF([Es_Demasia], "Pendiente", "")
 - **Cant_Demasia_Solicitada** [Number] · Show_If: = [Demasia_Estado] = "Rechazada · Editable_If: =FALSE
 - **Demasia_Decidido_Por** [Email] · Show_If: =ISNOT BLANK([_THIS]) · Editable_If: =FALSE
-- **\_UM_Req** [Text] · fórmula =[Item_Req_Ref].[UNIDAD MEDIDA] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Cant_Req** [Decimal] · fórmula =IF([UNIDAD DE MEDIDA] = [Item_Req_Ref].[UNIDAD MEDIDA], [CANTIDAD], [Cant_Equiv_Req]) Read-Only Yes Hidden No Label No Formula version 0 · Valid_If: =OR([Es_Demasia],[_THIS] > 0) · solo lectura
-- **\_Exceso** [Decimal] · fórmula =[_Cant_Req] - [Cant_Cubre_Req] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Aviso_Exceso** [Text] · fórmula =IF([_Exceso] > 0, " ⚠ Compras " & [_Exceso] & " " & [_UM_Req] & " más de lo pedido. Indica el sustento.", "") Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =AND(NOT([Es_Demasia]),[_Exceso] > 0) · solo lectura
+- **_UM_Req** [Text] · fórmula =[Item_Req_Ref].[UNIDAD MEDIDA] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Cant_Req** [Decimal] · fórmula =IF([UNIDAD DE MEDIDA] = [Item_Req_Ref].[UNIDAD MEDIDA], [CANTIDAD], [Cant_Equiv_Req]) Read-Only Yes Hidden No Label No Formula version 0 · Valid_If: =OR([Es_Demasia],[_THIS] > 0) · solo lectura
+- **_Exceso** [Decimal] · fórmula =[_Cant_Req] - [Cant_Cubre_Req] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Aviso_Exceso** [Text] · fórmula =IF([_Exceso] > 0, " ⚠ Compras " & [_Exceso] & " " & [_UM_Req] & " más de lo pedido. Indica el sustento.", "") Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =AND(NOT([Es_Demasia]),[_Exceso] > 0) · solo lectura
 - **Related Des_Productos** [List] · ref→Des_Productos · solo lectura
 
-## Tabla `Base de datos Proveedores` · ALL_CHANGES
+## Tabla `Base de datos Proveedores`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **RUC** [Text] · CLAVE
 - **RAZON SOCIAL** [Text]
 - **CONDICION COMERCIAL** [Text]
@@ -621,28 +601,25 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **BANCO_INTERMEDIARIO** [Text] · Show_If: =[ORIGEN] = "Extranjero
 - **SWIFT_INTERMEDIARIO** [Text] · Show_If: =[ORIGEN] = "Extranjero
 - **Related OCs** [List] · ref→OC · solo lectura
-- **\_Retencion** [Text] · fórmula =IFS( [ORIGEN] = "Extranjero", "No aplica", [Verificado_Contab] <> TRUE, " ⚠ Por verificar", OR([Es_Agente_Retencion] = TRUE, [Es_Buen_Contribuyente] = TRUE), " ✓ No retener", TRUE, " ✓ Retener 3%" ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Retencion** [Text] · fórmula =IFS( [ORIGEN] = "Extranjero", "No aplica", [Verificado_Contab] <> TRUE, " ⚠ Por verificar", OR([Es_Agente_Retencion] = TRUE, [Es_Buen_Contribuyente] = TRUE), " ✓ No retener", TRUE, " ✓ Retener 3%" ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Related Pagos** [List] · ref→Pagos · solo lectura
 
-## Tabla `Conceptos` · ALL_CHANGES
+## Tabla `Conceptos`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **Concepto** [Text] · CLAVE
 - **Related Conceptos_Gasto_Imps** [List] · ref→Conceptos_Gasto_Imp · solo lectura
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 
-## Tabla `Empresas` · ALL_CHANGES
+## Tabla `Empresas`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **Unidad de negocio** [Text] · CLAVE
 - **Razón Social** [Text]
 - **RUC** [Text]
@@ -654,17 +631,15 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Related Proyectos** [List] · ref→Proyectos · solo lectura
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 - **Open Url (Carpeta_OC_Raiz)** (NAVIGATE_URL) — si: `NOT(ISBLANK([Carpeta_OC_Raiz]))`
 
-## Tabla `Solicitud_Items` · ALL_CHANGES
+## Tabla `Solicitud_Items`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Item** [Text] · inicial UNIQUEID() · solo lectura · CLAVE
 - **Solicitud_Ref** [Ref] · ref→Solicitudes
 - **N_Item** [Text] · inicial =COUNT(SELECT(Solicitud_Items[ID_Item], [Solicitud_Ref] = [_THISROW].[Solicitud_Ref])) + 1 · Editable_If: =CONT EXT("ViewType") <> "Form
@@ -679,23 +654,21 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Plazo_Adquisicion** [Date] · Editable_If: =IN([Soli citud_Ref].[Estado], LIST("Borrador
 - **Estatus_Item** [Text] · solo lectura
 - **Related Items** [List] · ref→Items · fórmula =REF_ROWS("Items", "Solicitud_Item_Ref") Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_Estado_Compra** [Text] · fórmula =IF( COUNT(SELECT(Items[ID_Item], [Solicitud_Item_Ref] = [_THISROW].[ID_Item])) = 0, "", ANY(SELECT(Items[Estado del Item], [Solicitud_Item_Ref] = [_THISROW].[ID_Item])) ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =ISNOTBLANK([_Estado_Compra]) · solo lectura
+- **_Estado_Compra** [Text] · fórmula =IF( COUNT(SELECT(Items[ID_Item], [Solicitud_Item_Ref] = [_THISROW].[ID_Item])) = 0, "", ANY(SELECT(Items[Estado del Item], [Solicitud_Item_Ref] = [_THISROW].[ID_Item])) ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =ISNOTBLANK([_Estado_Compra]) · solo lectura
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD Only if this condition is true =IN([Solicitud_) — si: `=IN([Solicitud_Ref].[Estado], LIST("Borrador", "Observada"))`
 - **Edit** (EDIT_RECORD Only if this condition is true =IN([Solicitud_Re) — si: `=IN([Solicitud_Ref].[Estado], LIST("Borrador", "Observada"))`
 - **Add** (ADD_RECORD Only if this condition is true =TRUE) — si: `=TRUE`
 - **View Ref (Solicitud_Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([Solicitud_Ref]))`
 - **Open File (Ficha_Tecnica)** (OPEN_FILE) — si: `NOT(ISBLANK([Ficha_Tecnica]))`
 - **Open Url (Referencia_Link)** (NAVIGATE_URL) — si: `NOT(ISBLANK([Referencia_Link]))`
-- **\_Clonar item al nuevo** (ADD_RECORD_TO Only if this condition is true true) — si: `true` — pone: Solicitud_Ref== [Solicitud_Ref].[Nueva_Solicitud_ID]; Tipo==[Tipo]; Codigo_Cliente== [Codigo_Cliente]; Descripcion== [Descripcion]; Unidad_Medida== [Unidad_Medida]; Cantidad==[Cantidad]; Ficha_Tecnica== [Ficha_Tecnica]; Referencia_Link== [Referencia_Link]; Detalle==[Detalle]; Plazo_Adquisicion== [Plazo_Adquisicion]
+- **_Clonar item al nuevo** (ADD_RECORD_TO Only if this condition is true true) — si: `true` — pone: Solicitud_Ref== [Solicitud_Ref].[Nueva_Solicitud_ID]; Tipo==[Tipo]; Codigo_Cliente== [Codigo_Cliente]; Descripcion== [Descripcion]; Unidad_Medida== [Unidad_Medida]; Cantidad==[Cantidad]; Ficha_Tecnica== [Ficha_Tecnica]; Referencia_Link== [Referencia_Link]; Detalle==[Detalle]; Plazo_Adquisicion== [Plazo_Adquisicion]
 
-## Tabla `Solicitudes` · ALL_CHANGES
+## Tabla `Solicitudes`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Solicitud** [Text] · inicial UNIQUEID() · CLAVE
 - **N_Solicitud_old** [Text]
 - **Fecha_Solicitada** [Date] · inicial =TODAY() · solo lectura
@@ -726,31 +699,30 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Rechazado_Por** [Email]
 - **Fecha_Rechazo** [DateTime]
 - **Related Solicitud_Items** [List] · ref→Solicitud_Items · solo lectura
-- **\_Cantidad_Items** [Number] · fórmula =COUNT([Related Solicitud_Items]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_MiArea** [Text] · fórmula =LOOKUP(USEREMAIL(),"Usuarios","Email","Área") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Cantidad_Items** [Number] · fórmula =COUNT([Related Solicitud_Items]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_MiArea** [Text] · fórmula =LOOKUP(USEREMAIL(),"Usuarios","Email","Área") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Related Requerimientos** [List] · ref→Requerimientos · solo lectura
-- **\_Ruta_Archivo** [Text] · fórmula =CONCATENATE([Archivo_Items]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Ruta_Archivo** [Text] · fórmula =CONCATENATE([Archivo_Items]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Related Carga_items** [List] · ref→Carga_items · solo lectura
-- **\_Items_Con_Error** [Number] · fórmula =COUNT(FILTER("Carga_Items", AND([Solicitud_Ref] = [_THISROW].[ID_Solicitud], [Estado_Fila] = "Error", [Lote_ID] = [_THISROW].[Lote_Actual]))) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =AND (\n ISNOTBLANK([ID_Solicitud]),\n [Estado_Carga] = "Revision"\n) · solo lectura
-- **\_Items_Listos** [Number] · fórmula =COUNT( FILTER("Carga_Items", AND( [Solicitud_Ref] = [_THISROW].[ID_Solicitud], IN([Estado_Fila], LIST("Valido", "Advertencia")), [Lote_ID] = [_THISROW].[Lote_Actual] ) ) ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =AND (\n ISNOTBLANK([ID_Solicitud]),\n [Estado_Carga] = "Revision"\n) · solo lectura
-- **\_Carga_Errores** [List] · ref→Carga_Errores · fórmula =FILTER("Carga_Items", AND( [Solicitud_Ref] = [_THISROW]. [ID_Solicitud], [Estado_Fila] = "Error", [Lote_ID] = [_THISROW]. [Lote_Actual] ) ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Carga_Listos** [List] · ref→Carga_Listos · fórmula =FILTER("Carga_Items", AND( [Solicitud_Ref] = [_THISROW]. [ID_Solicitud], IN([Estado_Fila], LIST("Valido", "Advertencia")), [Lote_ID] = [_THISROW].[Lote_Actual] ) ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Aprobadores** [List] · fórmula =IFS( AND([Tipo_Solicitud] = "Proyecto", ISNOTBLANK([Etapa_Ref])), [Etapa_Ref].[Aprobadores], TRUE, LIST([Jefe_Email]) ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Soy_Aprobador** [Yes/No] · fórmula =IN(USEREMAIL(), [_Aprobadores]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Proyecto** [Text] · fórmula =[Proyecto_Ref].[Etiqueta_Proyecto] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Etapa** [Text] · fórmula =[Etapa_Ref].[Nombre_Etapa] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Liberado_Por_Nombre** [Text] · fórmula =LOOKUP([Liberado_Por], "Usuarios", "Email", "Nombre") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Quien_soy** [Email] · fórmula =USEREMAIL() Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_Debug** [Text] · fórmula =CONCATENATE( "[", [Etapa_Ref].[Aprobadores], "]", " || user: [", USEREMAIL(), "]", " || etapa: [", [Etapa_Ref], "]" ) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_Aviso_Carga** [Text] · fórmula =" 💾 Guarda tu solicitud y luego carga tus ítems." Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =NOT(IN([ID_Solicitud], Solicitudes[ID_Solicitud])) · solo lectura
-- **\_Requiere_Aprobacion** [Yes/No] · fórmula =OR( COUNT(SELECT(Solicitud_Items[ID_Item], AND([Solicitud_Ref] = [_THISROW].[ID_Solicitud], NOT(IN([ID_Item], Items[Solicitud_Item_Ref]))))) > 0, COUNT(SELECT(Items[ID_Item], AND([ID_Req] = [_THISROW]. [Nuevo_ID_Req], ISNOTBLANK([Solicitud_Item_Ref].[ID_Item]), OR([Solicitud_Item_Ref].[Cantidad] > [CANTIDAD REQUERIDA], [Solicitud_Item_Ref].[Descripcion] <> [DESCRIPCIÓN CLIENTE])))) > 0 ) Read-Onl · solo lectura
-- **\_Aviso_Aprobacion** [Text] · fórmula =" ⚠ Agregaste ítems o aumentaste cantidades: al reenviar, la solicitud volverá a aprobación." Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =AND([Estado] = "Observada · solo lectura
+- **_Items_Con_Error** [Number] · fórmula =COUNT(FILTER("Carga_Items", AND([Solicitud_Ref] = [_THISROW].[ID_Solicitud], [Estado_Fila] = "Error", [Lote_ID] = [_THISROW].[Lote_Actual]))) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =AND (\n ISNOTBLANK([ID_Solicitud]),\n [Estado_Carga] = "Revision"\n) · solo lectura
+- **_Items_Listos** [Number] · fórmula =COUNT( FILTER("Carga_Items", AND( [Solicitud_Ref] = [_THISROW].[ID_Solicitud], IN([Estado_Fila], LIST("Valido", "Advertencia")), [Lote_ID] = [_THISROW].[Lote_Actual] ) ) ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =AND (\n ISNOTBLANK([ID_Solicitud]),\n [Estado_Carga] = "Revision"\n) · solo lectura
+- **_Carga_Errores** [List] · ref→Carga_Errores · fórmula =FILTER("Carga_Items", AND( [Solicitud_Ref] = [_THISROW]. [ID_Solicitud], [Estado_Fila] = "Error", [Lote_ID] = [_THISROW]. [Lote_Actual] ) ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Carga_Listos** [List] · ref→Carga_Listos · fórmula =FILTER("Carga_Items", AND( [Solicitud_Ref] = [_THISROW]. [ID_Solicitud], IN([Estado_Fila], LIST("Valido", "Advertencia")), [Lote_ID] = [_THISROW].[Lote_Actual] ) ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Aprobadores** [List] · fórmula =IFS( AND([Tipo_Solicitud] = "Proyecto", ISNOTBLANK([Etapa_Ref])), [Etapa_Ref].[Aprobadores], TRUE, LIST([Jefe_Email]) ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Soy_Aprobador** [Yes/No] · fórmula =IN(USEREMAIL(), [_Aprobadores]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Proyecto** [Text] · fórmula =[Proyecto_Ref].[Etiqueta_Proyecto] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Etapa** [Text] · fórmula =[Etapa_Ref].[Nombre_Etapa] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Liberado_Por_Nombre** [Text] · fórmula =LOOKUP([Liberado_Por], "Usuarios", "Email", "Nombre") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Quien_soy** [Email] · fórmula =USEREMAIL() Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Debug** [Text] · fórmula =CONCATENATE( "[", [Etapa_Ref].[Aprobadores], "]", " || user: [", USEREMAIL(), "]", " || etapa: [", [Etapa_Ref], "]" ) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Aviso_Carga** [Text] · fórmula =" 💾 Guarda tu solicitud y luego carga tus ítems." Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =NOT(IN([ID_Solicitud], Solicitudes[ID_Solicitud])) · solo lectura
+- **_Requiere_Aprobacion** [Yes/No] · fórmula =OR( COUNT(SELECT(Solicitud_Items[ID_Item], AND([Solicitud_Ref] = [_THISROW].[ID_Solicitud], NOT(IN([ID_Item], Items[Solicitud_Item_Ref]))))) > 0, COUNT(SELECT(Items[ID_Item], AND([ID_Req] = [_THISROW]. [Nuevo_ID_Req], ISNOTBLANK([Solicitud_Item_Ref].[ID_Item]), OR([Solicitud_Item_Ref].[Cantidad] > [CANTIDAD REQUERIDA], [Solicitud_Item_Ref].[Descripcion] <> [DESCRIPCIÓN CLIENTE])))) > 0 ) Read-Onl · solo lectura
+- **_Aviso_Aprobacion** [Text] · fórmula =" ⚠ Agregaste ítems o aumentaste cantidades: al reenviar, la solicitud volverá a aprobación." Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =AND([Estado] = "Observada · solo lectura
 - **N_Solicitud** [Text] · fórmula =LOOKUP([_THISROW].[ID_Solicitud], "Solicitud_Docs", "ID_Solicitud", "N_Solicitud") Read-Only Yes Hidden No Label Yes Formula version 0 · solo lectura
 - **PDF_Solicitud** [Url] · fórmula =LOOKUP([_THISROW].[ID_Solicitud], "Solicitud_Docs", "ID_Solicitud", "PDF_Solicitud") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Motivo_Cierre** [Text] · fórmula =IFS( [Estado] = "Cancelada", [Motivo_Cancelacion], [Estado] = "Rechazada", [Motivo_Rechazo] ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =IN([Estado], LIST("Cancelada · solo lectura
+- **_Motivo_Cierre** [Text] · fórmula =IFS( [Estado] = "Cancelada", [Motivo_Cancelacion], [Estado] = "Rechazada", [Motivo_Rechazo] ) Read-Only Yes Hidden No Label No Formula version 0 · Show_If: =IN([Estado], LIST("Cancelada · solo lectura
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD Only if this condition is true =[Estado] = "Bo) — si: `=[Estado] = "Borrador"`
 - **Edit** (EDIT_RECORD Only if this condition is true =IN([Estado], LIS) — si: `=IN([Estado], LIST("Borrador", "Observada"))`
 - **Compose Email (Email_Solicitante)** (EMAIL) — si: `NOT(ISBLANK([Email_Solicitante]))`
@@ -773,7 +745,7 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **5_Cerrar carga** (SET_COLUMN_VALUE) — si: `true` — pone: Estado_Carga==\"Confir mado\"
 - **Confirmar carga (masivo)** (SET_COLUMN_VALUE) — si: `=AND([_Items_Listos] > 0, [Estado_Carga] = "Revision")` — pone: Estado_Carga==\"Confir mando\"
 - **Compose Email (Liberado_Por)** (EMAIL) — si: `NOT(ISBLANK([Liberado_Por]))`
-- **Compose Email (\_Quien_soy)** (EMAIL) — si: `NOT(ISBLANK([_Quien_soy]))`
+- **Compose Email (_Quien_soy)** (EMAIL) — si: `NOT(ISBLANK([_Quien_soy]))`
 - **Open Url (PDF_Solicitud)** (NAVIGATE_URL) — si: `NOT(ISBLANK([PDF_Solicitud]))`
 - **Compose Email (Observado_Por)** (EMAIL) — si: `NOT(ISBLANK([Observado_Por]))`
 - **Devolver de Req** (SET_COLUMN_VALUE) — si: `=AND([Estado] = "En Req", USEREMAIL() = [Email_Solicitante], ANY(SELECT(Requerimientos[Estado_Req], [Solicitud_Ref] = [_THISROW].[ID_Solicitud])) = "En Proceso")` — pone: Estado==\"Observada\"; Motivo_Observacion== [_INPUT].[Motivo]; Observado_Por==USERE MAIL()
@@ -788,11 +760,10 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Compose Email (Rechazado_Por)** (EMAIL) — si: `NOT(ISBLANK([Rechazado_Por]))`
 - **Solicitar anulación del requerimiento** (NAVIGATE_APP) — si: `=AND( [Estado] = "En Req", TRIM(LOWER(USEREMAIL())) = TRIM(LOWER([Email_Solicitante])), ISNOTBLANK([Nuevo_ID_Req]), COUNT(SELECT(Anulaciones[ID_Anulacion], AND([ID_Req] = [_THISROW].[Nuevo_ID_Req], IN([Estado], LIST("Pendiente", "Aprobada"))))) = 0 )`
 
-## Tabla `Proyectos` · ALL_CHANGES
+## Tabla `Proyectos`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **Nombre_Proyecto** [Text]
 - **Codigo_Proyecto** [Text] · Required_If: =([Estado] = "Ganado")
 - **ID_Proyecto** [Text] · inicial =uniqueid() · Editable_If: =ISBLA NK([ID_Proyecto]) · CLAVE
@@ -807,7 +778,6 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Related Solicitudes By Proyecto_Ref** [List] · ref→Solicitudes · solo lectura
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
@@ -817,11 +787,10 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Marcar como Perdido** (SET_COLUMN_VALUE) — si: `=[Estado] = "Estudio de mercado"` — pone: Estado==\"Perdido\"
 - **Action for Agregar etapa** (ADD_RECORD_TO Only if this condition is true true) — si: `true` — pone: Proyecto_Ref== [ID_Proyecto]; Nombre_Etapa==\"Gener al\"; Aprobadores==LIST([Ger ente_Email]); Orden==1
 
-## Tabla `Proyecto_Etapas` · ALL_CHANGES
+## Tabla `Proyecto_Etapas`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Etapa** [Text] · inicial UNIQUEID() · CLAVE
 - **Proyecto_Ref** [Ref] · ref→Proyectos · Editable_If: =ISBLANK([ID_Proyecto])
 - **Nombre_Etapa** [Text]
@@ -830,17 +799,15 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Related Solicitudes** [List] · ref→Solicitudes · solo lectura
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 - **View Ref (Proyecto_Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([Proyecto_Ref]))`
 
-## Tabla `Carga_items` · ALL_CHANGES
+## Tabla `Carga_items`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Carga** [Text] · inicial UNIQUEID() · solo lectura · CLAVE
 - **Lote_ID** [Text] · solo lectura
 - **Solicitud_Ref** [Ref] · ref→Solicitudes · solo lectura
@@ -858,10 +825,9 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Errores** [Text] · solo lectura
 - **Advertencias** [Text] · solo lectura
 - **Marca_Temporal** [Text] · solo lectura
-- **\_Es_Valido** [Yes/No] · fórmula =AND( ISNOTBLANK([N_Item]), ISNOTBLANK([Tipo]), ISNOTBLANK([Descripcion]), ISNOTBLANK([Unidad_Medida]), NUMBER([Cantidad]) > 0, ISNOTBLANK([Plazo_Adquisicion]), ISBLANK( FILTER("Solicitud_Items", AND( [Solicitud_Ref] = [_THISROW].[Solicitud_Ref], [N_Item] = [_THISROW].[N_Item] ) ) ) ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Es_Valido** [Yes/No] · fórmula =AND( ISNOTBLANK([N_Item]), ISNOTBLANK([Tipo]), ISNOTBLANK([Descripcion]), ISNOTBLANK([Unidad_Medida]), NUMBER([Cantidad]) > 0, ISNOTBLANK([Plazo_Adquisicion]), ISBLANK( FILTER("Solicitud_Items", AND( [Solicitud_Ref] = [_THISROW].[Solicitud_Ref], [N_Item] = [_THISROW].[N_Item] ) ) ) ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
@@ -872,35 +838,31 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Cargar este item** (COMPOSITE Only if this condition is true =AND([Estado_Fila]) — si: `=AND([Estado_Fila] = "Error", [_Es_Valido])` — ejecuta: 1_Copiar item, 2_Marcar procesado
 - **Descartar item** (SET_COLUMN_VALUE) — si: `=[Estado_Fila] = "Error"` — pone: Estado_Fila==\"Descarta do\"
 
-## Tabla `Conceptos_Item` · READ_ONLY
+## Tabla `Conceptos_Item`  ·  READ_ONLY
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **Concepto** [Text] · CLAVE
 
-## Tabla `Solicitud_Docs` · ADDS_AND_UPDATES
+## Tabla `Solicitud_Docs`  ·  ADDS_AND_UPDATES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Solicitud** [Text] · inicial UNIQUEID() · CLAVE
 - **N_Solicitud** [Text]
 - **PDF_Solicitud** [Url]
-- **\_Num** [Number] · fórmula =IF(ISBLANK([N_Solicitud]), 0, NUMBER(RIGHT([N_Solicitud], 4))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Num** [Number] · fórmula =IF(ISBLANK([N_Solicitud]), 0, NUMBER(RIGHT([N_Solicitud], 4))) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 
 ### Acciones
-
 - **Edit** (EDIT_RECORD)
 - **Open Url (PDF_Solicitud)** (NAVIGATE_URL) — si: `NOT(ISBLANK([PDF_Solicitud]))`
 - **Add** (ADD_RECORD)
 - **Limpiar PDF** (SET_COLUMN_VALUE) — si: `true` — pone: PDF_Solicitud==\"\"
 
-## Tabla `Anulaciones` · ALL_CHANGES
+## Tabla `Anulaciones`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Anulacion** [Text] · inicial UNIQUEID() · CLAVE
 - **ID_Req** [Ref] · ref→Requerimientos
 - **Tipo** [Enum] · enum ["Total","Ítems"]
@@ -916,14 +878,13 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Resultado** [Text] · Show_If: =AND(CONTEXT("ViewType") <> "Form
 - **Fecha_Ejecucion** [Text] · Show_If: =AND(CONTEXT("ViewType") <> "Form
 - **Accion** [Enum] · enum ["Deshabilitar","Rehabilitar"] · inicial ="Deshabilitar"
-- **\_Aprobadores** [List] · fórmula =IF( [Causa] = "Error de emisión", LIST(LOOKUP([Solicitado_Por], "Usuarios", "Email", "Jefe")), [ID_Req].[Solicitud_Ref].[_Aprobadores] ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_N_RC** [Text] · fórmula =[ID_Req].[N° RC] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_N_Solicitud** [Text] · fórmula =[ID_Req].[Solicitud_Ref].[N_Solicitud] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Proyecto** [Text] · fórmula =[ID_Req].[MOTIVO O PROYECTO] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Items_Afectados** [List] · ref→Items_Anulacion · fórmula =IFS( [Tipo] = "Total", SELECT(Items[ID_Item], [ID_Req] = [_THISROW].[ID_Req]), CONTAINS([Items], "-"), SELECT(Items[ID_Item], AND( [ID_Req] = [_THISROW].[ID_Req], [N° ITEM] >= NUMBER(INDEX(SPLIT([_THISROW].[Items], "-"), 1)), [N° ITEM] <= NUMBER(INDEX(SPLIT([_THISROW].[Items], "- "), 2)))), TRUE, SELECT(Items[ID_Item], AND( [ID_Req] = [_THISROW].[ID_Req], IN(TEXT([N° ITEM]), SPLIT(SUBSTITUTE([_TH · solo lectura
+- **_Aprobadores** [List] · fórmula =IF( [Causa] = "Error de emisión", LIST(LOOKUP([Solicitado_Por], "Usuarios", "Email", "Jefe")), [ID_Req].[Solicitud_Ref].[_Aprobadores] ) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_N_RC** [Text] · fórmula =[ID_Req].[N° RC] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_N_Solicitud** [Text] · fórmula =[ID_Req].[Solicitud_Ref].[N_Solicitud] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Proyecto** [Text] · fórmula =[ID_Req].[MOTIVO O PROYECTO] Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Items_Afectados** [List] · ref→Items_Anulacion · fórmula =IFS( [Tipo] = "Total", SELECT(Items[ID_Item], [ID_Req] = [_THISROW].[ID_Req]), CONTAINS([Items], "-"), SELECT(Items[ID_Item], AND( [ID_Req] = [_THISROW].[ID_Req], [N° ITEM] >= NUMBER(INDEX(SPLIT([_THISROW].[Items], "-"), 1)), [N° ITEM] <= NUMBER(INDEX(SPLIT([_THISROW].[Items], "- "), 2)))), TRUE, SELECT(Items[ID_Item], AND( [ID_Req] = [_THISROW].[ID_Req], IN(TEXT([N° ITEM]), SPLIT(SUBSTITUTE([_TH · solo lectura
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
@@ -933,11 +894,10 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Ver requerimiento** (NAVIGATE_APP) — si: `true`
 - **Ver PDF** (NAVIGATE_URL) — si: `=ISNOTBLANK([ID_Req].[PDF_Req])`
 
-## Tabla `OC_Docs` · ALL_CHANGES
+## Tabla `OC_Docs`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_OC** [Text] · inicial UNIQUEID() · CLAVE
 - **N_OC** [Text]
 - **Serie** [Text]
@@ -951,16 +911,14 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **PDF_Proveedor** [Text]
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 
-## Tabla `Aprobadores_OC` · ALL_CHANGES
+## Tabla `Aprobadores_OC`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID** [Number] · CLAVE
 - **Email** [Email]
 - **Nombre** [Text]
@@ -968,17 +926,15 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Activo** [Yes/No]
 
 ### Acciones
-
 - **Compose Email (Email)** (EMAIL) — si: `NOT(ISBLANK([Email]))`
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 
-## Tabla `Reglas_Aprobacion` · ALL_CHANGES
+## Tabla `Reglas_Aprobacion`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID** [Number] · CLAVE
 - **Tipo_Compra** [Text]
 - **Monto_Desde** [Decimal]
@@ -986,16 +942,14 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Ruta** [Text]
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 
-## Tabla `Documentos_OC` · ADDS_AND_UPDATES
+## Tabla `Documentos_OC`  ·  ADDS_AND_UPDATES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Doc** [Text] · inicial ="D" & UNIQUEID() · solo lectura · CLAVE
 - **OC_Ref** [Ref] · ref→OC
 - **Tipo_Doc** [Enum] · enum ["Cotización","Correo de sustento","Factura","Nota de crédito","Guía de remisión","Acta de Conformidad","Valorización","Voucher de pago","Otro","Proforma (PI)","Factura comercial","Packing list","Ficha técnica","Validación técnica","Carta de compatibilidad","SWIFT"]
@@ -1011,10 +965,9 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Fecha_Doc** [Date] · Show_If: =IN([Tipo_Doc], LIST("Factura · Required_If: =IN([Tipo_Doc], LIST("Factura
 - **Related Pagos By Factura_Ref** [List] · ref→Pagos · solo lectura
 - **Related Pagos By Voucher_Ref** [List] · ref→Pagos · solo lectura
-- **\_Etiqueta_Doc** [Text] · fórmula =CONCATENATE( [Tipo_Doc], " ", IF(ISNOTBLANK([N_Documento]), [N_Documento], [Descripcion]), IF(ISNOTBLANK([Monto_Doc]), " · S/ " & TEXT([Monto_Doc]), ""), " · ", TEXT([Fecha_Subida], "DD/MM/YYYY") ) Read-Only Yes Hidden No Label Yes Formula version 0 · solo lectura
+- **_Etiqueta_Doc** [Text] · fórmula =CONCATENATE( [Tipo_Doc], " ", IF(ISNOTBLANK([N_Documento]), [N_Documento], [Descripcion]), IF(ISNOTBLANK([Monto_Doc]), " · S/ " & TEXT([Monto_Doc]), ""), " · ", TEXT([Fecha_Subida], "DD/MM/YYYY") ) Read-Only Yes Hidden No Label Yes Formula version 0 · solo lectura
 
 ### Acciones
-
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 - **View Ref (OC_Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([OC_Ref]))`
@@ -1026,11 +979,10 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Action for Actualizar Estado de Pago** (REF_ACTION Only if this condition is true true) — si: `true`
 - **Fechas de factura Action - 1** (REF_ACTION Only if this condition is true true) — si: `true`
 
-## Tabla `Conceptos_Gasto_Imp` · ALL_CHANGES
+## Tabla `Conceptos_Gasto_Imp`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **Concepto** [Ref] · ref→Conceptos · CLAVE
 - **Entra_Costo** [Yes/No]
 - **Reparto** [Enum] · enum ["Producto","Valor"]
@@ -1039,17 +991,15 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Related Des_Gastos** [List] · ref→Des_Gastos · solo lectura
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **View Ref (Concepto)** (NAVIGATE_APP) — si: `NOT(ISBLANK([Concepto]))`
 - **Add** (ADD_RECORD)
 
-## Tabla `Des_Costeo_Hist` · READ_ONLY
+## Tabla `Des_Costeo_Hist`  ·  READ_ONLY
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Hist** [Text] · inicial UNIQUEID() · CLAVE
 - **Des_Ref** [Ref] · ref→Desaduanajes
 - **Version** [Number]
@@ -1065,15 +1015,13 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Costo_Unit_S** [Decimal]
 
 ### Acciones
-
 - **View Ref (Des_Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([Des_Ref]))`
 - **Compose Email (Cerrado_Por)** (EMAIL) — si: `NOT(ISBLANK([Cerrado_Por]))`
 
-## Tabla `Des_Gastos` · ALL_CHANGES
+## Tabla `Des_Gastos`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Gasto** [Text] · inicial UNIQUEID() · CLAVE
 - **Des_Ref** [Ref] · ref→Desaduanajes
 - **Concepto** [Ref] · ref→Conceptos_Gasto_Imp
@@ -1094,7 +1042,6 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Comentario** [LongText]
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD Only if this condition is true =[Des_Ref].[Est) — si: `=[Des_Ref].[Estado] <> "Costeo cerrado"`
 - **Edit** (EDIT_RECORD Only if this condition is true =[Des_Ref].[Estad) — si: `=[Des_Ref].[Estado] <> "Costeo cerrado"`
 - **View Ref (Concepto)** (NAVIGATE_APP) — si: `NOT(ISBLANK([Concepto]))`
@@ -1104,11 +1051,10 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Add** (ADD_RECORD)
 - **Compose Email (Registrado_Por)** (EMAIL) — si: `NOT(ISBLANK([Registrado_Por]))`
 
-## Tabla `Des_Productos` · ALL_CHANGES
+## Tabla `Des_Productos`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_DP** [Text] · inicial UNIQUEID() · CLAVE
 - **Des_Ref** [Ref] · ref→Desaduanajes
 - **OC_Ref** [Ref] · ref→OC
@@ -1131,7 +1077,6 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Comentario** [LongText]
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
@@ -1139,11 +1084,10 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **View Ref (OC_Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([OC_Ref]))`
 - **View Ref (Linea_Ref)** (NAVIGATE_APP) — si: `NOT(ISBLANK([Linea_Ref]))`
 
-## Tabla `Desaduanajes` · ALL_CHANGES
+## Tabla `Desaduanajes`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Des** [Text] · inicial UNIQUEID() · CLAVE
 - **N_Des** [Text]
 - **Empresa** [Text] · fórmula =[OC_Duena].[Unidad de negocio] Read-Only No Hidden No Label No Formula version 0
@@ -1187,36 +1131,34 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Related Des_Gastos** [List] · ref→Des_Gastos · solo lectura
 - **Related Des_Costeo_Hists** [List] · ref→Des_Costeo_Hist · solo lectura
 - **Related Des_Productos** [List] · ref→Des_Productos · solo lectura
-- **\_N_Des** [Text] · fórmula =LOOKUP([_THISROW].[ID_Des], "Des_Docs", "ID_Des", "N_Des") Read-Only Yes Hidden No Label Yes Formula version 0 · solo lectura
-- **\_Romano** [Text] · fórmula =LOOKUP([_THISROW].[ID_Des], "Des_Docs", "ID_Des", "Romano") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
-- **\_Carpeta** [Url] · fórmula =LOOKUP([_THISROW].[ID_Des], "Des_Docs", "ID_Des", "Link_Carpeta") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_N_Des** [Text] · fórmula =LOOKUP([_THISROW].[ID_Des], "Des_Docs", "ID_Des", "N_Des") Read-Only Yes Hidden No Label Yes Formula version 0 · solo lectura
+- **_Romano** [Text] · fórmula =LOOKUP([_THISROW].[ID_Des], "Des_Docs", "ID_Des", "Romano") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Carpeta** [Url] · fórmula =LOOKUP([_THISROW].[ID_Des], "Des_Docs", "ID_Des", "Link_Carpeta") Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 - **Related Des_Documentos** [List] · ref→Des_Documentos · solo lectura
-- **\_Doc_Factura** [Yes/No] · fórmula =OR([Chk_Factura] = TRUE, COUNT(SELECT(Des_Documentos[ID_DocDes], AND([Des_Ref] = [_THISROW].[ID_Des], [Tipo_Doc] = "Factura comercial"))) > 0) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_Doc_BL** [Yes/No] · fórmula =OR([Chk_BL] = TRUE, COUNT(SELECT(Des_Documentos[ID_DocDes], AND([Des_Ref] = [_THISROW].[ID_Des], [Tipo_Doc] = "BL / AWB"))) > 0) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_Doc_Origen** [Yes/No] · fórmula =OR([Chk_Cert_Origen] = TRUE, COUNT(SELECT(Des_Documentos[ID_DocDes], AND([Des_Ref] = [_THISROW].[ID_Des], [Tipo_Doc] = "Certificado de origen"))) > 0) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_Doc_Seguro** [Yes/No] · fórmula =OR([Chk_Seguro] = TRUE, COUNT(SELECT(Des_Documentos[ID_DocDes], AND([Des_Ref] = [_THISROW].[ID_Des], [Tipo_Doc] = "Póliza de seguro"))) > 0) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_Doc_Permiso** [Yes/No] · fórmula =OR([Chk_Permiso] = TRUE, COUNT(SELECT(Des_Documentos[ID_DocDes], AND([Des_Ref] = [_THISROW].[ID_Des], [Tipo_Doc] = "Permiso (MTC / DIGESA)"))) > 0) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_Docs_Completos** [Yes/No] · fórmula =AND([_Doc_Factura], [_Doc_BL], [_Doc_Origen], [_Doc_Seguro], OR([Requiere_Permiso] <> TRUE, [_Doc_Permiso])) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
-- **\_Checklist** [Text] · fórmula =IF([_Docs_Completos], " ✅ Completos", " ❌ Falta: " & SUBSTITUTE(TRIM(CONCATENATE( IF([_Doc_Factura], "", "Factura comercial, "), IF([_Doc_BL], "", "BL / AWB, "), IF([_Doc_Origen], "", "Certificado de origen, "), IF([_Doc_Seguro], "", "Seguro, "), IF(OR([Requiere_Permiso] <> TRUE, [_Doc_Permiso]), "", "Permiso, ") )) & "|", ",|", "")) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
+- **_Doc_Factura** [Yes/No] · fórmula =OR([Chk_Factura] = TRUE, COUNT(SELECT(Des_Documentos[ID_DocDes], AND([Des_Ref] = [_THISROW].[ID_Des], [Tipo_Doc] = "Factura comercial"))) > 0) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Doc_BL** [Yes/No] · fórmula =OR([Chk_BL] = TRUE, COUNT(SELECT(Des_Documentos[ID_DocDes], AND([Des_Ref] = [_THISROW].[ID_Des], [Tipo_Doc] = "BL / AWB"))) > 0) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Doc_Origen** [Yes/No] · fórmula =OR([Chk_Cert_Origen] = TRUE, COUNT(SELECT(Des_Documentos[ID_DocDes], AND([Des_Ref] = [_THISROW].[ID_Des], [Tipo_Doc] = "Certificado de origen"))) > 0) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Doc_Seguro** [Yes/No] · fórmula =OR([Chk_Seguro] = TRUE, COUNT(SELECT(Des_Documentos[ID_DocDes], AND([Des_Ref] = [_THISROW].[ID_Des], [Tipo_Doc] = "Póliza de seguro"))) > 0) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Doc_Permiso** [Yes/No] · fórmula =OR([Chk_Permiso] = TRUE, COUNT(SELECT(Des_Documentos[ID_DocDes], AND([Des_Ref] = [_THISROW].[ID_Des], [Tipo_Doc] = "Permiso (MTC / DIGESA)"))) > 0) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Docs_Completos** [Yes/No] · fórmula =AND([_Doc_Factura], [_Doc_BL], [_Doc_Origen], [_Doc_Seguro], OR([Requiere_Permiso] <> TRUE, [_Doc_Permiso])) Read-Only Yes Hidden Yes Label No Formula version 0 · solo lectura
+- **_Checklist** [Text] · fórmula =IF([_Docs_Completos], " ✅ Completos", " ❌ Falta: " & SUBSTITUTE(TRIM(CONCATENATE( IF([_Doc_Factura], "", "Factura comercial, "), IF([_Doc_BL], "", "BL / AWB, "), IF([_Doc_Origen], "", "Certificado de origen, "), IF([_Doc_Seguro], "", "Seguro, "), IF(OR([Requiere_Permiso] <> TRUE, [_Doc_Permiso]), "", "Permiso, ") )) & "|", ",|", "")) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 - **View Ref (OC_Duena)** (NAVIGATE_APP) — si: `NOT(ISBLANK([OC_Duena]))`
-- **Open Url (\_Carpeta)** (NAVIGATE_URL) — si: `NOT(ISBLANK([_Carpeta]))`
+- **Open Url (_Carpeta)** (NAVIGATE_URL) — si: `NOT(ISBLANK([_Carpeta]))`
 - **Documentos completos** (SET_COLUMN_VALUE) — si: `=AND([Estado] = "Borrador", [_Docs_Completos])` — pone: Estado==\"Documentos completos\"
 - **Registrar DAM** (SET_COLUMN_VALUE) — si: `=[Estado] = "Documentos completos"` — pone: N_DAM==[_INPUT].[N° DAM]; Fecha_Numeracion== [_INPUT].[Fecha]; Estado==\"DAM numerada\"
 - **Registrar llegada** (SET_COLUMN_VALUE) — si: `=[Estado] = "DAM numerada"` — pone: Fecha_Llegada== [_INPUT].[Fecha]; Estado==\"Llegada\" — confirma: «¿R egistrar la llegada de la carga hoy?»
 - **Registrar levante** (SET_COLUMN_VALUE) — si: `=[Estado] = "Llegada"` — pone: Fecha_Levante== [_INPUT].[Fecha]; Estado==\"Levante\" — confirma: «¿R egistrar el levante hoy?»
 - **Ingreso a almacén** (SET_COLUMN_VALUE) — si: `=[Estado] = "Levante"` — pone: Fecha_Almacen== [_INPUT].[Fecha]; Estado==\"En almacén\" — confirma: «¿R egistrar el ingreso a almacén hoy?»
 
-## Tabla `TC_Costeo` · ALL_CHANGES
+## Tabla `TC_Costeo`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_TC** [Text] · inicial UNIQUEID() · CLAVE
 - **Moneda** [Text]
 - **TC** [Decimal]
@@ -1225,16 +1167,14 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Comentario** [Text]
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
 
-## Tabla `Des_Docs` · READ_ONLY
+## Tabla `Des_Docs`  ·  READ_ONLY
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_Des** [Text] · inicial UNIQUEID() · CLAVE
 - **N_Des** [Text]
 - **Serie** [Text]
@@ -1248,11 +1188,10 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Mensaje** [Text]
 - **Fecha** [Text]
 
-## Tabla `Des_Documentos` · ALL_CHANGES
+## Tabla `Des_Documentos`  ·  ALL_CHANGES
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **ID_DocDes** [Text] · inicial UNIQUEID() · CLAVE
 - **Des_Ref** [Ref] · ref→Desaduanajes
 - **Tipo_Doc** [Enum] · enum ["Factura comercial","Packing list","BL / AWB","Certificado de origen","Póliza de seguro","Permiso (MTC / DIGESA)","DAM","Otro"]
@@ -1265,7 +1204,6 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Mensaje** [Text] · solo lectura
 
 ### Acciones
-
 - **Delete** (DELETE_RECORD)
 - **Edit** (EDIT_RECORD)
 - **Add** (ADD_RECORD)
@@ -1273,11 +1211,10 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Open File (Archivo)** (OPEN_FILE) — si: `NOT(ISBLANK([Archivo]))`
 - **Compose Email (Subido_Por)** (EMAIL) — si: `NOT(ISBLANK([Subido_Por]))`
 
-## Tabla `Datos` · READ_ONLY
+## Tabla `Datos`  ·  READ_ONLY
 
 ### Columnas
-
-- **\_RowNumber** [Number] · solo lectura
+- **_RowNumber** [Number] · solo lectura
 - **FECHA/ HR EMISIÓN** [Date]
 - **RAZON SOCIAL** [Text]
 - **N° RC** [Text]
@@ -1315,7 +1252,7 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **FECHA RECEPCIÓN** [Text]
 - **ESTADO RECEPCIÓN** [Text]
 - **CONCATENADO** [Text]
-- **\_ID_Item** [Text] · fórmula =CONCATENATE([RAZON SOCIAL], "-", [N° RC], "-", [N° ITEM]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura · CLAVE
+- **_ID_Item** [Text] · fórmula =CONCATENATE([RAZON SOCIAL], "-", [N° RC], "-", [N° ITEM]) Read-Only Yes Hidden No Label No Formula version 0 · solo lectura · CLAVE
 
 ## Acciones de líneas de OC y de proveedores (el PDF las agrupa como «Base»)
 
@@ -1335,8 +1272,8 @@ Se redactaron URLs, correos e ids largos. Los bots NO traen su lógica en la doc
 - **Compose Email (Verificado_Por)** — si: `NOT(ISBLANK([Verificado_Por]))`
 - **Verificar Retención** — si: `=AND([ORIGEN] <> "Extranjero", [Verificado_Contab] <> TRUE, IN("CONTABILIDAD", SELECT(Aprobadores_OC[Rol], AND(LOWER([Email]) = LOWER(USEREMAIL()), [Activo] = TRUE))) )` — pone: Verificado_Contab==TRU E; Verificado_Por==USERE MAIL(); Fecha_Verificacion==NO W()
 - **＋ Demasía** — si: `=AND( NOT([Es_Demasia]), COUNT(SELECT(Base de datos OC NAC[ID_Linea], AND([OC_Ref] = [_THISROW].[OC_Ref], [Item_Req_Ref] = [_THISROW].[Item_Req_Ref], [Es_Demasia]))) = 0, OR(IN([OC_Ref].[Estatus Compra], LIST("Borrador", "En modificación")), STARTSWITH([OC_Ref].[Estatus Compra], "Observado")) )`
-- **\_Rechazar_Demasia** — si: `true` — pone: CANTIDAD==0; Demasia_Estado==\"Rec hazada\"; Demasia_Decidido_Por== USEREMAIL()
-- **\_Aprobar_Demasia** — si: `true` — pone: Demasia_Estado==\"Apr obada\"; Demasia_Decidido_Por== USEREMAIL()
+- **_Rechazar_Demasia** — si: `true` — pone: CANTIDAD==0; Demasia_Estado==\"Rec hazada\"; Demasia_Decidido_Por== USEREMAIL()
+- **_Aprobar_Demasia** — si: `true` — pone: Demasia_Estado==\"Apr obada\"; Demasia_Decidido_Por== USEREMAIL()
 - **Compose Email (Demasia_Decidido_Por)** — si: `NOT(ISBLANK([Demasia_Decidido_Por]))`
 
 ## Slices (filtros de filas)

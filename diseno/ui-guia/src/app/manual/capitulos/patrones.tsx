@@ -15,26 +15,10 @@ import { DOCS, ESTADO_LABEL, ESTADO_TONE } from '../../../guia/data.ts';
 import { EscenaConPaneles } from '../paneles.tsx';
 
 const GRUPOS = [
-    {
-        titulo: 'Listado',
-        texto: 'Filtros arriba, la tabla debajo y el paginador al pie. Los filtros valen para toda la pantalla y el conteo dice cuántas filas hay.',
-        pista: 'Filtra, busca y cambia de página',
-    },
-    {
-        titulo: 'Tablero con KPI',
-        texto: 'Una fila de KPI y, debajo, lo que los explica: barras y tablas. Lo más importante va arriba a la izquierda.',
-        pista: 'Cambia entre Compras y Ventas',
-    },
-    {
-        titulo: 'Formulario completo',
-        texto: 'Cada campo con su etiqueta; el error dice qué falta y cómo arreglarlo, y un resumen arriba si hay varios. Guardar, a la izquierda.',
-        pista: 'Escribe el RUC completo y la razón social',
-    },
-    {
-        titulo: 'Vacío, carga y error',
-        texto: 'Nunca una pantalla en blanco: el vacío dice qué falta, la carga guarda el sitio con huecos y el error explica y deja reintentar.',
-        pista: 'Pulsa los botones de cada estado',
-    },
+    { titulo: 'Listado', texto: 'Filtros arriba, la tabla debajo y el paginador al pie. Los filtros valen para toda la pantalla y el conteo dice cuántas filas hay.', pista: 'Filtra, busca y cambia de página' },
+    { titulo: 'Tablero con KPI', texto: 'Una fila de KPI y, debajo, lo que los explica: barras y tablas. Lo más importante va arriba a la izquierda.', pista: 'Cambia entre Compras y Ventas' },
+    { titulo: 'Formulario completo', texto: 'Cada campo con su etiqueta; el error dice qué falta y cómo arreglarlo, y un resumen arriba si hay varios. Guardar, a la izquierda.', pista: 'Escribe el RUC completo y la razón social' },
+    { titulo: 'Vacío, carga y error', texto: 'Nunca una pantalla en blanco: el vacío dice qué falta, la carga guarda el sitio con huecos y el error explica y deja reintentar.', pista: 'Pulsa los botones de cada estado' },
 ] as const;
 
 const ESTADOS = [
@@ -47,9 +31,7 @@ const ESTADOS = [
 function Listado() {
     const [estado, setEstado] = useState('todos');
     const [q, setQ] = useState('');
-    const lista = DOCS.slice(0, 24).filter(
-        (d) => (estado === 'todos' || d.estado === estado) && (!q || `${d.nombre} ${d.ruc} ${d.serie}`.toLowerCase().includes(q.toLowerCase())),
-    );
+    const lista = DOCS.slice(0, 24).filter((d) => (estado === 'todos' || d.estado === estado) && (!q || `${d.nombre} ${d.ruc} ${d.serie}`.toLowerCase().includes(q.toLowerCase())));
     const paged = usePaged(lista, `${estado}${q}`, 3);
     return (
         <div className="flex flex-col gap-4">
@@ -129,11 +111,7 @@ function Formulario() {
     const faltan = [errRuc, errRazon].filter(Boolean).length;
     return (
         <div className="flex max-w-md flex-col gap-4">
-            {faltan > 0 && (
-                <Notice tone="danger" cerrable={false}>
-                    Revisa {faltan} {faltan === 1 ? 'campo marcado' : 'campos marcados'}.
-                </Notice>
-            )}
+            {faltan > 0 && <Notice tone="danger" cerrable={false}>Revisa {faltan} {faltan === 1 ? 'campo marcado' : 'campos marcados'}.</Notice>}
             <Field label="RUC" hint="11 dígitos." error={errRuc}>
                 {(p) => <Input {...p} inputMode="numeric" maxLength={11} value={ruc} onChange={(e) => setRuc(e.target.value.replace(/\D/g, ''))} />}
             </Field>

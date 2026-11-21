@@ -25,33 +25,11 @@ export const T = {
  * Cabecera ordenable: la flecha se ve siempre. Gris con dos puntas = se puede ordenar por aquí; azul con una punta =
  * ordenada así. Va dentro de `<th>`; `aria-sort` lo pone el `<th>`, no este botón.
  */
-export function SortTh({
-    label,
-    active,
-    dir,
-    onSort,
-    num = false,
-    fit = false,
-}: {
-    label: string;
-    active: boolean;
-    dir: 'asc' | 'desc';
-    onSort: () => void;
-    num?: boolean;
-    fit?: boolean;
-}) {
+export function SortTh({ label, active, dir, onSort, num = false, fit = false }: { label: string; active: boolean; dir: 'asc' | 'desc'; onSort: () => void; num?: boolean; fit?: boolean }) {
     const Icon = !active ? ChevronsUpDown : dir === 'asc' ? ArrowUp : ArrowDown;
     return (
-        <th
-            scope="col"
-            aria-sort={active ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}
-            className={`${num ? T.thNum : T.th}${fit ? ' w-px whitespace-nowrap' : ''}`}
-        >
-            <button
-                type="button"
-                onClick={onSort}
-                className={`inline-flex items-center gap-1.5 hover:text-ink focus-visible:outline-2 focus-visible:outline-primary ${active ? 'text-ink' : ''}`}
-            >
+        <th scope="col" aria-sort={active ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'} className={`${num ? T.thNum : T.th}${fit ? ' w-px whitespace-nowrap' : ''}`}>
+            <button type="button" onClick={onSort} className={`inline-flex items-center gap-1.5 hover:text-ink focus-visible:outline-2 focus-visible:outline-primary ${active ? 'text-ink' : ''}`}>
                 {label}
                 <Icon size={12} className={`flex-none ${active ? 'text-primary' : 'text-ink-3'}`} aria-hidden />
             </button>
@@ -224,25 +202,12 @@ const NOTICE = {
  * `cerrable` (por defecto sí): la equis lo oculta. `onClose` avisa a la pantalla, por si quiere recordar que se cerró.
  * Un aviso que NO debe poder cerrarse (algo que bloquea el trabajo) pasa `cerrable={false}`.
  */
-export function Notice({
-    tone = 'danger',
-    children,
-    cerrable = true,
-    onClose,
-}: {
-    tone?: keyof typeof NOTICE;
-    children: ReactNode;
-    cerrable?: boolean;
-    onClose?: () => void;
-}) {
+export function Notice({ tone = 'danger', children, cerrable = true, onClose }: { tone?: keyof typeof NOTICE; children: ReactNode; cerrable?: boolean; onClose?: () => void }) {
     const [visible, setVisible] = useState(true);
     if (!visible) return null;
     const { icono, Icon } = NOTICE[tone];
     return (
-        <div
-            role={tone === 'danger' ? 'alert' : 'status'}
-            className="mb-4 flex w-fit max-w-full items-start gap-3 rounded-card border border-line bg-surface px-4 py-3 text-ui text-ink"
-        >
+        <div role={tone === 'danger' ? 'alert' : 'status'} className="mb-4 flex w-fit max-w-full items-start gap-3 rounded-card border border-line bg-surface px-4 py-3 text-ui text-ink">
             <Icon size={18} aria-hidden className={`mt-px flex-none ${icono}`} />
             <div className="min-w-0">{children}</div>
             {cerrable && (

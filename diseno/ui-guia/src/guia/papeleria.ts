@@ -23,9 +23,7 @@ const COL = { gris: '#4a4a48' };
 
 /** El logo: la imagen oficial (o el cubo blanco sobre un fondo de color) con «Industrias Roland Print» al lado. */
 function logo(src: string, alto: number, blanco = false): string {
-    const icono = blanco
-        ? cuboHtml(alto, { variante: 'relleno', color: 'blanco' })
-        : `<img src="${src}" alt="" style="display:block;width:${alto}mm;height:${alto}mm;object-fit:contain">`;
+    const icono = blanco ? cuboHtml(alto, { variante: 'relleno', color: 'blanco' }) : `<img src="${src}" alt="" style="display:block;width:${alto}mm;height:${alto}mm;object-fit:contain">`;
     const color = blanco ? HEX.blanco : HEX.texto;
     return `<div class="logo" style="gap:${alto * 0.2}mm;color:${color}">${icono}<div><small style="font-size:${alto * 0.17}mm;margin-bottom:${alto * 0.04}mm">Industrias</small><b style="font-size:${alto * 0.4}mm">Roland Print</b></div></div>`;
 }

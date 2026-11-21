@@ -66,14 +66,7 @@ export const area = base({
     xAxis: ejeMeses,
     yAxis: ejeValor,
     series: [
-        {
-            name: 'Facturas',
-            type: 'line',
-            stack: 'c',
-            areaStyle: { opacity: 0.35 },
-            showSymbol: false,
-            data: [120, 132, 101, 134, 90, 130, 140, 150, 138, 160, 180],
-        },
+        { name: 'Facturas', type: 'line', stack: 'c', areaStyle: { opacity: 0.35 }, showSymbol: false, data: [120, 132, 101, 134, 90, 130, 140, 150, 138, 160, 180] },
         { name: 'Boletas', type: 'line', stack: 'c', areaStyle: { opacity: 0.35 }, showSymbol: false, data: [60, 72, 71, 74, 70, 80, 85, 88, 82, 90, 96] },
         { name: 'Notas', type: 'line', stack: 'c', areaStyle: { opacity: 0.35 }, showSymbol: false, data: [20, 22, 21, 24, 20, 23, 26, 25, 24, 28, 30] },
     ],
@@ -85,24 +78,8 @@ export const ranking = base({
     legend: { show: false },
     tooltip: { trigger: 'axis', axisPointer: { type: 'none' } },
     xAxis: { type: 'value', axisLabel: EJE, splitLine: REJILLA },
-    yAxis: {
-        type: 'category',
-        inverse: true,
-        data: ['Cliente Norte SAC', 'Corporación Sur SA', 'Distribuidora Andina', 'Comercial Pacífico', 'Grupo Rímac'],
-        axisLine: LINEA_EJE,
-        axisTick: { show: false },
-        axisLabel: EJE,
-    },
-    series: [
-        {
-            name: 'Monto',
-            type: 'bar',
-            data: [412, 288, 241, 190, 122],
-            barWidth: 14,
-            itemStyle: { borderRadius: [0, 3, 3, 0] },
-            label: { show: true, position: 'right', color: 'var(--color-ink-2)' },
-        },
-    ],
+    yAxis: { type: 'category', inverse: true, data: ['Cliente Norte SAC', 'Corporación Sur SA', 'Distribuidora Andina', 'Comercial Pacífico', 'Grupo Rímac'], axisLine: LINEA_EJE, axisTick: { show: false }, axisLabel: EJE },
+    series: [{ name: 'Monto', type: 'bar', data: [412, 288, 241, 190, 122], barWidth: 14, itemStyle: { borderRadius: [0, 3, 3, 0] }, label: { show: true, position: 'right', color: 'var(--color-ink-2)' } }],
 });
 
 export const conMeta = base({
@@ -117,13 +94,7 @@ export const conMeta = base({
             data: [32, 41, 38, 46, 35, 18],
             barWidth: 22,
             itemStyle: { borderRadius: [3, 3, 0, 0] },
-            markLine: {
-                silent: true,
-                symbol: 'none',
-                lineStyle: { type: 'dashed', color: 'var(--color-ink-2)' },
-                label: { color: 'var(--color-ink-2)', formatter: 'Meta {c}' },
-                data: [{ yAxis: 40 }],
-            },
+            markLine: { silent: true, symbol: 'none', lineStyle: { type: 'dashed', color: 'var(--color-ink-2)' }, label: { color: 'var(--color-ink-2)', formatter: 'Meta {c}' }, data: [{ yAxis: 40 }] },
         },
     ],
 });
@@ -133,16 +104,7 @@ export const tendencia = base({
     legend: { show: false },
     xAxis: { ...ejeMeses, data: ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'S10', 'S11'] },
     yAxis: ejeValor,
-    series: [
-        {
-            name: 'Visitas',
-            type: 'line',
-            smooth: true,
-            showSymbol: false,
-            areaStyle: { opacity: 0.15 },
-            data: [210, 230, 224, 260, 280, 270, 310, 330, 320, 360, 410],
-        },
-    ],
+    series: [{ name: 'Visitas', type: 'line', smooth: true, showSymbol: false, areaStyle: { opacity: 0.15 }, data: [210, 230, 224, 260, 280, 270, 310, 330, 320, 360, 410] }],
 });
 
 const Grid = ({ children }: { children: ReactNode }) => <div className="grid gap-2 sm:grid-cols-2">{children}</div>;
@@ -316,27 +278,17 @@ export const USAGE: Record<string, ReactNode> = {
             <Use label="Filtro elegido" cls="border-primary bg-primary-soft text-primary-strong">
                 <div className="flex gap-2">
                     <span className="rounded-full border border-control bg-surface px-3 py-1.5 text-small text-ink">Todos</span>
-                    <span className="rounded-full border border-primary bg-primary-soft px-3 py-1.5 text-small font-medium text-primary-strong">
-                        Pendientes
-                    </span>
+                    <span className="rounded-full border border-primary bg-primary-soft px-3 py-1.5 text-small font-medium text-primary-strong">Pendientes</span>
                 </div>
             </Use>
             <Use label="Zona de arrastre con un archivo encima" cls="border-primary bg-primary-soft" wide>
-                <div className="grid w-full place-items-center rounded-card border border-dashed border-primary bg-primary-soft px-3 py-4 text-small text-ink">
-                    Suelta el archivo aquí
-                </div>
+                <div className="grid w-full place-items-center rounded-card border border-dashed border-primary bg-primary-soft px-3 py-4 text-small text-ink">Suelta el archivo aquí</div>
             </Use>
             <Use label="Botón punteado: normal, encima y pulsado" cls="text-primary · hover:bg-primary-soft · active:bg-primary-line" wide>
                 <div className="flex flex-wrap gap-2">
-                    <span className="rounded-control border border-dashed border-control px-3 py-1.5 text-small font-medium text-primary">
-                        + Añadir proveedor
-                    </span>
-                    <span className="rounded-control border border-dashed border-control bg-primary-soft px-3 py-1.5 text-small font-medium text-primary">
-                        + Añadir proveedor
-                    </span>
-                    <span className="rounded-control border border-dashed border-control bg-primary-line px-3 py-1.5 text-small font-medium text-primary">
-                        + Añadir proveedor
-                    </span>
+                    <span className="rounded-control border border-dashed border-control px-3 py-1.5 text-small font-medium text-primary">+ Añadir proveedor</span>
+                    <span className="rounded-control border border-dashed border-control bg-primary-soft px-3 py-1.5 text-small font-medium text-primary">+ Añadir proveedor</span>
+                    <span className="rounded-control border border-dashed border-control bg-primary-line px-3 py-1.5 text-small font-medium text-primary">+ Añadir proveedor</span>
                 </div>
             </Use>
         </Grid>

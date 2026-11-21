@@ -155,14 +155,7 @@ function Pestanas() {
         { key: 'pagados', label: 'Pagados', count: 48 },
         { key: 'anulados', label: 'Anulados', count: 3 },
     ];
-    const panels = Object.fromEntries(
-        tabs.map((t) => [
-            t.key,
-            <p key={t.key} className="text-ui text-ink-2">
-                Contenido de «{t.label}».
-            </p>,
-        ]),
-    );
+    const panels = Object.fromEntries(tabs.map((t) => [t.key, <p key={t.key} className="text-ui text-ink-2">Contenido de «{t.label}».</p>]));
     return (
         <div className="flex flex-col gap-8">
             <Tabs tabs={tabs} panels={panels} hash={false} />
@@ -258,10 +251,7 @@ function ToastEj() {
     return (
         <Row>
             <Button onClick={() => toast.success('Orden OC-2026-0142 guardada.')}>Éxito</Button>
-            <Button
-                variant="secondary"
-                onClick={() => toast.success('nombre@inroprin.com ya no puede entrar.', { action: { label: 'Deshacer', onClick: () => {} } })}
-            >
+            <Button variant="secondary" onClick={() => toast.success('nombre@inroprin.com ya no puede entrar.', { action: { label: 'Deshacer', onClick: () => {} } })}>
                 Con «Deshacer»
             </Button>
             <Button variant="danger" onClick={() => toast.error('No se pudo guardar: SUNAT no respondió.')}>
@@ -283,14 +273,7 @@ function TablaEj() {
     });
     const paged = usePaged(list, `${sort.col}${sort.dir}`, 6);
     const th = (col: Col, label: string, num = false, fit = false) => (
-        <SortTh
-            label={label}
-            num={num}
-            fit={fit}
-            active={sort.col === col}
-            dir={sort.dir}
-            onSort={() => setSort((s) => (s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' }))}
-        />
+        <SortTh label={label} num={num} fit={fit} active={sort.col === col} dir={sort.dir} onSort={() => setSort((s) => (s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' }))} />
     );
     return (
         <div className="flex flex-col gap-3">
@@ -484,9 +467,7 @@ function MenuLateralEj() {
                 marca={{ nombre: 'Inroconta', detalle: 'Contabilidad y legajo' }}
                 grupos={grupos}
             />
-            <div className="min-w-0 flex-1 bg-surface p-5 text-ui text-ink-2">
-                Contenido de la pantalla. Pasa el cursor sobre el menú para ver «Contraer» abajo.
-            </div>
+            <div className="min-w-0 flex-1 bg-surface p-5 text-ui text-ink-2">Contenido de la pantalla. Pasa el cursor sobre el menú para ver «Contraer» abajo.</div>
         </div>
     );
 }

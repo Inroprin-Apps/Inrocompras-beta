@@ -22,7 +22,9 @@ export default function Listado() {
 
     const list = useMemo(() => {
         const ws = words(q);
-        const out = DOCS.filter((d) => (estado === 'todos' || d.estado === estado) && ws.every((w) => plain(`${d.nombre} ${d.ruc} ${d.serie}`).includes(w)));
+        const out = DOCS.filter(
+            (d) => (estado === 'todos' || d.estado === estado) && ws.every((w) => plain(`${d.nombre} ${d.ruc} ${d.serie}`).includes(w)),
+        );
         const by: Record<Sort, (a: Doc, b: Doc) => number> = {
             fecha: (a, b) => b.fecha.localeCompare(a.fecha),
             monto: (a, b) => b.total - a.total,
@@ -79,10 +81,7 @@ export default function Listado() {
                                     onChange={setEstado}
                                     label="Estado"
                                     className="w-52"
-                                    options={[
-                                        { value: 'todos', label: 'Todos los estados' },
-                                        ...Object.entries(ESTADO_LABEL).map(([value, label]) => ({ value, label })),
-                                    ]}
+                                    options={[{ value: 'todos', label: 'Todos los estados' }, ...Object.entries(ESTADO_LABEL).map(([value, label]) => ({ value, label }))]}
                                 />
                                 <div className="flex flex-wrap items-center gap-2.5 sm:ml-auto">
                                     <SortSelect
@@ -94,10 +93,7 @@ export default function Listado() {
                                             { value: 'nombre', label: 'Razón social' },
                                         ]}
                                     />
-                                    <Button
-                                        variant="secondary"
-                                        onClick={() => toast.success(`Comprobantes.xlsx descargado (${thousands(list.length)} filas).`)}
-                                    >
+                                    <Button variant="secondary" onClick={() => toast.success(`Comprobantes.xlsx descargado (${thousands(list.length)} filas).`)}>
                                         <Download size={16} /> Exportar
                                     </Button>
                                 </div>
@@ -165,10 +161,7 @@ export default function Listado() {
                 <Rules
                     items={[
                         ['Título de pantalla (text-title) y, a su derecha, de cuándo son los datos.', 'El usuario siempre sabe si lo que ve está al día.'],
-                        [
-                            'El aviso, si lo hay, entre el título y la tarjeta, con un enlace que filtra lo que menciona.',
-                            'El aviso lleva a la acción, no solo informa.',
-                        ],
+                        ['El aviso, si lo hay, entre el título y la tarjeta, con un enlace que filtra lo que menciona.', 'El aviso lleva a la acción, no solo informa.'],
                         ['Filtros arriba a la izquierda; ordenar y exportar a la derecha.', 'Exportar descarga lo que se ve con los filtros puestos.'],
                         ['El conteo encima de la tabla.', '«128 comprobantes»: confirma que el filtro hizo algo.'],
                         ['El vacío ofrece salir de él: «Quitar filtros».', 'Un vacío sin salida obliga a deshacer filtro por filtro.'],

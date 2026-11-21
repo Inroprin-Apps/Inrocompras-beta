@@ -54,13 +54,7 @@ const SERIES: ChartOption = {
     grid: { left: 4, right: 12, top: 40, bottom: 4, containLabel: true },
     tooltip: { trigger: 'axis' },
     legend: { top: 0, left: 0, icon: 'roundRect', itemWidth: 12, itemHeight: 8, itemGap: 12, textStyle: { ...EJE, fontSize: 12 } },
-    xAxis: {
-        type: 'category',
-        data: ['jul', 'ago', 'set', 'oct', 'nov'],
-        axisLine: { lineStyle: { color: 'var(--color-control)' } },
-        axisTick: { show: false },
-        axisLabel: EJE,
-    },
+    xAxis: { type: 'category', data: ['jul', 'ago', 'set', 'oct', 'nov'], axisLine: { lineStyle: { color: 'var(--color-control)' } }, axisTick: { show: false }, axisLabel: EJE },
     yAxis: { type: 'value', axisLabel: EJE, splitLine: { lineStyle: { color: 'var(--color-divider)' } } },
     series: [
         { name: 'Papel', type: 'bar', stack: 't', data: [320, 302, 301, 334, 390] },
@@ -139,11 +133,7 @@ function FronteraEj() {
     const [clave, setClave] = useState(0);
     return (
         <div className="flex flex-col gap-3">
-            <ErrorBoundary
-                label="prueba"
-                resetKey={String(clave)}
-                fallback={(e) => <Notice tone="danger">Esta zona no se pudo mostrar: {e.message} El resto de la pantalla sigue funcionando.</Notice>}
-            >
+            <ErrorBoundary label="prueba" resetKey={String(clave)} fallback={(e) => <Notice tone="danger">Esta zona no se pudo mostrar: {e.message} El resto de la pantalla sigue funcionando.</Notice>}>
                 <Bomba rota={rota} />
             </ErrorBoundary>
             <div className="flex gap-2.5">
@@ -237,10 +227,7 @@ function Controles() {
                 <Card title="Avisos que se van (toast)">
                     <div className="flex flex-wrap gap-2.5">
                         <Button onClick={() => toast.success('Orden OC-2026-0142 guardada.')}>Éxito</Button>
-                        <Button
-                            variant="secondary"
-                            onClick={() => toast.success('nombre@inroprin.com ya no puede entrar.', { action: { label: 'Deshacer', onClick: () => {} } })}
-                        >
+                        <Button variant="secondary" onClick={() => toast.success('nombre@inroprin.com ya no puede entrar.', { action: { label: 'Deshacer', onClick: () => {} } })}>
                             Con «Deshacer»
                         </Button>
                         <Button variant="danger" onClick={() => toast.error('No se pudo guardar: SUNAT no respondió.')}>
@@ -268,10 +255,7 @@ function Controles() {
                             { key: 'a', label: 'Pendientes', count: 12 },
                             { key: 'b', label: 'Pagados', count: 48 },
                         ]}
-                        panels={{
-                            a: <p className="text-ui text-ink-2">Contenido de «Pendientes».</p>,
-                            b: <p className="text-ui text-ink-2">Contenido de «Pagados».</p>,
-                        }}
+                        panels={{ a: <p className="text-ui text-ink-2">Contenido de «Pendientes».</p>, b: <p className="text-ui text-ink-2">Contenido de «Pagados».</p> }}
                     />
                 </Card>
             </div>
@@ -304,9 +288,7 @@ function NuevaOrden() {
                     onCancel={close}
                     className="flex flex-col gap-3"
                 >
-                    <Field label="Proveedor" hint="Escribe y pulsa Enter para guardar.">
-                        {(p) => <Input {...p} value={prov} onChange={(e) => setProv(e.target.value)} />}
-                    </Field>
+                    <Field label="Proveedor" hint="Escribe y pulsa Enter para guardar.">{(p) => <Input {...p} value={prov} onChange={(e) => setProv(e.target.value)} />}</Field>
                     <div className="flex items-end gap-2.5">
                         <DateField value={dia} onChange={setDia} label="Entrega" />
                         <TimeField value={hora} onChange={setHora} live={false} label="Hora" />
@@ -324,6 +306,7 @@ function NuevaOrden() {
         </>
     );
 }
+
 
 /** Los dos adornos aprobados: los rombos sobre un título y el cubo en todas sus variantes y de fondo. */
 function Marca() {
@@ -386,8 +369,7 @@ function Papeleria() {
                         <FileDown size={16} /> Descargar todo (.zip)
                     </a>
                     <p className="max-w-xl text-small text-ink-2">
-                        El PDF va a tamaño real, una página por cara, listo para una papelería (sin sangrado ni marcas de corte). El Word trae el mismo diseño y
-                        los textos de la persona se escriben encima.
+                        El PDF va a tamaño real, una página por cara, listo para una papelería (sin sangrado ni marcas de corte). El Word trae el mismo diseño y los textos de la persona se escriben encima.
                     </p>
                 </div>
             </Card>
@@ -395,13 +377,7 @@ function Papeleria() {
                 {lista.map((p) => (
                     <section key={p.id} className="flex min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src={`/descargas/${p.slug}/vista-previa.png`}
-                            alt={`Vista previa: ${p.titulo}`}
-                            width={1200}
-                            height={630}
-                            className="block h-auto w-full border-b border-divider bg-surface-2"
-                        />
+                        <img src={`/descargas/${p.slug}/vista-previa.png`} alt={`Vista previa: ${p.titulo}`} width={1200} height={630} className="block h-auto w-full border-b border-divider bg-surface-2" />
                         <div className="flex flex-1 flex-col gap-3 p-4">
                             <div>
                                 <h3 className="text-heading font-semibold">{p.titulo}</h3>
@@ -434,13 +410,7 @@ function Comprobantes() {
     });
     const paged = usePaged(list, `${sort.col}${sort.dir}`, 6);
     const th = (col: Col, label: string, fit = false) => (
-        <SortTh
-            label={label}
-            fit={fit}
-            active={sort.col === col}
-            dir={sort.dir}
-            onSort={() => setSort((s) => (s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' }))}
-        />
+        <SortTh label={label} fit={fit} active={sort.col === col} dir={sort.dir} onSort={() => setSort((s) => (s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' }))} />
     );
     return (
         <Card title="Comprobantes de noviembre" note={`${list.length} en total`}>
@@ -531,15 +501,7 @@ export function Prueba() {
                 </Card>
                 <Card title="Por proveedor" note="noviembre 2026">
                     {PROVEEDORES.slice(0, 3).map(([nombre, cifra, pct], i) => (
-                        <BarRow
-                            key={nombre}
-                            label={nombre}
-                            figures={cifra}
-                            pct={pct}
-                            color={i === 1 ? 'teal' : 'primary'}
-                            chosen={elegida === i}
-                            onClick={() => setElegida(i)}
-                        />
+                        <BarRow key={nombre} label={nombre} figures={cifra} pct={pct} color={i === 1 ? 'teal' : 'primary'} chosen={elegida === i} onClick={() => setElegida(i)} />
                     ))}
                 </Card>
                 <Card title="Estado de los comprobantes">
@@ -617,7 +579,12 @@ export function Prueba() {
                 }
             }}
         >
-            <Sidebar activo={seccion} clave="ui-guia.prueba.menu" marca={{ nombre: 'Inroconta', detalle: 'Contabilidad y legajo' }} grupos={grupos} />
+            <Sidebar
+                activo={seccion}
+                clave="ui-guia.prueba.menu"
+                marca={{ nombre: 'Inroconta', detalle: 'Contabilidad y legajo' }}
+                grupos={grupos}
+                />
             <main className="mx-auto flex w-full min-w-0 max-w-6xl flex-1 flex-col gap-5 px-5 py-8">
                 <header className="flex flex-wrap items-end justify-between gap-4">
                     <div>

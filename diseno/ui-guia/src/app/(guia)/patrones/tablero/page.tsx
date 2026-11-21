@@ -123,10 +123,7 @@ export default function Tablero() {
             <Section title="Anatomía">
                 <Rules
                     items={[
-                        [
-                            'Un solo filtro de período arriba a la derecha, que manda sobre toda la pantalla.',
-                            'Si cada tarjeta tiene su propio filtro, nadie sabe qué período está mirando.',
-                        ],
+                        ['Un solo filtro de período arriba a la derecha, que manda sobre toda la pantalla.', 'Si cada tarjeta tiene su propio filtro, nadie sabe qué período está mirando.'],
                         ['Cada KPI se compara con algo: el período anterior, una meta.', 'Una cifra sola no dice si es buena o mala.'],
                         ['La flecha lleva el color de lo que significa, no de su dirección.', 'Compras que suben es rojo; ventas que suben es verde.'],
                         ['Ventas en azul, compras en turquesa, siempre.', 'Así se reconocen sin leer la leyenda.'],

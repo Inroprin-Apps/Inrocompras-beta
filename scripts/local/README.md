@@ -7,7 +7,9 @@ proveedores) y arranca `proxy.mjs` en `http://127.0.0.1:54321`, que imita las ru
 No usa Google ni el servicio de auth: las sesiones son JWT firmados con una clave local **pública** (`proxy.mjs`).
 Solo sirve en esta máquina; la app real usa Supabase y Google.
 
-Para probar en el navegador:
+La suite del repo (`tests/e2e`, Playwright) usa estas mismas sesiones: `pnpm build && pnpm test:e2e`.
+
+Para un guion suelto en el navegador:
 
 ```js
 import { como } from './scripts/local/e2e-helper.mjs';

@@ -71,9 +71,7 @@ export function PeriodPicker({
 
     const periods = kind && kind !== 'day' && kind !== 'range' ? optionsOf(kind, months) : [];
     // El elegido aunque no tenga datos (un enlace desde otra pantalla).
-    const periodOptions = [...(value && !periods.some(([c]) => c === value) ? [[value, periodLabel(p)] as [string, string]] : []), ...periods].map(
-        ([v, l]) => ({ value: v, label: l }),
-    );
+    const periodOptions = [...(value && !periods.some(([c]) => c === value) ? [[value, periodLabel(p)] as [string, string]] : []), ...periods].map(([v, l]) => ({ value: v, label: l }));
 
     return (
         <div className="flex flex-wrap items-center gap-2">
@@ -85,9 +83,7 @@ export function PeriodPicker({
                 options={KINDS.map((k) => ({ value: k.value, label: k.value ? k.label : allLabel }))}
                 className="w-44"
             />
-            {kind === 'day' && (
-                <DateField label="Día" value={p?.kind === 'day' ? p.from : ''} disabled={disabled} onChange={(day) => onChange(day ? `d${day}` : '')} />
-            )}
+            {kind === 'day' && <DateField label="Día" value={p?.kind === 'day' ? p.from : ''} disabled={disabled} onChange={(day) => onChange(day ? `d${day}` : '')} />}
             {kind === 'range' && (
                 <>
                     <DateField label="Desde" value={from} max={to || undefined} disabled={disabled} onChange={(day) => pickRange(day, to)} />

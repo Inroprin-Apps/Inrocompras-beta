@@ -12,8 +12,8 @@ export default function Formatos() {
                 title="Montos, fechas y números"
                 lead={
                     <>
-                        Todas las apps escriben un monto o una fecha de la misma forma. Las funciones están en <Code>ui/format.ts</Code>; nadie formatea a mano.
-                        Los resultados de abajo los calcula esa misma función.
+                        Todas las apps escriben un monto o una fecha de la misma forma. Las funciones están en <Code>ui/format.ts</Code>; nadie formatea a
+                        mano. Los resultados de abajo los calcula esa misma función.
                     </>
                 }
             />
@@ -58,10 +58,7 @@ export default function Formatos() {
                     items={[
                         ['Coma para miles, punto para decimales: S/ 1,234.50.', 'Como en los comprobantes de SUNAT y en Excel de la oficina.'],
                         ['Siempre dos decimales en montos, salvo en la forma corta (S/ 48 mil).', ''],
-                        [
-                            'Las horas, en hora de Lima, aunque el servidor esté en otro sitio.',
-                            'Las funciones ya lo hacen; un new Date().toLocaleString() suelto no.',
-                        ],
+                        ['Las horas, en hora de Lima, aunque el servidor esté en otro sitio.', 'Las funciones ya lo hacen; un new Date().toLocaleString() suelto no.'],
                         ['Las fechas como dd/mm/aaaa; los meses en minúsculas abreviados (nov 26).', 'Nunca 11/17/2026 ni 2026-11-17 a la vista del usuario.'],
                         ['Los montos negativos con signo menos, no entre paréntesis.', ''],
                     ]}
