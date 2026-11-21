@@ -47,6 +47,7 @@ export function FormNuevo({ onCerrar, onCreado }: { onCerrar: () => void; onCrea
             onCerrar={cerrar}
             onEnviar={() => void crear()}
             aviso={aviso}
+            amplio
             titulo="Nuevo desaduanaje"
             descripcion="De una orden de importación aprobada. Trae sus líneas como productos."
             pie={

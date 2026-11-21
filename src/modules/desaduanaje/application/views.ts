@@ -4,3 +4,4 @@ export * from '../domain/checklist.ts';
 export * from '../domain/costeo.ts';
 export * from '../domain/lista.ts';
 export * from '../domain/formato.ts';
+export * from '../domain/exportar.ts';

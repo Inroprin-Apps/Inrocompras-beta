@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { aTexto, aValor, leerTasa, mostrar, parametros, tcVigentes, totalesCola, faltaEnConcepto } from '@/modules/configuracion/domain/configuracion.ts';
+import { columnasCola } from '@/modules/configuracion/domain/exportar.ts';
+import { columnasEquipo } from '@/modules/equipo/domain/exportar.ts';
 import { filtrarEquipo, hayCambios, datosDe, valorCambio, sinArea, type Miembro } from '@/modules/equipo/domain/equipo.ts';
 
 describe('parámetros de config', () => {
@@ -83,5 +85,47 @@ describe('equipo', () => {
         expect(hayCambios(a, { ...datosDe(a), roles: ['ADMIN', 'GOP'] })).toBe(true);
         expect(valorCambio({ accion: 'equipo_jefe' }, 'a', (id) => (id === 'a' ? 'Ana' : undefined))).toBe('Ana');
         expect(valorCambio({ accion: 'equipo_activo' }, 'false', () => undefined)).toBe('No');
+    });
+});
+
+describe('Excel de equipo y de la cola', () => {
+    it('equipo: roles juntos, jefe por nombre y el día en Lima', () => {
+        const m: Miembro = {
+            id: 'u1',
+            email: 'ana@ejemplo.com',
+            nombre: 'Ana',
+            area: 'Compras',
+            jefeId: 'u2',
+            ambito: 'nac',
+            activo: true,
+            creado: '2026-11-21T03:00:00Z',
+            roles: [],
+        };
+        const cols = columnasEquipo((id) => (id === 'u2' ? 'Beto' : undefined));
+        const v = (t: string) => cols.find((c) => c.titulo === t)!.valor(m);
+        expect(v('Jefe')).toBe('Beto');
+        expect(v('Ámbito')).toBe('Solo nacional');
+        expect(v('Entró por primera vez')).toEqual(new Date(Date.UTC(2026, 10, 20)));
+    });
+    it('cola: el próximo intento solo para lo pendiente', () => {
+        const x = {
+            id: 7,
+            tipo: 'correo',
+            refTabla: null,
+            refId: null,
+            estado: 'Error' as const,
+            intentos: 3,
+            error: 'Sin respuesta',
+            creado: '2026-11-20T15:00:00Z',
+            procesarDesde: '2026-11-20T16:00:00Z',
+            terminado: null,
+        };
+        const v = (t: string) =>
+            columnasCola()
+                .find((c) => c.titulo === t)!
+                .valor(x);
+        expect(v('Próximo intento')).toBeNull();
+        expect(v('Mensaje')).toBe('Sin respuesta');
+        expect(v('Intentos')).toBe(3);
     });
 });

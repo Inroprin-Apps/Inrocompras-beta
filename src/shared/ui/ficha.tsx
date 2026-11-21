@@ -35,7 +35,7 @@ export function Ficha({
     return (
         <aside
             aria-label="Ficha"
-            className="fixed inset-0 z-30 flex flex-col overflow-hidden bg-surface md:inset-y-0 md:right-0 md:left-auto md:w-[560px] min-[1920px]:w-[640px] md:border-l md:border-line md:shadow-float"
+            className="ficha-lateral fixed inset-0 z-30 flex flex-col overflow-hidden bg-surface md:inset-y-0 md:right-0 md:left-auto md:border-l md:border-line md:shadow-float"
         >
             <header className="flex items-start gap-3 border-b border-divider px-5 py-4">
                 <div className="min-w-0 flex-1">

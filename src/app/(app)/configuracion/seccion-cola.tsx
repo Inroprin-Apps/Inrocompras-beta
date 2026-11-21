@@ -9,6 +9,7 @@ import { RefreshCw } from 'lucide-react';
 import { cola } from '@/modules/configuracion/composition.ts';
 import {
     ESTADOS_COLA,
+    columnasCola,
     etiquetaTipo,
     puedeDescartar,
     puedeReintentar,
@@ -28,6 +29,7 @@ import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
+import { BotonExportar } from '../_components/exportar.tsx';
 import { refrescar } from '../_lib/resource.ts';
 import { colaResumenStore, colaStore } from './store.ts';
 
@@ -75,6 +77,9 @@ export function SeccionCola() {
                 <Button variant="secondary" onClick={() => refrescar(['cola'])}>
                     <RefreshCw size={15} aria-hidden /> Actualizar cola
                 </Button>
+                <div className="ml-auto">
+                    <BotonExportar nombre="Cola de trabajos" columnas={columnasCola()} filas={lista ?? []} />
+                </div>
             </FilterRow>
             <Lista
                 estado={{ data: lista, error: estado.error ?? resumen.error }}

@@ -2,6 +2,7 @@
 
 // La ficha de una orden: fases, «Lo que te toca» (acciones_disponibles), totales, cabecera (editable si la base
 // lo permite: public.oc_edicion), líneas (con «＋ Demasía»), aprobaciones, cuotas, documentos e historial.
+import { useBorrarConDeshacer } from '../_lib/deshacer.ts';
 import { useState } from 'react';
 import { Pencil } from 'lucide-react';
 import { TIPOS_ORDEN } from '@/modules/documentos/application/views.ts';
@@ -54,6 +55,7 @@ export function FichaOrden({ id, onCerrar }: { id: string; onCerrar: () => void 
 function FichaCargada({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () => void }) {
     const perfil = usePerfil();
     const edicion = edicionStore.use(o.id).data;
+    const deshacer = useBorrarConDeshacer();
     const proveedores = proveedoresStore.use().data;
     const gente = personasStore.use().data;
     const [editando, setEditando] = useState(false);
@@ -143,8 +145,8 @@ function FichaCargada({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () => void }
                 )}
             </FichaSeccion>
 
-            <FichaSeccion titulo={`Líneas (${o.lineas.length})`}>
-                <LineasOrden o={o} edicion={edicion ?? null} />
+            <FichaSeccion titulo={`Líneas (${o.lineas.filter((l) => !deshacer.ocultos.has(l.id)).length})`}>
+                <LineasOrden o={o} edicion={edicion ?? null} deshacer={deshacer} />
             </FichaSeccion>
 
             <FichaSeccion titulo="Aprobaciones">

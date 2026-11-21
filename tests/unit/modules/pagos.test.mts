@@ -16,6 +16,7 @@ import {
     vencida,
     type Pago,
 } from '@/modules/pagos/domain/pago.ts';
+import { columnasPago } from '@/modules/pagos/domain/exportar.ts';
 
 const base: Pago = {
     id: 'p1',
@@ -143,5 +144,20 @@ describe('pagos', () => {
         expect(notaPago(p({ estado: 'Plan' }))).toMatch(/Sube la factura/);
         expect(notaPago(p({ estado: 'Plan', tipo: 'Adelanto' }))).toBeNull();
         expect(notaPago(p({ estado: 'Observado Finanzas', motivoObs: 'Falta factura' }))).toMatch(/Falta factura.*subsánala/);
+    });
+});
+
+describe('Excel de pagos', () => {
+    it('desarma la retención y el neto, deja la moneda aparte y marca la vencida', () => {
+        const cols = columnasPago(HOY);
+        const fila = p({ moneda: 'USD', monto: 1000, aplicaRetencion: true, retencion: 30, neto: 970, fechaLimite: '2026-11-10' });
+        const v = (t: string) => cols.find((c) => c.titulo === t)!.valor(fila);
+        expect(v('Moneda')).toBe('USD');
+        expect(cols.find((c) => c.titulo === 'Monto')!.tipo).toBe('monto');
+        expect(v('Retención')).toBe(30);
+        expect(v('Neto')).toBe(970);
+        expect(v('Vencida')).toBe(true);
+        expect(v('Fecha límite')).toEqual(new Date(Date.UTC(2026, 10, 10)));
+        expect(cols.find((c) => c.titulo === 'Retención')!.valor(p({}))).toBeNull();
     });
 });

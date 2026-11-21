@@ -18,6 +18,7 @@ import {
     type Desaduanaje,
     type GastoDes,
 } from '@/modules/desaduanaje/application/views.ts';
+import { columnasDes } from '@/modules/desaduanaje/domain/exportar.ts';
 
 const sinChk: Checklist = { factura: false, bl: false, certOrigen: false, seguro: false, permiso: false };
 
@@ -187,5 +188,25 @@ describe('formato de montos', () => {
         expect(monto(10, 'EUR')).toBe('€ 10.00');
         expect(monto(0)).toBe('S/ 0.00');
         expect(monto(-0.001)).toBe('S/ 0.00');
+    });
+});
+
+describe('Excel de desaduanaje', () => {
+    it('cada fecha en su columna; el FI solo para quien ve precios', () => {
+        const titulos = (ve: boolean) => columnasDes(ve).map((c) => c.titulo);
+        expect(titulos(true)).toContain('FI');
+        expect(titulos(false)).not.toContain('FI');
+        expect(titulos(false)).toEqual(expect.arrayContaining(['Embarque', 'Llegada', 'Levante', 'Ingreso a almacén']));
+        const fila = d({ numero: 'DES-2026-0001', romano: '', fechaLevante: '2026-11-12' });
+        expect(
+            columnasDes(true)
+                .find((c) => c.titulo === 'Levante')!
+                .valor(fila),
+        ).toEqual(new Date(Date.UTC(2026, 10, 12)));
+        expect(
+            columnasDes(true)
+                .find((c) => c.titulo === 'Desaduanaje')!
+                .valor(fila),
+        ).toBe('DES-2026-0001');
     });
 });

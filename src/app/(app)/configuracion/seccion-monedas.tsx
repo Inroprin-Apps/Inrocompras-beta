@@ -64,7 +64,7 @@ export function SeccionMonedas({ tasas, tc }: { tasas: boolean; tc: boolean }) {
                                                 <div className={T.sub}>{m.nombre}</div>
                                             </td>
                                             <td className={`${T.tdNum} text-right`}>{tasaFmt(m.id === 'PEN' ? 1 : m.tasa)}</td>
-                                            <td className={T.td}>{dayTime(m.actualizado)}</td>
+                                            <td className={`${T.td} whitespace-nowrap`}>{dayTime(m.actualizado)}</td>
                                             {tasas && (
                                                 <td className={`${T.td} w-12`}>
                                                     {m.id !== 'PEN' && (
@@ -119,7 +119,7 @@ export function SeccionMonedas({ tasas, tc }: { tasas: boolean; tc: boolean }) {
                                 <tbody>
                                     {ts.map((t) => (
                                         <tr key={t.id} className={T.row}>
-                                            <td className={T.td}>{dmy(t.vigenteDesde)}</td>
+                                            <td className={`${T.td} whitespace-nowrap`}>{dmy(t.vigenteDesde)}</td>
                                             <td className={T.td}>{t.moneda}</td>
                                             <td className={`${T.tdNum} text-right`}>{tasaFmt(t.tc)}</td>
                                             <td className={T.td}>
@@ -210,6 +210,7 @@ function FormTc({ monedas, onCerrar }: { monedas: Moneda[]; onCerrar: () => void
             onCerrar={cerrar}
             onEnviar={() => void guardar()}
             aviso={aviso}
+            amplio
             titulo="Registrar TC de costeo"
             pie={
                 <>

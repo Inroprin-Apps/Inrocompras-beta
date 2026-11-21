@@ -48,6 +48,7 @@ export function FormDatos({ d, onCerrar }: { d: DesaduanajeDetalle; onCerrar: ()
             onCerrar={cerrar}
             onEnviar={() => void guardar()}
             aviso={aviso}
+            amplio
             titulo="Datos del embarque"
             pie={
                 <>

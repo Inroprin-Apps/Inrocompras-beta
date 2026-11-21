@@ -5,8 +5,9 @@
 // costeo con sus versiones, productos, gastos, documentos e historial.
 import { useState } from 'react';
 import { ExternalLink, Pencil } from 'lucide-react';
+import { desaduanajes } from '@/modules/desaduanaje/composition.ts';
 import { TIPOS_DESADUANAJE } from '@/modules/documentos/application/views.ts';
-import { FASES_DES, faseDes, nombreDes, tc, tonoEstadoDes, type DesaduanajeDetalle } from '@/modules/desaduanaje/application/views.ts';
+import { FASES_DES, faseDes, nombreDes, tc, tonoEstadoDes, type DesaduanajeDetalle, type GastoDes } from '@/modules/desaduanaje/application/views.ts';
 import { Button, LINK_CLASS } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
 import { Datos, Fases, Ficha, FichaSeccion } from '@/shared/ui/ficha.tsx';
@@ -16,6 +17,7 @@ import { Historial } from '../_acciones/historial.tsx';
 import { PanelAcciones } from '../_acciones/panel-acciones.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
 import { Documentos } from '../_documentos/documentos.tsx';
+import { useBorrarConDeshacer } from '../_lib/deshacer.ts';
 import { personasStore } from '../_lib/stores.ts';
 import { ChecklistDes } from './checklist.tsx';
 import { Costeo } from './costeo.tsx';
@@ -39,10 +41,20 @@ export function FichaDesaduanaje({ id, onCerrar }: { id: string; onCerrar: () =>
     return <FichaCargada d={d} onCerrar={onCerrar} />;
 }
 
-function FichaCargada({ d, onCerrar }: { d: DesaduanajeDetalle; onCerrar: () => void }) {
+function FichaCargada({ d: leido, onCerrar }: { d: DesaduanajeDetalle; onCerrar: () => void }) {
     const perfil = usePerfil();
     const gente = personasStore.use().data;
     const [editando, setEditando] = useState(false);
+    // Borrar un gasto no pregunta: se oculta (en la lista, el conteo y el costeo) y el aviso ofrece «Deshacer» unos
+    // segundos antes de borrarlo en la base.
+    const { ocultos, borrar } = useBorrarConDeshacer();
+    const d = ocultos.size ? { ...leido, gastos: leido.gastos.filter((g) => !ocultos.has(g.id)) } : leido;
+    const borrarGasto = (g: GastoDes) =>
+        borrar(g.id, {
+            aviso: `Gasto de ${g.concepto} borrado. Vuelve a calcular el costeo.`,
+            ejecutar: () => desaduanajes().borrarGasto(g.id),
+            tocadas: ['des_gastos', 'desaduanajes'],
+        });
     const nombre = (u: string | null) => (u ? (gente?.find((g) => g.id === u)?.nombre ?? 'Otra persona') : '');
     const cerrado = d.estado === 'Costeo cerrado';
     // Comodidad: lo decide RLS (0002 «editar» de desaduanajes y des_productos; 0050 para des_gastos).
@@ -153,7 +165,7 @@ function FichaCargada({ d, onCerrar }: { d: DesaduanajeDetalle; onCerrar: () => 
             </FichaSeccion>
 
             <FichaSeccion titulo={`Gastos (${d.gastos.length})`}>
-                <Gastos d={d} registra={registraGastos} nombre={nombre} />
+                <Gastos d={d} registra={registraGastos} nombre={nombre} onBorrar={borrarGasto} />
             </FichaSeccion>
 
             <FichaSeccion titulo="Documentos">

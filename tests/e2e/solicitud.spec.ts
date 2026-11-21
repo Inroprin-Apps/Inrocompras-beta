@@ -25,7 +25,7 @@ test('solicitante crea, completa y emite una solicitud', async ({ page, errores 
     await expect(page.getByText(`Mesa de trabajo (${marca})`)).toBeVisible();
 
     await page.getByRole('button', { name: 'Emitir solicitud' }).click();
-    await expect(page.getByText('Pendiente Liberación').first()).toBeVisible();
+    await expect(page.getByRole('complementary', { name: 'Ficha' }).getByText('Pendiente Liberación').first()).toBeVisible();
     expect(new URL(page.url()).searchParams.get('ver'), 'la ficha queda abierta en la URL').toBeTruthy();
     expect(errores).toEqual([]);
 });

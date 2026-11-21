@@ -9,6 +9,7 @@ import {
     ESTADOS_DES,
     FILTROS_DES,
     TIPOS_DES,
+    columnasDes,
     factor,
     fechaDelEstado,
     filtrarDes,
@@ -27,6 +28,7 @@ import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
+import { BotonExportar } from '../_components/exportar.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
 import { urlState } from '../_lib/url-state.ts';
 import { FichaDesaduanaje } from './ficha-desaduanaje.tsx';
@@ -99,7 +101,10 @@ export function DesaduanajeView() {
                     onChange={(t) => vista$.set({ tipo: t as FiltrosDes['tipo'] })}
                     options={[{ value: '', label: 'Todos los tipos' }, ...TIPOS_DES.map((t) => ({ value: t, label: t }))]}
                 />
-                <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                <div className="ml-auto flex flex-wrap items-center gap-2.5">
+                    <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                    <BotonExportar nombre="Desaduanaje" columnas={columnasDes(perfil.ve_precios)} filas={estado.data ? lista : []} />
+                </div>
             </FilterRow>
             <Lista
                 estado={{ data: estado.data ? lista : null, error: estado.error }}
@@ -144,21 +149,26 @@ export function DesaduanajeView() {
                                             onKeyDown={(e) => e.key === 'Enter' && vista$.set({ ver: d.id })}
                                         >
                                             <td className={T.td}>
-                                                <div className="font-medium">{nombreDes(d)}</div>
+                                                <div className="font-medium whitespace-nowrap">{nombreDes(d)}</div>
                                                 <div className={T.sub}>
                                                     {d.tipo} · {d.alcance}
-                                                    {d.nDam && ` · DAM ${d.nDam}`}
+                                                    {d.nDam && (
+                                                        <>
+                                                            {' · '}
+                                                            <span className="whitespace-nowrap">DAM {d.nDam}</span>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </td>
                                             <td className={T.td}>
-                                                <div>{d.ordenNumero || 'Sin número'}</div>
+                                                <div className="whitespace-nowrap">{d.ordenNumero || 'Sin número'}</div>
                                                 <div className={T.sub}>{d.proveedor || 'Sin proveedor'}</div>
                                             </td>
                                             <td className={T.td}>
                                                 <Chip tone={tonoEstadoDes(d.estado)}>{d.estado}</Chip>
                                                 {d.versionCosteo > 0 && <div className={T.sub}>Costeo v{d.versionCosteo}</div>}
                                             </td>
-                                            <td className={T.td}>
+                                            <td className={`${T.td} whitespace-nowrap`}>
                                                 <Fechas d={d} />
                                             </td>
                                             <td className={`${T.tdNum} text-right`}>{factor(d.fi)}</td>

@@ -79,6 +79,7 @@ export function FormGasto({ d, gasto, onCerrar }: { d: DesaduanajeDetalle; gasto
             onCerrar={cerrar}
             onEnviar={() => void guardar()}
             aviso={aviso}
+            amplio
             titulo={gasto ? 'Corregir gasto' : 'Registrar gasto'}
             descripcion="Montos sin IGV. El IGV y la percepción se registran con su concepto: no entran al costo."
             pie={

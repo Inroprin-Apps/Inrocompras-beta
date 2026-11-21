@@ -245,13 +245,21 @@
 
 /* La ficha lateral (src/shared/ui/ficha.tsx): de 768 a 1535 px va ENCIMA de la lista (en una laptop, correr la lista
    la dejaba en ~500 px y partía cada celda en varias líneas). Desde 1536 px corre la lista, que sigue con ≥ 660 px.
-   Desde 1920 px la ficha crece a 640 px. */
+   Desde 1920 px la ficha crece a 640 px. El ancho y el corrimiento viven juntos aquí para que no se desfasen. */
+@media (min-width: 768px) {
+    .ficha-lateral {
+        width: 560px;
+    }
+}
 @media (min-width: 1536px) {
     html.con-ficha main {
         padding-right: calc(560px + 1rem);
     }
 }
 @media (min-width: 1920px) {
+    .ficha-lateral {
+        width: 640px;
+    }
     html.con-ficha main {
         padding-right: calc(640px + 1rem);
     }

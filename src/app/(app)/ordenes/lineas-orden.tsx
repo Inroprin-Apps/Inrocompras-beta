@@ -13,19 +13,28 @@ import { Chip } from '@/shared/ui/card.tsx';
 import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input, Textarea } from '@/shared/ui/field.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
-import { useBorrarConDeshacer } from '../_lib/deshacer.ts';
+import type { useBorrarConDeshacer } from '../_lib/deshacer.ts';
 import { refrescar } from '../_lib/resource.ts';
 
 const TOCA = ['ordenes', 'oc_lineas', 'acciones'];
 /** «Línea 3» (o «Línea», si aún no tiene número), para los avisos. */
 const etiquetaLinea = (l: Linea) => (l.nLinea != null ? `Línea ${l.nLinea}` : 'Línea');
 
-export function LineasOrden({ o, edicion }: { o: OrdenDetalle; edicion: Edicion | null }) {
+export function LineasOrden({
+    o,
+    edicion,
+    deshacer,
+}: {
+    o: OrdenDetalle;
+    edicion: Edicion | null;
+    /** El de la ficha, para que su título «Líneas (N)» no cuente lo que se está quitando. */
+    deshacer: ReturnType<typeof useBorrarConDeshacer>;
+}) {
     const [editar, setEditar] = useState<Linea | null>(null);
     const [demasia, setDemasia] = useState<Linea | null>(null);
     const editable = edicion?.editar === null;
     // Quitar una línea o una demasía no pregunta: se oculta y el aviso ofrece «Deshacer» (guía, «Estado»).
-    const { ocultos, borrar } = useBorrarConDeshacer();
+    const { ocultos, borrar } = deshacer;
     const lineas = o.lineas.filter((l) => !ocultos.has(l.id));
     const base = lineas.filter((l) => !l.esDemasia).length;
     const quitar = (l: Linea) =>

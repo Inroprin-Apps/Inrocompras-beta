@@ -55,12 +55,14 @@ export function FilaPago({
                 </td>
             )}
             <td className={T.td}>
-                <div className="font-medium">{p.ordenNumero}</div>
+                <div className="font-medium whitespace-nowrap">{p.ordenNumero}</div>
                 <div className={T.sub}>{p.proveedor || 'Sin proveedor'}</div>
             </td>
             <td className={T.td}>
-                {formatoCuota(p.nCuota)}. {p.tipo}
-                {p.porcentaje != null && p.porcentaje < 1 && <span className="text-ink-2"> · {Math.round(p.porcentaje * 100)} %</span>}
+                <div className="whitespace-nowrap">
+                    {formatoCuota(p.nCuota)}. {p.tipo}
+                    {p.porcentaje != null && p.porcentaje < 1 && <span className="text-ink-2"> · {Math.round(p.porcentaje * 100)} %</span>}
+                </div>
                 <div className={T.sub}>{p.factura ? `Factura ${p.factura.numero || 'sin número'}` : p.hito}</div>
             </td>
             <td className={`${T.tdNum} text-right`}>
@@ -85,7 +87,7 @@ export function FilaPago({
                 <Chip tone={tonoPago(p.estado)}>{p.estado}</Chip>
                 {p.estado === 'Pagado' && p.nOperacion && <div className={T.sub}>Op. {p.nOperacion}</div>}
             </td>
-            <td className={T.td}>{p.inropayRef || <span className="text-ink-3">—</span>}</td>
+            <td className={`${T.td} whitespace-nowrap`}>{p.inropayRef || <span className="text-ink-3">—</span>}</td>
         </tr>
     );
 }

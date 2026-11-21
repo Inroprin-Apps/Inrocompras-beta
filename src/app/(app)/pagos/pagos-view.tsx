@@ -8,6 +8,7 @@ import { useMemo, useState } from 'react';
 import { CalendarClock } from 'lucide-react';
 import {
     ESTADOS_PAGO,
+    columnasPago,
     FILTROS_PAGO,
     MONEDAS_PAGO,
     VENCE,
@@ -29,6 +30,7 @@ import { money } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
+import { BotonExportar } from '../_components/exportar.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
 import { urlState } from '../_lib/url-state.ts';
 import { FichaPago } from './ficha-pago.tsx';
@@ -145,27 +147,30 @@ export function PagosView() {
                 <SearchBox value={v.texto} onChange={(texto) => vista$.set({ texto })} placeholder="Busca por orden, proveedor, factura u operación" />
                 <SelectMenu
                     label="Estado"
-                    className="w-44"
+                    className="w-48"
                     value={v.estado}
                     onChange={(e) => vista$.set({ estado: e })}
                     options={[{ value: '', label: 'Todos los estados' }, ...ESTADOS_PAGO.map((e) => ({ value: e, label: e }))]}
                 />
-                <SelectMenu label="Fecha límite" className="w-48" value={v.vence} onChange={(x) => vista$.set({ vence: x as Vence })} options={VENCE} />
+                <SelectMenu label="Fecha límite" className="w-56" value={v.vence} onChange={(x) => vista$.set({ vence: x as Vence })} options={VENCE} />
                 <SelectMenu
                     label="Proveedor"
-                    className="w-52"
+                    className="w-60"
                     value={v.proveedor}
                     onChange={(proveedor) => vista$.set({ proveedor })}
                     options={[{ value: '', label: 'Todos los proveedores' }, ...proveedores.map(([id, nombre]) => ({ value: id, label: nombre }))]}
                 />
                 <SelectMenu
                     label="Moneda"
-                    className="w-36"
+                    className="w-48"
                     value={v.moneda}
                     onChange={(moneda) => vista$.set({ moneda })}
                     options={[{ value: '', label: 'Todas las monedas' }, ...MONEDAS_PAGO.map((m) => ({ value: m, label: m }))]}
                 />
-                <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                <div className="ml-auto flex flex-wrap items-center gap-2.5">
+                    <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                    <BotonExportar nombre="Pagos" columnas={columnasPago(hoy)} filas={estado.data ? lista : []} />
+                </div>
             </FilterRow>
             {enBloque && marcadasVivas.length > 0 && (
                 <div className="sticky top-0 z-10 mb-3 flex flex-wrap items-center gap-2.5 rounded-card border border-primary-line bg-primary-soft px-4 py-2.5">

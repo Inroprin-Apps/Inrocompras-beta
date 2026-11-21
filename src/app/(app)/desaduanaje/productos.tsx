@@ -108,6 +108,7 @@ function FormProducto({ p, onCerrar }: { p: ProductoDes; onCerrar: () => void })
             onCerrar={cerrar}
             onEnviar={() => void guardar()}
             aviso={aviso}
+            amplio
             titulo={p.descripcion}
             descripcion={`${numero(p.cantidad)} × ${monto(p.precioExw, p.moneda || 'USD')} EXW`}
             pie={

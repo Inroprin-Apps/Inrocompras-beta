@@ -3,9 +3,11 @@
 // Equipo (administrador): quién entró, su área, jefe, ámbito, roles y si está activo. Filtros y la persona abierta en
 // la URL (?filtro=&texto=&ver=). Guardar llama a ac_equipo_guardar (todo o nada, con historial; 0005): la base no deja
 // la app sin administrador ni a nadie como su propio jefe, y su motivo se muestra tal cual.
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { TriangleAlert } from 'lucide-react';
 import {
     FILTROS_EQUIPO,
+    columnasEquipo,
     datosDe,
     etiquetaCambio,
     filtrarEquipo,
@@ -30,6 +32,7 @@ import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
+import { BotonExportar } from '../_components/exportar.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
 import { refrescar } from '../_lib/resource.ts';
 import { urlState } from '../_lib/url-state.ts';
@@ -63,6 +66,20 @@ function EquipoAdmin({ yo }: { yo: string }) {
     const lista = useMemo(() => (estado.data ? filtrarEquipo(estado.data, v.filtro, v.texto) : null), [estado.data, v.filtro, v.texto]);
     const pag = usePaged(lista ?? [], lista, 30, vista$.usePage());
     const abierta = personas.find((p) => p.id === v.ver) ?? null;
+    // Cambios sin guardar en la ficha: el primer intento de cerrarla o de abrir otra persona avisa; el segundo descarta.
+    const [sucio, setSucio] = useState(false);
+    const [avisado, setAvisado] = useState(false);
+    const ver = (id: string) => {
+        if (id === v.ver) return;
+        if (sucio && !avisado) return setAvisado(true);
+        setAvisado(false);
+        setSucio(false);
+        vista$.set({ ver: id });
+    };
+    const marcarSucio = useCallback((s: boolean) => {
+        setSucio(s);
+        if (!s) setAvisado(false);
+    }, []);
     const etiquetas: Record<FiltroEquipo, string> = {
         todas: `Todas (${personas.length})`,
         'sin-area': `Sin área (${sinArea(personas)})`,
@@ -80,6 +97,9 @@ function EquipoAdmin({ yo }: { yo: string }) {
                         onChange={(filtro) => vista$.set({ filtro })}
                         options={FILTROS_EQUIPO.map((k) => ({ value: k, label: etiquetas[k] }))}
                     />
+                </div>
+                <div className="ml-auto">
+                    <BotonExportar nombre="Equipo" columnas={columnasEquipo((id) => nombre.get(id))} filas={lista ?? []} />
                 </div>
             </FilterRow>
             <Lista
@@ -121,8 +141,8 @@ function EquipoAdmin({ yo }: { yo: string }) {
                                             tabIndex={0}
                                             aria-selected={v.ver === p.id}
                                             className={`${T.row} cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${v.ver === p.id ? 'bg-primary-soft' : ''}`}
-                                            onClick={() => vista$.set({ ver: p.id })}
-                                            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), vista$.set({ ver: p.id }))}
+                                            onClick={() => ver(p.id)}
+                                            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), ver(p.id))}
                                         >
                                             <td className={T.td}>
                                                 <div className="font-medium">
@@ -162,21 +182,44 @@ function EquipoAdmin({ yo }: { yo: string }) {
                     </>
                 )}
             </Lista>
-            {abierta && <FichaMiembro key={abierta.id} persona={abierta} personas={personas} nombre={nombre} onCerrar={() => vista$.set({ ver: '' })} />}
+            {abierta && (
+                <FichaMiembro
+                    key={abierta.id}
+                    persona={abierta}
+                    personas={personas}
+                    nombre={nombre}
+                    avisado={sucio && avisado}
+                    onSucio={marcarSucio}
+                    onCerrar={() => ver('')}
+                />
+            )}
         </>
     );
 }
 
-function FichaMiembro({ persona, personas, nombre, onCerrar }: { persona: Miembro; personas: Miembro[]; nombre: Map<string, string>; onCerrar: () => void }) {
+function FichaMiembro({
+    persona,
+    personas,
+    nombre,
+    avisado,
+    onSucio,
+    onCerrar,
+}: {
+    persona: Miembro;
+    personas: Miembro[];
+    nombre: Map<string, string>;
+    /** Se intentó cerrar la ficha o abrir otra persona con cambios sin guardar. */
+    avisado: boolean;
+    onSucio: (sucio: boolean) => void;
+    onCerrar: () => void;
+}) {
     const [d, setD] = useState<DatosEquipo>(() => datosDe(persona));
     const [guardando, setGuardando] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const hist = historialEquipoStore.use(persona.id);
     const set = (patch: Partial<DatosEquipo>) => (setD({ ...d, ...patch }), setError(null));
     const cambios = hayCambios(persona, d);
-    // Como useCerrarConCambios del diálogo, pero la ficha no tiene «Cancelar»: el primer cierre con cambios avisa.
-    const [avisado, setAvisado] = useState(false);
-    const cerrar = () => (cambios && !avisado ? setAvisado(true) : onCerrar());
+    useEffect(() => onSucio(cambios), [cambios, onSucio]);
 
     async function guardar() {
         setGuardando(true);
@@ -197,8 +240,14 @@ function FichaMiembro({ persona, personas, nombre, onCerrar }: { persona: Miembr
                     {!persona.activo && <Chip tone="muted">Desactivada</Chip>}
                 </div>
             }
-            onCerrar={cerrar}
+            onCerrar={onCerrar}
         >
+            {avisado && (
+                <p role="alert" className="flex items-start gap-2 border-b border-divider bg-warning-soft px-5 py-3 text-small text-ink">
+                    <TriangleAlert size={16} aria-hidden className="mt-px flex-none text-warning-strong" />
+                    Tienes cambios sin guardar en {persona.nombre}. Guárdalos, o vuelve a cerrar la ficha o a elegir otra persona para descartarlos.
+                </p>
+            )}
             <FichaSeccion titulo="Área, jefe y roles">
                 <form
                     noValidate
@@ -256,11 +305,6 @@ function FichaMiembro({ persona, personas, nombre, onCerrar }: { persona: Miembr
                     {error && (
                         <p role="alert" className="text-small font-medium text-danger-strong">
                             {error}
-                        </p>
-                    )}
-                    {cambios && avisado && (
-                        <p role="alert" className="text-small font-medium text-ink">
-                            Tienes cambios sin guardar. Cierra la ficha otra vez para descartarlos, o guarda.
                         </p>
                     )}
                     <div className="flex justify-end">
