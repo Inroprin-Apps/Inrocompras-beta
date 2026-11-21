@@ -21,10 +21,26 @@ import { Tooltip } from '../../../ui/tooltip.tsx';
 import { EscenaConPaneles } from '../paneles.tsx';
 
 const GRUPOS = [
-    { titulo: 'Acciones', texto: 'Cinco variantes de botón con sus cinco estados, el enlace y el tooltip que explica un icono.', pista: 'Pulsa un botón o pasa el cursor sobre los iconos' },
-    { titulo: 'Formularios', texto: 'Cada campo dice qué es, qué falta y cómo se arregla; el error va debajo, nunca solo en rojo.', pista: 'Escribe en el RUC o abre la lista y la fecha' },
-    { titulo: 'Navegación', texto: 'Segmentado para pocas vistas, pestañas para secciones y píldoras para filtrar.', pista: 'Cambia de vista, de período o de pestaña' },
-    { titulo: 'Datos', texto: 'KPI para lo que se mira todos los días, barras para comparar y gráficos para la evolución.', pista: 'Pulsa una barra para elegirla' },
+    {
+        titulo: 'Acciones',
+        texto: 'Cinco variantes de botón con sus cinco estados, el enlace y el tooltip que explica un icono.',
+        pista: 'Pulsa un botón o pasa el cursor sobre los iconos',
+    },
+    {
+        titulo: 'Formularios',
+        texto: 'Cada campo dice qué es, qué falta y cómo se arregla; el error va debajo, nunca solo en rojo.',
+        pista: 'Escribe en el RUC o abre la lista y la fecha',
+    },
+    {
+        titulo: 'Navegación',
+        texto: 'Segmentado para pocas vistas, pestañas para secciones y píldoras para filtrar.',
+        pista: 'Cambia de vista, de período o de pestaña',
+    },
+    {
+        titulo: 'Datos',
+        texto: 'KPI para lo que se mira todos los días, barras para comparar y gráficos para la evolución.',
+        pista: 'Pulsa una barra para elegirla',
+    },
     { titulo: 'Estado', texto: 'Chips para el estado de algo, avisos que se quedan y toasts que se van.', pista: 'Pulsa un botón para ver el aviso que sale' },
 ] as const;
 
@@ -41,7 +57,13 @@ const BARRAS: ChartOption = {
     grid: { left: 4, right: 8, top: 34, bottom: 4, containLabel: true },
     tooltip: { trigger: 'axis' },
     legend: { top: 0, left: 0, icon: 'roundRect', itemWidth: 12, itemHeight: 8, textStyle: { color: 'var(--color-ink-2)', fontSize: 12 } },
-    xAxis: { type: 'category', data: ['ago', 'set', 'oct', 'nov'], axisLine: { lineStyle: { color: 'var(--color-control)' } }, axisTick: { show: false }, axisLabel: { color: 'var(--color-ink-2)' } },
+    xAxis: {
+        type: 'category',
+        data: ['ago', 'set', 'oct', 'nov'],
+        axisLine: { lineStyle: { color: 'var(--color-control)' } },
+        axisTick: { show: false },
+        axisLabel: { color: 'var(--color-ink-2)' },
+    },
     yAxis: { type: 'value', axisLabel: { color: 'var(--color-ink-2)' }, splitLine: { lineStyle: { color: 'var(--color-divider)' } } },
     series: [
         { name: 'Ventas', type: 'bar', data: [640, 598, 671, 722], itemStyle: { borderRadius: [3, 3, 0, 0] } },
@@ -103,7 +125,13 @@ function Formularios() {
             <Field label="Estado SUNAT">{(p) => <Input {...p} defaultValue="ACTIVO · HABIDO" disabled />}</Field>
             <SelectMenu value={estado} onChange={setEstado} options={ESTADOS} label="Estado" placeholder="Elige un estado…" />
             <DateField value={dia} onChange={setDia} label="Fecha de emisión" />
-            <MultiChoice values={clientes} onChange={setClientes} options={CLIENTES.map((c, i) => ({ value: c, label: c, detail: `RUC 2051234${String(i).padStart(4, '0')}` }))} noneLabel="Todos los clientes" countLabel={(n) => `${n} clientes`} />
+            <MultiChoice
+                values={clientes}
+                onChange={setClientes}
+                options={CLIENTES.map((c, i) => ({ value: c, label: c, detail: `RUC 2051234${String(i).padStart(4, '0')}` }))}
+                noneLabel="Todos los clientes"
+                countLabel={(n) => `${n} clientes`}
+            />
             <Checkbox label="Afecta a detracción" hint="12 % sobre servicios." checked={ok} onChange={(e) => setOk(e.target.checked)} />
         </div>
     );
@@ -161,7 +189,15 @@ function Datos() {
                     ['Corporación Sur SA', 'S/ 288 mil', 70],
                     ['Comercial Este EIRL', 'S/ 154 mil', 38],
                 ].map(([nombre, cifra, pct], i) => (
-                    <BarRow key={nombre as string} label={nombre as string} figures={cifra as string} pct={pct as number} color={i === 1 ? 'teal' : 'primary'} chosen={elegida === i} onClick={() => setElegida(i)} />
+                    <BarRow
+                        key={nombre as string}
+                        label={nombre as string}
+                        figures={cifra as string}
+                        pct={pct as number}
+                        color={i === 1 ? 'teal' : 'primary'}
+                        chosen={elegida === i}
+                        onClick={() => setElegida(i)}
+                    />
                 ))}
             </div>
             <div className="flex items-center">

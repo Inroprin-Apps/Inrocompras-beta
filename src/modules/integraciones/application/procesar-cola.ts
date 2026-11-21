@@ -149,7 +149,13 @@ async function leerDocumento(d: Integraciones, t: Trabajo): Paso {
     const lectura = await leer(d, archivo.value, doc.value.mime);
     // Nunca se confirma solo: queda como propuesta (lectura_estado = 'Leído') para que la persona la revise.
     const g = await d.repo.guardarLectura(doc.value.id, lectura);
-    return g.isErr() ? err(g.error) : ok(hecho(`${lectura.fuente === 'ninguna' ? 'Sin datos leídos: la persona los completa a mano.' : `Leído (${lectura.fuente}).`}${lectura.avisos.length ? ' ' + lectura.avisos.join(' ') : ''}`));
+    return g.isErr()
+        ? err(g.error)
+        : ok(
+              hecho(
+                  `${lectura.fuente === 'ninguna' ? 'Sin datos leídos: la persona los completa a mano.' : `Leído (${lectura.fuente}).`}${lectura.avisos.length ? ' ' + lectura.avisos.join(' ') : ''}`,
+              ),
+          );
 }
 
 /** Paso 1 gratis (texto) y, si no basta y hay llave, paso 2 con Gemini. Si Gemini falla, queda la lectura gratuita. */
@@ -213,7 +219,11 @@ async function enviarCorreo(d: Integraciones, t: Trabajo): Paso {
     if (r.isErr()) return err(r.error);
     const g = await d.repo.marcarEnviada(o.value.id, para, d.correo.modo);
     if (g.isErr()) return err(g.error);
-    return ok(d.correo.modo === 'registro' ? descartado(`Correo en modo registro: no se envió a ${para}. Configura CORREO_MODO (gmail o smtp).`) : hecho(`Enviado a ${para}.`));
+    return ok(
+        d.correo.modo === 'registro'
+            ? descartado(`Correo en modo registro: no se envió a ${para}. Configura CORREO_MODO (gmail o smtp).`)
+            : hecho(`Enviado a ${para}.`),
+    );
 }
 
 async function notificar(d: Integraciones, t: Trabajo): Paso {
@@ -227,7 +237,12 @@ async function notificar(d: Integraciones, t: Trabajo): Paso {
     if (!u?.activo || !u.email) return ok(descartado('La persona no está activa: no se le escribe.'));
     const falta = d.correo.falta();
     if (falta) return err(noConfigurado(`Correo (${d.correo.modo})`, falta));
-    const p = notificacion({ nombre: primerNombre(u.nombre), titulo: n.value.titulo, cuerpo: n.value.cuerpo, enlace: d.appUrl + rutaDe(n.value.tabla, n.value.refId) });
+    const p = notificacion({
+        nombre: primerNombre(u.nombre),
+        titulo: n.value.titulo,
+        cuerpo: n.value.cuerpo,
+        enlace: d.appUrl + rutaDe(n.value.tabla, n.value.refId),
+    });
     const r = await d.correo.enviar({ para: [u.email], asunto: p.asunto, html: p.html });
     if (r.isErr()) return err(r.error);
     return ok(d.correo.modo === 'registro' ? descartado(`Correo en modo registro: no se envió a ${u.email}.`) : hecho(`Enviado a ${u.email}.`));

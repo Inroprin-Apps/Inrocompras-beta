@@ -6,7 +6,8 @@ import { filasPlantilla, type Celda } from '../domain/carga.ts';
 
 /** La primera hoja del archivo, celda por celda (texto, número, fecha o vacío). */
 export async function leerHoja(archivo: File): Promise<Result<Celda[][], ErrorFuente>> {
-    if (!/\.xlsx$/i.test(archivo.name)) return err({ kind: 'regla', message: 'Sube un archivo .xlsx (Excel). Si lo tienes en .xls o .csv, guárdalo como .xlsx.' });
+    if (!/\.xlsx$/i.test(archivo.name))
+        return err({ kind: 'regla', message: 'Sube un archivo .xlsx (Excel). Si lo tienes en .xls o .csv, guárdalo como .xlsx.' });
     try {
         const { readSheet } = await import('read-excel-file/browser');
         const filas = (await readSheet(archivo)) as unknown as Celda[][];
@@ -21,10 +22,11 @@ export async function descargarPlantilla(): Promise<Result<null, ErrorFuente>> {
     try {
         const { default: writeXlsxFile } = await import('write-excel-file/browser');
         const { titulos, ejemplo, anchos } = filasPlantilla();
-        await writeXlsxFile(
-            [titulos.map((value) => ({ value, fontWeight: 'bold' as const })), ejemplo],
-            { sheet: 'Items', columns: anchos.map((width) => ({ width })), stickyRowsCount: 1 },
-        ).toFile('plantilla-items-solicitud.xlsx');
+        await writeXlsxFile([titulos.map((value) => ({ value, fontWeight: 'bold' as const })), ejemplo], {
+            sheet: 'Items',
+            columns: anchos.map((width) => ({ width })),
+            stickyRowsCount: 1,
+        }).toFile('plantilla-items-solicitud.xlsx');
         return ok(null);
     } catch {
         return err({ kind: 'fuente', message: 'No se pudo armar la plantilla. Inténtalo otra vez.' });

@@ -18,11 +18,7 @@ import type {
 } from '../domain/requerimiento.ts';
 import type { FilaSeguimiento } from '../domain/seguimiento.ts';
 import type { ItemTecnica } from '../domain/validacion.ts';
-
-type Fila = Record<string, unknown>;
-const s = (v: unknown) => (v == null ? '' : String(v));
-const sn = (v: unknown) => (v == null || v === '' ? null : String(v));
-const nn = (v: unknown) => (v == null || v === '' ? null : Number(v));
+import { nn, s, sn, type Fila } from '@/shared/supabase/filas.ts';
 
 const COLS_REQ =
     'id,numero,rq_sidige,empresa_id,area_emisora,tipo_compra,proyecto_id,motivo,destino,direccion,receptor,concepto_general,solicitud_id,estado,emisor_id,fecha_emision,motivo_observacion,creado';
@@ -159,7 +155,8 @@ export class SupabaseRequerimientosAdapter implements RequerimientosPort {
         };
         // Sin .select(): si RLS no deja, no hay error pero tampoco filas; se comprueba con count.
         const r = await this.db.from('requerimientos').update(fila, { count: 'exact' }).eq('id', id);
-        if (!r.error && r.count === 0) return err({ kind: 'permiso', message: 'No se guardó: solo el área emisora edita el requerimiento mientras está en proceso.' });
+        if (!r.error && r.count === 0)
+            return err({ kind: 'permiso', message: 'No se guardó: solo el área emisora edita el requerimiento mientras está en proceso.' });
         return resultado(r).map(() => null);
     }
 
@@ -171,7 +168,8 @@ export class SupabaseRequerimientosAdapter implements RequerimientosPort {
             plazo_entrega_dias: e.plazoEntregaDias.trim() ? Number(e.plazoEntregaDias) : null,
         };
         const r = await this.db.from('requerimiento_items').update(fila, { count: 'exact' }).eq('id', id);
-        if (!r.error && r.count === 0) return err({ kind: 'permiso', message: 'No se guardó: solo el área emisora edita los ítems mientras el requerimiento está en proceso.' });
+        if (!r.error && r.count === 0)
+            return err({ kind: 'permiso', message: 'No se guardó: solo el área emisora edita los ítems mientras el requerimiento está en proceso.' });
         return resultado(r).map(() => null);
     }
 
@@ -186,7 +184,11 @@ export class SupabaseRequerimientosAdapter implements RequerimientosPort {
     }
 
     async itemTecnica(id: string): Promise<Result<ItemTecnica, ErrorFuente>> {
-        const r = await this.db.from('requerimiento_items').select(`${COLS_ITEM}, requerimientos(id,numero,motivo,estado,proyecto_id)`).eq('id', id).maybeSingle();
+        const r = await this.db
+            .from('requerimiento_items')
+            .select(`${COLS_ITEM}, requerimientos(id,numero,motivo,estado,proyecto_id)`)
+            .eq('id', id)
+            .maybeSingle();
         return resultadoUno<Fila>(r, 'No encontré ese ítem.').map(itemTecnica);
     }
 

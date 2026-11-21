@@ -92,7 +92,9 @@ export function PlanView() {
 
     const opcionesProyecto = [
         ...ganados.map((p) => ({ value: p.id, label: [p.codigo, p.nombre].filter(Boolean).join(' · ') })),
-        ...(proyectos ?? []).filter((p) => p.estado !== 'Ganado').map((p) => ({ value: p.id, label: `${[p.codigo, p.nombre].filter(Boolean).join(' · ')} (${p.estado.toLowerCase()})` })),
+        ...(proyectos ?? [])
+            .filter((p) => p.estado !== 'Ganado')
+            .map((p) => ({ value: p.id, label: `${[p.codigo, p.nombre].filter(Boolean).join(' · ')} (${p.estado.toLowerCase()})` })),
         { value: 'sin', label: 'Sin proyecto (administrativas)' },
         { value: 'todos', label: 'Todos los proyectos' },
     ];
@@ -102,7 +104,14 @@ export function PlanView() {
         <>
             <SectionTitle title="Plan de compras" />
             <FilterRow>
-                <SelectMenu label="Proyecto" className="w-full sm:w-80" value={alcance ?? ''} onChange={cambiarAlcance} options={opcionesProyecto} placeholder="Cargando proyectos…" />
+                <SelectMenu
+                    label="Proyecto"
+                    className="w-full sm:w-80"
+                    value={alcance ?? ''}
+                    onChange={cambiarAlcance}
+                    options={opcionesProyecto}
+                    placeholder="Cargando proyectos…"
+                />
             </FilterRow>
             <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
                 <Kpi label="Líneas" value={resumen?.lineas ?? null} />
@@ -164,7 +173,14 @@ export function PlanView() {
                     <>
                         <ul className="flex flex-col gap-2 md:hidden">
                             {pag.rows.map((f) => (
-                                <TarjetaPlan key={f.itemId} f={f} compra={compra} marcada={marcadas.includes(f.itemId)} onMarcar={() => marcar(f)} verOc={perfil.ve_precios} />
+                                <TarjetaPlan
+                                    key={f.itemId}
+                                    f={f}
+                                    compra={compra}
+                                    marcada={marcadas.includes(f.itemId)}
+                                    onMarcar={() => marcar(f)}
+                                    verOc={perfil.ve_precios}
+                                />
                             ))}
                         </ul>
                         <div className="hidden overflow-x-auto md:block">
@@ -187,7 +203,14 @@ export function PlanView() {
                                 </thead>
                                 <tbody>
                                     {pag.rows.map((f) => (
-                                        <FilaTabla key={f.itemId} f={f} compra={compra} marcada={marcadas.includes(f.itemId)} onMarcar={() => marcar(f)} verOc={perfil.ve_precios} />
+                                        <FilaTabla
+                                            key={f.itemId}
+                                            f={f}
+                                            compra={compra}
+                                            marcada={marcadas.includes(f.itemId)}
+                                            onMarcar={() => marcar(f)}
+                                            verOc={perfil.ve_precios}
+                                        />
                                     ))}
                                 </tbody>
                             </table>
@@ -200,7 +223,8 @@ export function PlanView() {
                 <div className="sticky bottom-3 z-20 mt-4 flex flex-wrap items-center gap-3 rounded-card border border-primary-line bg-primary-soft px-4 py-3 shadow-float">
                     <ShoppingCart size={18} className="text-primary-strong" aria-hidden />
                     <span className="min-w-0 flex-1 text-ui">
-                        <span className="font-semibold">{elegidas.length === 1 ? '1 línea' : `${elegidas.length} líneas`}</span> · {elegidas[0].canal?.toLowerCase()}
+                        <span className="font-semibold">{elegidas.length === 1 ? '1 línea' : `${elegidas.length} líneas`}</span> ·{' '}
+                        {elegidas[0].canal?.toLowerCase()}
                     </span>
                     <Button variant="secondary" onClick={() => setMarcadas([])}>
                         Quitar todas
@@ -279,7 +303,13 @@ function Descripcion({ f }: { f: FilaPlan }) {
                 {f.descripcion}
             </div>
             <div className={T.sub}>
-                {[f.canal ?? 'Sin canal', f.codigoCliente && `Cód. ${f.codigoCliente}`, f.sku && `SKU ${f.sku}`, f.requerimiento ?? 'RC sin emitir', f.rqSidige && `RQ ${f.rqSidige}`]
+                {[
+                    f.canal ?? 'Sin canal',
+                    f.codigoCliente && `Cód. ${f.codigoCliente}`,
+                    f.sku && `SKU ${f.sku}`,
+                    f.requerimiento ?? 'RC sin emitir',
+                    f.rqSidige && `RQ ${f.rqSidige}`,
+                ]
                     .filter(Boolean)
                     .join(' · ')}
             </div>

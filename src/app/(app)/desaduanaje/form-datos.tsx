@@ -29,7 +29,8 @@ export function FormDatos({ d, onCerrar }: { d: DesaduanajeDetalle; onCerrar: ()
     const set = (p: Partial<DatosDes>) => setX((v) => ({ ...v, ...p }));
 
     async function guardar() {
-        if (x.fechaEmbarque && x.fechaLlegadaEst && x.fechaLlegadaEst < x.fechaEmbarque) return setError('La llegada estimada no puede ser antes del embarque.');
+        if (x.fechaEmbarque && x.fechaLlegadaEst && x.fechaLlegadaEst < x.fechaEmbarque)
+            return setError('La llegada estimada no puede ser antes del embarque.');
         setGuardando(true);
         const r = await desaduanajes().guardarDatos(d.id, x);
         setGuardando(false);
@@ -75,7 +76,14 @@ export function FormDatos({ d, onCerrar }: { d: DesaduanajeDetalle; onCerrar: ()
                     <DateField label="Fecha de llegada estimada" value={x.fechaLlegadaEst ?? ''} onChange={(f) => set({ fechaLlegadaEst: f || null })} />
                 </div>
                 <Field label="Moneda de la DAM">
-                    {(p) => <SelectMenu {...p} value={x.monedaDam} onChange={(monedaDam) => set({ monedaDam })} options={MONEDAS_DAM.map((m) => ({ value: m, label: m }))} />}
+                    {(p) => (
+                        <SelectMenu
+                            {...p}
+                            value={x.monedaDam}
+                            onChange={(monedaDam) => set({ monedaDam })}
+                            options={MONEDAS_DAM.map((m) => ({ value: m, label: m }))}
+                        />
+                    )}
                 </Field>
             </div>
             <Checkbox

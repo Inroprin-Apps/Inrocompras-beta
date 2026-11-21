@@ -1,6 +1,7 @@
 // Equipo: el administrador asigna área, jefe, ámbito, roles y si la persona está activa (0005: ac_equipo_guardar).
 // PURO: tipos, filtros y cómo se lee el historial de cambios.
 import { rolLabel } from '@/shared/tipos.ts';
+import { palabrasDe, plano } from '@/shared/texto.ts';
 
 export interface Miembro {
     id: string;
@@ -34,10 +35,8 @@ export interface CambioEquipo {
 export const FILTROS_EQUIPO = ['todas', 'sin-area', 'inactivas'] as const;
 export type FiltroEquipo = (typeof FILTROS_EQUIPO)[number];
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-
 export function filtrarEquipo(lista: Miembro[], filtro: FiltroEquipo, texto: string): Miembro[] {
-    const palabras = plano(texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(texto);
     return lista.filter((p) => {
         if (filtro === 'sin-area' && p.area !== 'Sin área') return false;
         if (filtro === 'inactivas' && p.activo) return false;
@@ -52,7 +51,13 @@ export const sinArea = (lista: Miembro[]) => lista.filter((p) => p.area === 'Sin
 export const datosDe = (p: Miembro): DatosEquipo => ({ area: p.area, jefeId: p.jefeId, ambito: p.ambito, activo: p.activo, roles: [...p.roles].sort() });
 
 export function hayCambios(p: Miembro, d: DatosEquipo): boolean {
-    return d.area !== p.area || (d.jefeId || null) !== p.jefeId || d.ambito !== p.ambito || d.activo !== p.activo || [...d.roles].sort().join() !== [...p.roles].sort().join();
+    return (
+        d.area !== p.area ||
+        (d.jefeId || null) !== p.jefeId ||
+        d.ambito !== p.ambito ||
+        d.activo !== p.activo ||
+        [...d.roles].sort().join() !== [...p.roles].sort().join()
+    );
 }
 
 const ACCION: Record<string, string> = {

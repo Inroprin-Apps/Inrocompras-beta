@@ -51,7 +51,11 @@ export function ChecklistDes({ d, edita }: { d: DesaduanajeDetalle; edita: boole
                                 />
                             ) : (
                                 <span className="flex items-center gap-2 text-ui">
-                                    {i.cumple ? <CircleCheck size={16} className="text-success-strong" aria-hidden /> : <CircleDashed size={16} className="text-ink-3" aria-hidden />}
+                                    {i.cumple ? (
+                                        <CircleCheck size={16} className="text-success-strong" aria-hidden />
+                                    ) : (
+                                        <CircleDashed size={16} className="text-ink-3" aria-hidden />
+                                    )}
                                     {i.etiqueta}
                                 </span>
                             )}
@@ -62,7 +66,8 @@ export function ChecklistDes({ d, edita }: { d: DesaduanajeDetalle; edita: boole
             </ul>
             {marcable && (
                 <p className="text-small text-ink-3">
-                    Marca lo que ya tienes o súbelo en Documentos con su tipo. {d.requierePermiso ? '' : 'Si la mercadería requiere permiso (MTC, DIGESA), indícalo en Datos del embarque.'}
+                    Marca lo que ya tienes o súbelo en Documentos con su tipo.{' '}
+                    {d.requierePermiso ? '' : 'Si la mercadería requiere permiso (MTC, DIGESA), indícalo en Datos del embarque.'}
                 </p>
             )}
         </div>

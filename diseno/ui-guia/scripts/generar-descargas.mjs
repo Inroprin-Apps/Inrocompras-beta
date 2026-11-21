@@ -65,7 +65,19 @@ async function esperarArchivo(ruta, limiteMs = 60000) {
 function edge(args, html) {
     const archivo = path.join(tmp, `hoja-${++n}.html`);
     writeFileSync(archivo, html);
-    execFileSync(exe, ['--headless=new', '--disable-gpu', `--user-data-dir=${path.join(tmp, 'perfil')}`, '--hide-scrollbars', '--virtual-time-budget=15000', ...args, pathToFileURL(archivo).href], { stdio: 'ignore' });
+    execFileSync(
+        exe,
+        [
+            '--headless=new',
+            '--disable-gpu',
+            `--user-data-dir=${path.join(tmp, 'perfil')}`,
+            '--hide-scrollbars',
+            '--virtual-time-budget=15000',
+            ...args,
+            pathToFileURL(archivo).href,
+        ],
+        { stdio: 'ignore' },
+    );
 }
 
 async function aPdf(html, destino) {
@@ -89,13 +101,18 @@ async function aPng(html, anchoPx, altoPx, escala, destino) {
 }
 
 // --- Las hojas ----------------------------------------------------------------------------------------------------------------
-const documento = (titulo, estilo, cuerpo) => `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${titulo}</title>${FUENTE}<style>${BASE}${PAPELERIA_CSS}.pp{border:0}${estilo}</style></head><body>${cuerpo}</body></html>`;
+const documento = (titulo, estilo, cuerpo) =>
+    `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${titulo}</title>${FUENTE}<style>${BASE}${PAPELERIA_CSS}.pp{border:0}${estilo}</style></head><body>${cuerpo}</body></html>`;
 
 /** El PDF para imprimir: una página por cara, del tamaño exacto. */
 function htmlPdf(p) {
     const { w, h } = p.caras[0];
     const paginas = p.caras.map((c) => `<section class="pag">${c.html}</section>`).join('');
-    return documento(p.titulo, `@page{size:${w}mm ${h}mm;margin:0}.pag{width:${w}mm;height:${h}mm;overflow:hidden;break-after:page}.pag:last-child{break-after:auto}`, paginas);
+    return documento(
+        p.titulo,
+        `@page{size:${w}mm ${h}mm;margin:0}.pag{width:${w}mm;height:${h}mm;overflow:hidden;break-after:page}.pag:last-child{break-after:auto}`,
+        paginas,
+    );
 }
 
 /** El fondo de una página del Word: la cara sin los textos que se cambian. */
@@ -136,7 +153,8 @@ const escalaDe = (c) => Math.min(6, Math.max(1, 2400 / Math.max(c.w * PX_POR_MM,
 // --- Todo junto ------------------------------------------------------------------------------------------------------------------
 mkdirSync(SALIDA, { recursive: true });
 // Archivos de versiones anteriores que ya no existen.
-for (const viejo of ['papeleria-roland-print.pdf', 'hoja-membretada-a4.pdf', 'sobre-roland-print.pdf', 'rombos-y-cubo.pdf']) rmSync(path.join(SALIDA, viejo), { force: true });
+for (const viejo of ['papeleria-roland-print.pdf', 'hoja-membretada-a4.pdf', 'sobre-roland-print.pdf', 'rombos-y-cubo.pdf'])
+    rmSync(path.join(SALIDA, viejo), { force: true });
 
 const paraElZip = [];
 for (const p of piezas(logo)) {

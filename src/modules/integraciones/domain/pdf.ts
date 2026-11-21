@@ -42,26 +42,78 @@ export interface OrdenPdf {
     empresa: { razonSocial: string; ruc: string | null; direccion: string | null };
     proveedor: { razonSocial: string; ruc: string | null; pais: string | null } | null;
     proyecto: { codigo: string | null; nombre: string } | null;
-    aprobaciones: { ppto: string | null; cgFecha: string | null; gop: string | null; gopFecha: string | null; gaf: string | null; gafFecha: string | null; tipo: string | null };
+    aprobaciones: {
+        ppto: string | null;
+        cgFecha: string | null;
+        gop: string | null;
+        gopFecha: string | null;
+        gaf: string | null;
+        gafFecha: string | null;
+        tipo: string | null;
+    };
     comprador: { id: string; nombre: string };
     lineas: LineaPdf[];
 }
 
 export const TEXTOS = {
     es: {
-        titulo: 'ORDEN DE COMPRA', srv: 'ORDEN DE SERVICIO', borrador: 'BORRADOR', prov: 'Proveedor', fecha: 'Fecha', moneda: 'Moneda',
-        pago: 'Forma de pago', entrega: 'Lugar de entrega', plazo: 'Plazo de entrega', dias: 'días', item: 'N°', desc: 'Descripción',
-        und: 'Und.', cant: 'Cant.', pu: 'P. unit.', total: 'Total', sub: 'Subtotal', igv: 'IGV 18 %', tot: 'Total',
-        terminos: 'Términos y condiciones', aprob: 'Aprobaciones', rev: 'Revisión', proyecto: 'Proyecto', comprador: 'Comprador',
-        pendiente: 'pendiente', adelanto: 'adelanto', saldo: 'saldo',
+        titulo: 'ORDEN DE COMPRA',
+        srv: 'ORDEN DE SERVICIO',
+        borrador: 'BORRADOR',
+        prov: 'Proveedor',
+        fecha: 'Fecha',
+        moneda: 'Moneda',
+        pago: 'Forma de pago',
+        entrega: 'Lugar de entrega',
+        plazo: 'Plazo de entrega',
+        dias: 'días',
+        item: 'N°',
+        desc: 'Descripción',
+        und: 'Und.',
+        cant: 'Cant.',
+        pu: 'P. unit.',
+        total: 'Total',
+        sub: 'Subtotal',
+        igv: 'IGV 18 %',
+        tot: 'Total',
+        terminos: 'Términos y condiciones',
+        aprob: 'Aprobaciones',
+        rev: 'Revisión',
+        proyecto: 'Proyecto',
+        comprador: 'Comprador',
+        pendiente: 'pendiente',
+        adelanto: 'adelanto',
+        saldo: 'saldo',
         penal: (p: number, t: number) => `Penalidad por demora: ${p} % por día, hasta ${t} % del monto.`,
     },
     en: {
-        titulo: 'PURCHASE ORDER', srv: 'SERVICE ORDER', borrador: 'DRAFT', prov: 'Supplier', fecha: 'Date', moneda: 'Currency',
-        pago: 'Payment terms', entrega: 'Delivery place', plazo: 'Lead time', dias: 'days', item: '#', desc: 'Description',
-        und: 'Unit', cant: 'Qty', pu: 'Unit price', total: 'Amount', sub: 'Subtotal', igv: 'VAT', tot: 'Total',
-        terminos: 'Terms and conditions', aprob: 'Approvals', rev: 'Revision', proyecto: 'Project', comprador: 'Buyer',
-        pendiente: 'pending', adelanto: 'advance', saldo: 'balance',
+        titulo: 'PURCHASE ORDER',
+        srv: 'SERVICE ORDER',
+        borrador: 'DRAFT',
+        prov: 'Supplier',
+        fecha: 'Date',
+        moneda: 'Currency',
+        pago: 'Payment terms',
+        entrega: 'Delivery place',
+        plazo: 'Lead time',
+        dias: 'days',
+        item: '#',
+        desc: 'Description',
+        und: 'Unit',
+        cant: 'Qty',
+        pu: 'Unit price',
+        total: 'Amount',
+        sub: 'Subtotal',
+        igv: 'VAT',
+        tot: 'Total',
+        terminos: 'Terms and conditions',
+        aprob: 'Approvals',
+        rev: 'Revision',
+        proyecto: 'Project',
+        comprador: 'Buyer',
+        pendiente: 'pending',
+        adelanto: 'advance',
+        saldo: 'balance',
         penal: (p: number, t: number) => `Late delivery penalty: ${p}% per day, up to ${t}% of the order amount.`,
     },
 } as const;
@@ -73,8 +125,13 @@ export const idiomaPdf = (version: VersionPdf, procedencia: string): Idioma => (
 export const lineasPdf = (o: OrdenPdf) => o.lineas.filter((l) => !(l.esDemasia && l.demasiaEstado === 'Rechazada')).sort((a, b) => a.nLinea - b.nLinea);
 
 const FORMAS_EN: Record<string, string> = {
-    Contado: 'Cash', Crédito: 'Credit', Adelanto: 'Advance', 'Tarjeta de crédito': 'Credit card', 'Caja chica': 'Petty cash',
-    'Contra entrega': 'Cash on delivery', Letra: 'Bill of exchange',
+    Contado: 'Cash',
+    Crédito: 'Credit',
+    Adelanto: 'Advance',
+    'Tarjeta de crédito': 'Credit card',
+    'Caja chica': 'Petty cash',
+    'Contra entrega': 'Cash on delivery',
+    Letra: 'Bill of exchange',
 };
 
 export function formaPagoTexto(o: OrdenPdf, idioma: Idioma): string {

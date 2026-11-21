@@ -21,7 +21,9 @@ export function AprobarView() {
             {aprobador ? (
                 <PorFirmar titulo={false} />
             ) : (
-                <ListaVacia titulo="Aquí firman Control de Gestión, la GOP y la GAF">Tu perfil no valida ni aprueba órdenes. Puedes ver todas en Órdenes o en el Cuadro de aprobaciones.</ListaVacia>
+                <ListaVacia titulo="Aquí firman Control de Gestión, la GOP y la GAF">
+                    Tu perfil no valida ni aprueba órdenes. Puedes ver todas en Órdenes o en el Cuadro de aprobaciones.
+                </ListaVacia>
             )}
         </div>
     );

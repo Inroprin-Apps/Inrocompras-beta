@@ -1,6 +1,8 @@
 // Requerimientos, sus ítems y las anulaciones (AppSheet: Requerimientos, Items, Anulaciones). PURO: tipos, filtros,
 // orden y reglas de presentación. Quién emite, observa, anula o valida lo deciden las funciones de la base (0003/0010).
 
+import { palabrasDe, plano } from '@/shared/texto.ts';
+
 export const ESTADOS_REQ = ['En Proceso', 'Emitido', 'Observado', 'Anulado'] as const;
 export type EstadoReq = (typeof ESTADOS_REQ)[number];
 
@@ -174,10 +176,8 @@ export interface FiltrosReq {
 }
 export const FILTROS_REQ: FiltrosReq = { estado: '', proyecto: '', area: '', texto: '' };
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-
 export function filtrarRequerimientos(lista: Requerimiento[], f: FiltrosReq, nombreProyecto?: (id: string | null) => string): Requerimiento[] {
-    const palabras = plano(f.texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(f.texto);
     return lista.filter((r) => {
         if (f.estado && r.estado !== f.estado) return false;
         if (f.proyecto && r.proyectoId !== f.proyecto) return false;

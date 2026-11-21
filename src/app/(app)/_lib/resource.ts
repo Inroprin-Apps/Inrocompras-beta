@@ -32,7 +32,11 @@ export function refrescar(etiquetas?: readonly string[]) {
     const hechas = new Set<() => void>();
     for (const [e, fs] of recargas) {
         if (etiquetas && !etiquetas.includes(e)) continue;
-        for (const f of fs) if (!hechas.has(f)) (hechas.add(f), f());
+        for (const f of fs) {
+            if (hechas.has(f)) continue;
+            hechas.add(f);
+            f();
+        }
     }
 }
 
@@ -74,11 +78,6 @@ export function resource<T>(cargar: Cargador<T>, etiquetas: readonly string[] = 
     // Solo se recarga si alguien ya lo pidió alguna vez (no se leen pantallas que nadie abrió).
     registrar(etiquetas, () => usado && void load());
 
-    function watch(listener: () => void) {
-        listeners.add(listener);
-        return () => void listeners.delete(listener);
-    }
-
     function subscribe(listener: () => void) {
         listeners.add(listener);
         usado = true;
@@ -103,13 +102,6 @@ export function resource<T>(cargar: Cargador<T>, etiquetas: readonly string[] = 
         },
         /** Lo lee solo si no hay nada aquí ni en camino (precarga en tiempo ocioso). */
         warm: (): Promise<void> => (state.data ? Promise.resolve() : (inFlight ?? load())),
-        /** Lo que hay ahora, SIN pedirlo (los contadores del menú). */
-        peek: (): T | null =>
-            useSyncExternalStore(
-                watch,
-                () => state.data,
-                () => null,
-            ),
         use: (): ResourceState<T> =>
             useSyncExternalStore(
                 subscribe,
@@ -147,8 +139,15 @@ export function keyed<T>(cargarDe: (key: string) => Promise<Result<T, ErrorFuent
     }
     // Tras una acción: lo abierto se vuelve a pedir; lo demás se olvida (se pedirá al abrirlo).
     registrar(etiquetas, () => {
-        for (const k of [...asked]) if (!open.has(k)) (asked.delete(k), states.delete(k));
-        for (const k of open) (asked.delete(k), void ask(k));
+        for (const k of [...asked]) {
+            if (open.has(k)) continue;
+            asked.delete(k);
+            states.delete(k);
+        }
+        for (const k of open) {
+            asked.delete(k);
+            void ask(k);
+        }
     });
 
     if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => pump());

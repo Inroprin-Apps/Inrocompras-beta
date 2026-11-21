@@ -23,7 +23,11 @@ export function SeccionParametros() {
     const [editando, setEditando] = useState<Parametro | null>(null);
     return (
         <>
-            <Lista estado={{ data: lista, error: estado.error }} onReintentar={() => void configuracionStore.retry()} vacia={<ListaVacia titulo="Sin parámetros" />}>
+            <Lista
+                estado={{ data: lista, error: estado.error }}
+                onReintentar={() => void configuracionStore.retry()}
+                vacia={<ListaVacia titulo="Sin parámetros" />}
+            >
                 {(ps) => (
                     <ul className="flex flex-col divide-y divide-divider rounded-card border border-line bg-surface">
                         {ps.map((p) => (
@@ -90,12 +94,27 @@ function FormParametro({ p, onCerrar }: { p: Parametro; onCerrar: () => void }) 
                     ]}
                 />
             ) : (
-                <Field label="Valor" error={error} hint={p.tipo === 'porcentaje' ? 'En porcentaje: 3 = 3 %.' : p.unidad ? `En ${p.unidad}.` : `Clave: ${p.clave}`}>
+                <Field
+                    label="Valor"
+                    error={error}
+                    hint={p.tipo === 'porcentaje' ? 'En porcentaje: 3 = 3 %.' : p.unidad ? `En ${p.unidad}.` : `Clave: ${p.clave}`}
+                >
                     {(f) =>
                         p.tipo === 'area' ? (
-                            <SelectMenu {...f} value={texto} onChange={(v) => (setTexto(v), setError(null))} options={AREAS.filter((a) => a !== 'Sin área').map((a) => ({ value: a, label: a }))} />
+                            <SelectMenu
+                                {...f}
+                                value={texto}
+                                onChange={(v) => (setTexto(v), setError(null))}
+                                options={AREAS.filter((a) => a !== 'Sin área').map((a) => ({ value: a, label: a }))}
+                            />
                         ) : p.tipo === 'json' || p.tipo === 'correos' ? (
-                            <Textarea {...f} rows={p.tipo === 'json' ? 6 : 4} className="font-mono" value={texto} onChange={(e) => (setTexto(e.target.value), setError(null))} />
+                            <Textarea
+                                {...f}
+                                rows={p.tipo === 'json' ? 6 : 4}
+                                className="font-mono"
+                                value={texto}
+                                onChange={(e) => (setTexto(e.target.value), setError(null))}
+                            />
                         ) : (
                             <Input
                                 {...f}

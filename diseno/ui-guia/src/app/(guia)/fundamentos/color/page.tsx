@@ -8,10 +8,38 @@ import { CARD, Chip } from '../../../../ui/card.tsx';
 export const metadata = { title: 'Color' };
 
 const STATUS = [
-    { role: 'danger', use: 'Error, riesgo, falta algo, se borra', soft: 'bg-danger-soft', solid: 'bg-danger', strong: 'bg-danger-strong', text: 'text-danger-strong' },
-    { role: 'warning', use: 'Aviso, pendiente, por revisar', soft: 'bg-warning-soft', solid: 'bg-warning', strong: 'bg-warning-strong', text: 'text-warning-strong' },
-    { role: 'success', use: 'Correcto, cuadrado, pagado', soft: 'bg-success-soft', solid: 'bg-success', strong: 'bg-success-strong', text: 'text-success-strong' },
-    { role: 'info (primary)', use: 'Informativo, elegido', soft: 'bg-primary-soft', solid: 'bg-primary', strong: 'bg-primary-strong', text: 'text-primary-strong' },
+    {
+        role: 'danger',
+        use: 'Error, riesgo, falta algo, se borra',
+        soft: 'bg-danger-soft',
+        solid: 'bg-danger',
+        strong: 'bg-danger-strong',
+        text: 'text-danger-strong',
+    },
+    {
+        role: 'warning',
+        use: 'Aviso, pendiente, por revisar',
+        soft: 'bg-warning-soft',
+        solid: 'bg-warning',
+        strong: 'bg-warning-strong',
+        text: 'text-warning-strong',
+    },
+    {
+        role: 'success',
+        use: 'Correcto, cuadrado, pagado',
+        soft: 'bg-success-soft',
+        solid: 'bg-success',
+        strong: 'bg-success-strong',
+        text: 'text-success-strong',
+    },
+    {
+        role: 'info (primary)',
+        use: 'Informativo, elegido',
+        soft: 'bg-primary-soft',
+        solid: 'bg-primary',
+        strong: 'bg-primary-strong',
+        text: 'text-primary-strong',
+    },
 ];
 
 export default async function Color() {

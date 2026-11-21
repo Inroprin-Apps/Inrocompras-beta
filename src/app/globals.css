@@ -56,7 +56,11 @@
 
     /* @grupo tarjeta | Tarjeta | pendiente | Blanca y sin sombra, con un borde fino de `texto` al 20 % con blanco (#cccccc), el mismo de los controles. Antes era tu `borde-light` (#e6e6e6), que sigue en los colores de la empresa pero ya no manda este borde. */
     --color-surface: #ffffff; /* Tarjeta, control, menú, fondo de la app */
-    --color-line: color-mix(in oklab, var(--color-texto) 20%, white); /* Borde de tarjeta y de control (el mismo, #cccccc; antes `borde-light`) | borde sobre surface */
+    --color-line: color-mix(
+        in oklab,
+        var(--color-texto) 20%,
+        white
+    ); /* Borde de tarjeta y de control (el mismo, #cccccc; antes `borde-light`) | borde sobre surface */
 
     /* @grupo fila | Fila bajo el cursor y fila elegida | aprobado | Bajo el cursor, un gris apenas más oscuro que el blanco (3 % de `texto`). La fila elegida no cambia de fondo: lleva un borde azul fino. */
     --color-surface-2: color-mix(in oklab, var(--color-texto) 3%, white); /* Fila bajo el cursor */
@@ -70,7 +74,11 @@
     /* @grupo superficies | Controles y pistas | pendiente | El borde de un CONTROL es el mismo de una tarjeta (`line`, `texto` al 20 % = #cccccc) y, con el cursor encima, un paso más (36 %). Antes era `texto` al 60 % y al 78 % para dar ≥3:1 (WCAG 1.4.11); este da cerca de 1.6:1 y la hoja lo marca. */
     --color-surface-3: color-mix(in oklab, var(--color-texto) 7%, white); /* Pista de barra, pulsado */
     --color-control: var(--color-line); /* Borde de input, select y botón secundario (igual al de la tarjeta; antes 60 % de `texto`) | borde sobre surface */
-    --color-control-hover: color-mix(in oklab, var(--color-texto) 36%, white); /* Ese mismo borde con el cursor encima (antes 78 % de `texto`) | borde sobre surface */
+    --color-control-hover: color-mix(
+        in oklab,
+        var(--color-texto) 36%,
+        white
+    ); /* Ese mismo borde con el cursor encima (antes 78 % de `texto`) | borde sobre surface */
 
     /* @grupo texto | Texto | pendiente | Tres grises sólidos salidos de `texto` con blanco: 100 %, 80 % y 70 %. Pasan AA también sobre surface-2 y surface-3. */
     --color-ink: var(--color-texto); /* Texto principal, títulos, cifras | sobre surface */
@@ -98,13 +106,21 @@
     --color-primary-active: color-mix(in oklab, var(--color-primary) 84%, black); /* Enlace y botón azul pulsados (84 %) */
 
     /* @grupo error-campo | Error de un campo | aprobado | El borde del campo en rojo y, debajo, el mensaje en rojo oscuro: dice qué está mal y cómo se arregla. */
-    --color-danger-strong: color-mix(in oklab, var(--color-danger) 88%, black); /* Mensaje de error de un campo, texto del chip de error y etiqueta de un KPI en riesgo | sobre danger-soft */
+    --color-danger-strong: color-mix(
+        in oklab,
+        var(--color-danger) 88%,
+        black
+    ); /* Mensaje de error de un campo, texto del chip de error y etiqueta de un KPI en riesgo | sobre danger-soft */
 
     /* @grupo estados | Estados: texto y fondo | pendiente | Lo que sale de cada color de estado: fuerte (texto: 88 % rojo, 58 % amarillo, 76 % verde azulado, con negro) y suave (fondo, 12 % con blanco), más el hover y el pulsado del rojo. */
     --color-danger-soft: color-mix(in oklab, var(--color-danger) 12%, white); /* Fondo del chip de error y de la pastilla de riesgo */
     --color-danger-hover: color-mix(in oklab, var(--color-danger) 92%, black); /* Botón de borrar encima */
     --color-danger-active: color-mix(in oklab, var(--color-danger) 84%, black); /* Botón de borrar pulsado */
-    --color-warning-strong: color-mix(in oklab, var(--color-warning) 58%, black); /* Texto del chip de advertencia e icono del aviso de advertencia | sobre warning-soft */
+    --color-warning-strong: color-mix(
+        in oklab,
+        var(--color-warning) 58%,
+        black
+    ); /* Texto del chip de advertencia e icono del aviso de advertencia | sobre warning-soft */
     --color-warning-soft: color-mix(in oklab, var(--color-warning) 12%, white); /* Fondo del chip de advertencia */
     --color-success-strong: var(--color-teal-strong); /* Texto de correcto | sobre success-soft */
     --color-success-soft: var(--color-teal-soft); /* Fondo de correcto */

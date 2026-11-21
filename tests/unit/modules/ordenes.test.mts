@@ -16,13 +16,43 @@ import {
 } from '@/modules/ordenes/domain/orden.ts';
 
 const o = (x: Partial<Orden>): Orden => ({
-    id: '1', numero: 'INROPRIN-NAC-2026-0001', estatus: 'Borrador', estadoAprobacion: null, tipoAprobacion: null, procedencia: 'Nacional',
-    clase: 'Compra', proyectoId: 'p1', proyecto: 'P-001 · Talleres', proveedorId: 'v1', proveedor: 'Proveedor Uno', compradorId: 'u1',
-    fecha: '2026-11-20', moneda: 'PEN', formaPago: 'Contado', monto: 100, montoSoles: 100, fechaEmision: null, creado: '2026-11-20T10:00:00Z', ...x,
+    id: '1',
+    numero: 'INROPRIN-NAC-2026-0001',
+    estatus: 'Borrador',
+    estadoAprobacion: null,
+    tipoAprobacion: null,
+    procedencia: 'Nacional',
+    clase: 'Compra',
+    proyectoId: 'p1',
+    proyecto: 'P-001 · Talleres',
+    proveedorId: 'v1',
+    proveedor: 'Proveedor Uno',
+    compradorId: 'u1',
+    fecha: '2026-11-20',
+    moneda: 'PEN',
+    formaPago: 'Contado',
+    monto: 100,
+    montoSoles: 100,
+    fechaEmision: null,
+    creado: '2026-11-20T10:00:00Z',
+    ...x,
 });
 const cab: Cabecera = {
-    proveedorId: 'v1', moneda: 'PEN', tipoImpuesto: 'IGV 18%', formaPago: 'Contado', pctAdelanto: null, hitoSaldo: '', diasCredito: null,
-    condicion: 'Normal', concepto: '', lugarEntrega: '', plazoEntregaDias: null, terminos: '', incoterm: '', referenciaProv: '', correoEnvio: '',
+    proveedorId: 'v1',
+    moneda: 'PEN',
+    tipoImpuesto: 'IGV 18%',
+    formaPago: 'Contado',
+    pctAdelanto: null,
+    hitoSaldo: '',
+    diasCredito: null,
+    condicion: 'Normal',
+    concepto: '',
+    lugarEntrega: '',
+    plazoEntregaDias: null,
+    terminos: '',
+    incoterm: '',
+    referenciaProv: '',
+    correoEnvio: '',
 };
 
 describe('órdenes', () => {

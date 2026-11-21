@@ -84,9 +84,15 @@ export default function Forma() {
                 <DocTable
                     head={['Clase', 'Dónde']}
                     rows={[
-                                                [<Code key="a">border-line</Code>, 'Borde de la tarjeta: es decoración'],
-                        [<Code key="a">border-divider</Code>, 'Divisor entre filas dentro de una tarjeta y cabecera de tabla: un paso más marcado que el borde'],
-                        [<Code key="a">border-control</Code>, 'Borde de input, select, botón secundario y segmentado en reposo: tiene que dar ≥3:1 (WCAG 1.4.11)'],
+                        [<Code key="a">border-line</Code>, 'Borde de la tarjeta: es decoración'],
+                        [
+                            <Code key="a">border-divider</Code>,
+                            'Divisor entre filas dentro de una tarjeta y cabecera de tabla: un paso más marcado que el borde',
+                        ],
+                        [
+                            <Code key="a">border-control</Code>,
+                            'Borde de input, select, botón secundario y segmentado en reposo: tiene que dar ≥3:1 (WCAG 1.4.11)',
+                        ],
                         [<Code key="a">border-primary</Code>, 'Control con foco'],
                         [<Code key="a">border-danger</Code>, 'Campo con error'],
                     ]}
@@ -96,7 +102,10 @@ export default function Forma() {
             <Section title="Reglas">
                 <Rules
                     items={[
-                        ['Una tarjeta = CARD (rounded-card border border-line bg-surface).', 'Se importa la constante, no se reescribe: así el aspecto cambia en un solo sitio.'],
+                        [
+                            'Una tarjeta = CARD (rounded-card border border-line bg-surface).',
+                            'Se importa la constante, no se reescribe: así el aspecto cambia en un solo sitio.',
+                        ],
                         ['No se anidan tarjetas.', 'Dentro de una tarjeta se separa con border-line o con surface-2, no con otra tarjeta.'],
                         ['Sin sombra en lo que está quieto en la página.', 'La sombra dice «esto está encima»; si todo la tiene, no dice nada.'],
                     ]}

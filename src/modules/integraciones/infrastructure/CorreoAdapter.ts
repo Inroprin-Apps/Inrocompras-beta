@@ -27,7 +27,12 @@ export class CorreoAdapter implements CorreoPort {
             return intentar('Gmail', async () => {
                 const cred = credencialesGoogle()!;
                 const como = this.remitente.match(/<(.+)>/)?.[1] ?? this.remitente;
-                const jwt = new auth.JWT({ email: cred.client_email, key: cred.private_key, scopes: ['https://www.googleapis.com/auth/gmail.send'], subject: como });
+                const jwt = new auth.JWT({
+                    email: cred.client_email,
+                    key: cred.private_key,
+                    scopes: ['https://www.googleapis.com/auth/gmail.send'],
+                    subject: como,
+                });
                 const raw = Buffer.from(mensajeMime(c, this.remitente)).toString('base64url');
                 const r = await gmail({ version: 'v1', auth: jwt }).users.messages.send({ userId: 'me', requestBody: { raw } });
                 return { id: r.data.id ?? '' };

@@ -4,7 +4,13 @@
 // otra pendiente lo dice la base; el mensaje se muestra tal cual. La decide el jefe de quien la pide (Error de emisión)
 // o los aprobadores de la solicitud.
 import { useState } from 'react';
-import { CAUSAS_ANULACION, faltaEnAnulacion, type CausaAnulacion, type ItemRequerimiento, type PedidoAnulacion } from '@/modules/requerimientos/application/views.ts';
+import {
+    CAUSAS_ANULACION,
+    faltaEnAnulacion,
+    type CausaAnulacion,
+    type ItemRequerimiento,
+    type PedidoAnulacion,
+} from '@/modules/requerimientos/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
 import { Dialog } from '@/shared/ui/dialog.tsx';
 import { Field, Textarea } from '@/shared/ui/field.tsx';
@@ -67,7 +73,10 @@ export function FormAnulacion({
                         {...p}
                         value={f.itemId ?? ''}
                         onChange={(x) => setF({ ...f, itemId: x || null })}
-                        options={[{ value: '', label: 'Todo el requerimiento' }, ...vivos.map((i) => ({ value: i.id, label: `Ítem ${i.nItem ?? '—'} · ${i.descripcion}` }))]}
+                        options={[
+                            { value: '', label: 'Todo el requerimiento' },
+                            ...vivos.map((i) => ({ value: i.id, label: `Ítem ${i.nItem ?? '—'} · ${i.descripcion}` })),
+                        ]}
                     />
                 )}
             </Field>

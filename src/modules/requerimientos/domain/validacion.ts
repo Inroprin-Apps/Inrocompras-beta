@@ -1,6 +1,7 @@
 // Validación técnica de ítems (C-16): Técnica registra marca y modelo, observa con motivo o marca «No aplica».
 // PURO: agrupación por requerimiento, filtros y el formulario. Quién valida lo decide ac_item_tecnica.
 import type { ItemRequerimiento, Validacion } from './requerimiento.ts';
+import { palabrasDe, plano } from '@/shared/texto.ts';
 
 export interface ItemTecnica extends ItemRequerimiento {
     req: { id: string; numero: string; motivo: string; estado: string; proyectoId: string | null };
@@ -13,15 +14,15 @@ export interface FiltrosTecnica {
 }
 export const FILTROS_TECNICA: FiltrosTecnica = { estado: 'Pendiente', proyecto: '', texto: '' };
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-
 export function filtrarTecnica(lista: ItemTecnica[], f: FiltrosTecnica, nombreProyecto?: (id: string | null) => string): ItemTecnica[] {
-    const palabras = plano(f.texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(f.texto);
     return lista.filter((i) => {
         if (f.estado && i.validacionTecnica !== f.estado) return false;
         if (f.proyecto && i.req.proyectoId !== f.proyecto) return false;
         if (!palabras.length) return true;
-        const t = plano(`${i.descripcion} ${i.codigoCliente} ${i.codigoSidige} ${i.marca} ${i.modelo} ${i.req.numero} ${i.req.motivo} ${nombreProyecto?.(i.req.proyectoId) ?? ''}`);
+        const t = plano(
+            `${i.descripcion} ${i.codigoCliente} ${i.codigoSidige} ${i.marca} ${i.modelo} ${i.req.numero} ${i.req.motivo} ${nombreProyecto?.(i.req.proyectoId) ?? ''}`,
+        );
         return palabras.every((w) => t.includes(w));
     });
 }

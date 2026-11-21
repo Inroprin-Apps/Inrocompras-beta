@@ -61,12 +61,21 @@ export function EscenaConPaneles({
             },
         });
         for (let i = 1; i < hojas.length; i++) {
-            tl.to(hojas[i - 1], { autoAlpha: 0, y: -24, duration: 0.35 }, i - 0.35).fromTo(hojas[i], { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.35 }, '<');
+            tl.to(hojas[i - 1], { autoAlpha: 0, y: -24, duration: 0.35 }, i - 0.35).fromTo(
+                hojas[i],
+                { autoAlpha: 0, y: 24 },
+                { autoAlpha: 1, y: 0, duration: 0.35 },
+                '<',
+            );
         }
         tl.to({}, { duration: 0.5 }); // un respiro al final
         const st = ScrollTrigger.create({ trigger: q(`#${id} .escena`)[0], start: 'top top', end: recorrido, pin: true, animation: tl, scrub: 0.6 });
         // El panel i se ve entero en el segundo i de la línea de tiempo.
-        registrarEstados(st, tl, hojas.map((_, i) => i));
+        registrarEstados(
+            st,
+            tl,
+            hojas.map((_, i) => i),
+        );
         return () => setAnimado(false);
     });
 
@@ -132,7 +141,10 @@ export function EscenaConPaneles({
                             </p>
                             <ol className="flex flex-col gap-1">
                                 {grupos.map((g, i) => (
-                                    <li key={g.titulo} className={`rounded-control border px-4 py-2.5 transition-colors ${animado && activo !== i ? 'border-transparent' : 'border-line bg-surface'}`}>
+                                    <li
+                                        key={g.titulo}
+                                        className={`rounded-control border px-4 py-2.5 transition-colors ${animado && activo !== i ? 'border-transparent' : 'border-line bg-surface'}`}
+                                    >
                                         <b className={`text-ui font-semibold ${animado && activo !== i ? 'text-ink-3' : 'text-ink'}`}>
                                             {String(i + 1).padStart(2, '0')} · {g.titulo}
                                         </b>
@@ -141,10 +153,19 @@ export function EscenaConPaneles({
                                 ))}
                             </ol>
                         </div>
-                        <div className={animado ? 'relative h-[min(37rem,84vh)] rounded-card border border-line bg-surface p-6 transition-[height] duration-500 ease-out' : 'flex flex-col gap-8'}
-                            style={animado && altos[activo] ? { height: altos[activo] } : undefined}>
+                        <div
+                            className={
+                                animado
+                                    ? 'relative h-[min(37rem,84vh)] rounded-card border border-line bg-surface p-6 transition-[height] duration-500 ease-out'
+                                    : 'flex flex-col gap-8'
+                            }
+                            style={animado && altos[activo] ? { height: altos[activo] } : undefined}
+                        >
                             {paneles.map((Panel, i) => (
-                                <div key={grupos[i].titulo} className={`cp-panel ${animado ? 'no-scrollbar absolute inset-6 overflow-hidden' : 'rounded-card border border-line bg-surface p-6'}`}>
+                                <div
+                                    key={grupos[i].titulo}
+                                    className={`cp-panel ${animado ? 'no-scrollbar absolute inset-6 overflow-hidden' : 'rounded-card border border-line bg-surface p-6'}`}
+                                >
                                     {!animado && <h3 className="mb-4 text-heading font-semibold">{grupos[i].titulo}</h3>}
                                     <Pista texto={grupos[i].pista} />
                                     {/* El relleno de 8 px deja sitio a las filas con margen negativo (barra con cifra), que si no abrirían una barra horizontal. */}

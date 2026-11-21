@@ -5,7 +5,17 @@
 import { useState } from 'react';
 import { Pencil } from 'lucide-react';
 import { TIPOS_ORDEN } from '@/modules/documentos/application/views.ts';
-import { FASES_ORDEN, faseOrden, lateral, monto, nombreOrden, tonoAprobacion, tonoEstatus, type Firma, type OrdenDetalle } from '@/modules/ordenes/application/views.ts';
+import {
+    FASES_ORDEN,
+    faseOrden,
+    lateral,
+    monto,
+    nombreOrden,
+    tonoAprobacion,
+    tonoEstatus,
+    type Firma,
+    type OrdenDetalle,
+} from '@/modules/ordenes/application/views.ts';
 import { Notice } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
@@ -28,7 +38,9 @@ export function FichaOrden({ id, onCerrar }: { id: string; onCerrar: () => void 
     if (!o)
         return (
             <Ficha titulo={error ? 'No se pudo abrir la orden' : 'Cargando la orden…'} onCerrar={onCerrar}>
-                <div className="flex flex-col gap-3 px-5 py-4">{error ? <p className="text-ui text-danger-strong">{error}</p> : [1, 2, 3].map((i) => <Hueco key={i} className="h-16 w-full" />)}</div>
+                <div className="flex flex-col gap-3 px-5 py-4">
+                    {error ? <p className="text-ui text-danger-strong">{error}</p> : [1, 2, 3].map((i) => <Hueco key={i} className="h-16 w-full" />)}
+                </div>
             </Ficha>
         );
     return <FichaCargada o={o} onCerrar={onCerrar} />;
@@ -61,7 +73,12 @@ function FichaCargada({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () => void }
         >
             <div className="flex flex-col gap-3 border-b border-divider px-5 py-4">
                 <Fases pasos={FASES_ORDEN} actual={faseOrden(o)} />
-                {nota && <p className="text-small text-warning-strong">{nota}{o.motivoAprob && o.estatus.startsWith('Observado') ? ` «${o.motivoAprob}»` : ''}</p>}
+                {nota && (
+                    <p className="text-small text-warning-strong">
+                        {nota}
+                        {o.motivoAprob && o.estatus.startsWith('Observado') ? ` «${o.motivoAprob}»` : ''}
+                    </p>
+                )}
                 <PanelAcciones tabla="ordenes" id={o.id} tocadas={TOCADAS} />
             </div>
 
@@ -86,7 +103,8 @@ function FichaCargada({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () => void }
             >
                 {prov && prov.evaluacionFin !== 'Aprobado' && (
                     <Notice tone="warning" cerrable={false}>
-                        Finanzas aún no aprueba a {prov.razonSocial} (evaluación: {prov.evaluacionFin.toLowerCase()}). La orden no se podrá enviar al proveedor hasta entonces.
+                        Finanzas aún no aprueba a {prov.razonSocial} (evaluación: {prov.evaluacionFin.toLowerCase()}). La orden no se podrá enviar al proveedor
+                        hasta entonces.
                     </Notice>
                 )}
                 <Datos
@@ -138,7 +156,9 @@ function FichaCargada({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () => void }
                                 <div className="min-w-0 flex-1">
                                     <div className="text-ui font-medium">
                                         {c.nCuota}. {c.tipo}
-                                        {c.porcentaje != null && c.porcentaje < 1 && <span className="font-normal text-ink-2"> · {Math.round(c.porcentaje * 100)} %</span>}
+                                        {c.porcentaje != null && c.porcentaje < 1 && (
+                                            <span className="font-normal text-ink-2"> · {Math.round(c.porcentaje * 100)} %</span>
+                                        )}
                                     </div>
                                     <div className="text-small text-ink-2">
                                         {c.hito}
@@ -148,7 +168,13 @@ function FichaCargada({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () => void }
                                 </div>
                                 <div className="text-right">
                                     <div className="text-ui tabular-nums">{monto(c.monto, o.moneda)}</div>
-                                    <Chip tone={c.estado === 'Pagado' ? 'ok' : c.estado === 'Anulado' ? 'muted' : c.estado.startsWith('Observado') ? 'warn' : 'info'}>{c.estado}</Chip>
+                                    <Chip
+                                        tone={
+                                            c.estado === 'Pagado' ? 'ok' : c.estado === 'Anulado' ? 'muted' : c.estado.startsWith('Observado') ? 'warn' : 'info'
+                                        }
+                                    >
+                                        {c.estado}
+                                    </Chip>
                                 </div>
                             </li>
                         ))}
@@ -182,7 +208,8 @@ function Total({ k, v, fuerte = false }: { k: string; v: string; fuerte?: boolea
 
 function formaPago(o: OrdenDetalle) {
     const c = o.cabecera;
-    if (c.formaPago === 'Adelanto') return `Adelanto ${c.pctAdelanto != null ? Math.round(c.pctAdelanto * 100) + ' %' : '(falta el %)'}${c.hitoSaldo ? ` · saldo ${c.hitoSaldo.toLowerCase()}` : ''}`;
+    if (c.formaPago === 'Adelanto')
+        return `Adelanto ${c.pctAdelanto != null ? Math.round(c.pctAdelanto * 100) + ' %' : '(falta el %)'}${c.hitoSaldo ? ` · saldo ${c.hitoSaldo.toLowerCase()}` : ''}`;
     if (c.formaPago === 'Crédito' || c.formaPago === 'Letra') return `${c.formaPago} ${c.diasCredito != null ? c.diasCredito + ' días' : '(faltan los días)'}`;
     return c.formaPago;
 }
@@ -194,7 +221,23 @@ function Aprobaciones({ o, nombre }: { o: OrdenDetalle; nombre: (u: string | nul
                 <div className="text-ui font-medium">{quien}</div>
                 <div className="text-small text-ink-2">{f.por ? `${nombre(f.por)}${f.fecha ? ` · ${dayTime(f.fecha)}` : ''}` : falta}</div>
             </div>
-            {f.valor ? <Chip tone={f.valor === 'Aprobado' || f.valor === 'Presupuestado' || f.valor === 'Pre Aprobado' ? 'ok' : f.valor === 'Observado' ? 'warn' : f.valor === 'Rechazado' || f.valor === 'Anular OC' ? 'danger' : 'info'}>{f.valor}</Chip> : <Chip tone="muted">Pendiente</Chip>}
+            {f.valor ? (
+                <Chip
+                    tone={
+                        f.valor === 'Aprobado' || f.valor === 'Presupuestado' || f.valor === 'Pre Aprobado'
+                            ? 'ok'
+                            : f.valor === 'Observado'
+                              ? 'warn'
+                              : f.valor === 'Rechazado' || f.valor === 'Anular OC'
+                                ? 'danger'
+                                : 'info'
+                    }
+                >
+                    {f.valor}
+                </Chip>
+            ) : (
+                <Chip tone="muted">Pendiente</Chip>
+            )}
         </li>
     );
     const conjunta = o.tipoAprobacion === 'Aprobación Conjunta';

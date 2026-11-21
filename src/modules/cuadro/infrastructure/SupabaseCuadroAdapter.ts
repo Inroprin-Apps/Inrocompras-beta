@@ -3,18 +3,22 @@ import { ok, type Result } from 'neverthrow';
 import { resultado, type ErrorFuente } from '@/shared/errores.ts';
 import type { CuadroPort } from '../application/ports/CuadroPort.ts';
 import { COLUMNAS_CUADRO, type FilaCuadro, type OrdenPorAprobar, type TituloCuadro, type Valor } from '../domain/cuadro.ts';
+import { n, s, type Fila, uno } from '@/shared/supabase/filas.ts';
 
-type Fila = Record<string, unknown>;
-const s = (v: unknown) => (v == null ? '' : String(v));
-const n = (v: unknown) => (v == null || v === '' ? 0 : Number(v));
 const sOrNull = (v: unknown) => (v == null || v === '' ? null : String(v));
-const uno = (v: unknown): Fila | null => (Array.isArray(v) ? ((v[0] as Fila) ?? null) : ((v as Fila) ?? null));
 
 function fila(f: Fila): FilaCuadro {
     const valores = {} as Record<TituloCuadro, Valor>;
     for (const c of COLUMNAS_CUADRO) {
         const v = f[c.titulo];
-        valores[c.titulo] = v == null ? null : typeof v === 'boolean' || typeof v === 'number' ? v : c.tipo === 'moneda' || c.tipo === 'pct' || c.tipo === 'entero' ? Number(v) : String(v);
+        valores[c.titulo] =
+            v == null
+                ? null
+                : typeof v === 'boolean' || typeof v === 'number'
+                  ? v
+                  : c.tipo === 'moneda' || c.tipo === 'pct' || c.tipo === 'entero'
+                    ? Number(v)
+                    : String(v);
     }
     return { id: s(f.id), empresaId: s(f.empresa_id), valores };
 }

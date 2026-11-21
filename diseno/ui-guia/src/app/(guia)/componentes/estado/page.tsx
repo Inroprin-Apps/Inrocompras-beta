@@ -48,7 +48,10 @@ export default function Estado() {
                 </Example>
             </Section>
 
-            <Section title="Toasts" blurb="La confirmación de lo que se acaba de hacer: abajo a la derecha, 4 segundos. El color va solo en el icono. Cada botón lanza uno de verdad.">
+            <Section
+                title="Toasts"
+                blurb="La confirmación de lo que se acaba de hacer: abajo a la derecha, 4 segundos. El color va solo en el icono. Cada botón lanza uno de verdad."
+            >
                 <Example
                     code={`import { toast } from '@/shared/ui/toaster.tsx';
 
@@ -101,9 +104,18 @@ toast.info('Los datos se actualizaron a las 07:00.');`}
                 />
                 <Rules
                     items={[
-                        ['El toast nombra lo que pasó: «Orden OC-2026-0142 guardada», no «Guardado con éxito».', 'Con el nombre, el usuario sabe que fue lo que quería.'],
-                        ['Lo que se borra lleva «Deshacer» en el toast en lugar de un «¿Estás seguro?».', 'Preguntar antes se responde sin leer; deshacer después arregla el error de verdad.'],
-                        ['Un error nunca va solo en un toast si el usuario tiene que corregir algo.', 'El toast se va; el error se queda junto al campo o en un aviso.'],
+                        [
+                            'El toast nombra lo que pasó: «Orden OC-2026-0142 guardada», no «Guardado con éxito».',
+                            'Con el nombre, el usuario sabe que fue lo que quería.',
+                        ],
+                        [
+                            'Lo que se borra lleva «Deshacer» en el toast en lugar de un «¿Estás seguro?».',
+                            'Preguntar antes se responde sin leer; deshacer después arregla el error de verdad.',
+                        ],
+                        [
+                            'Un error nunca va solo en un toast si el usuario tiene que corregir algo.',
+                            'El toast se va; el error se queda junto al campo o en un aviso.',
+                        ],
                     ]}
                 />
             </Section>

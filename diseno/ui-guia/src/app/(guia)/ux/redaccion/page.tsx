@@ -31,7 +31,11 @@ export default function Redaccion() {
                         ['Botón mientras trabaja', 'Guardando… · Exportando…', '(sin cambio) · Cargando…'],
                         ['Toast de éxito', 'Orden OC-2026-0142 guardada.', 'Operación realizada con éxito.'],
                         ['Error de campo', 'El RUC tiene 11 dígitos; este tiene 10.', 'Campo inválido.'],
-                        ['Error de servidor', 'No se pudo guardar: SUNAT no respondió. Vuelve a intentar en un minuto.', 'Error 500 · Ha ocurrido un error inesperado.'],
+                        [
+                            'Error de servidor',
+                            'No se pudo guardar: SUNAT no respondió. Vuelve a intentar en un minuto.',
+                            'Error 500 · Ha ocurrido un error inesperado.',
+                        ],
                         ['Vacío', 'No hay comprobantes en noviembre 2026.', 'No data · Sin registros.'],
                         ['Confirmación de borrado', 'Eliminar la orden OC-2026-0142 (S/ 1,250.00) · Deshacer', '¿Está seguro? · Sí / No'],
                         ['Fecha de los datos', 'Actualizado hoy a las 07:00', 'Última sincronización: 2026-11-17T12:00:00Z'],

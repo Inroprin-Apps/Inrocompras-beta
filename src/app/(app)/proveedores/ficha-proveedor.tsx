@@ -73,7 +73,16 @@ export function FichaProveedor({ proveedor: p, onCerrar }: { proveedor: Proveedo
                         [p.origen === 'Nacional' ? 'RUC' : 'Identificación fiscal', p.ruc],
                         ['País', p.origen === 'Nacional' ? p.pais || 'Perú' : p.pais],
                         ['Contacto', p.contacto],
-                        ['Correo', p.correo ? <a className="text-primary hover:underline" href={`mailto:${p.correo}`}>{p.correo}</a> : ''],
+                        [
+                            'Correo',
+                            p.correo ? (
+                                <a className="text-primary hover:underline" href={`mailto:${p.correo}`}>
+                                    {p.correo}
+                                </a>
+                            ) : (
+                                ''
+                            ),
+                        ],
                         ['Teléfono', p.telefono],
                         ['Dado de alta', `${dayTime(p.creado)}${p.creadoPor ? ` · ${nombre(p.creadoPor)}` : ''}`],
                     ]}
@@ -91,7 +100,9 @@ export function FichaProveedor({ proveedor: p, onCerrar }: { proveedor: Proveedo
                                     {c.banco} · {c.moneda}
                                 </div>
                                 <div className="text-small break-all text-ink-2">
-                                    {[c.numero && `N° ${c.numero}`, c.cci && `CCI ${c.cci}`, c.swift && `SWIFT ${c.swift}`, c.iban && `IBAN ${c.iban}`].filter(Boolean).join(' · ')}
+                                    {[c.numero && `N° ${c.numero}`, c.cci && `CCI ${c.cci}`, c.swift && `SWIFT ${c.swift}`, c.iban && `IBAN ${c.iban}`]
+                                        .filter(Boolean)
+                                        .join(' · ')}
                                 </div>
                             </li>
                         ))}
@@ -107,7 +118,10 @@ export function FichaProveedor({ proveedor: p, onCerrar }: { proveedor: Proveedo
                         ['Nota de Finanzas', p.evaluacionNota],
                         ...(p.origen === 'Nacional'
                             ? ([
-                                  ['Verificado por Contabilidad', p.verificadoContab ? `${nombre(p.verificadoPor)} · ${dayTime(p.fechaVerificacion)}` : 'Aún no'],
+                                  [
+                                      'Verificado por Contabilidad',
+                                      p.verificadoContab ? `${nombre(p.verificadoPor)} · ${dayTime(p.fechaVerificacion)}` : 'Aún no',
+                                  ],
                                   ['Agente de retención', p.verificadoContab ? siNo(p.esAgenteRetencion) : ''],
                                   ['Buen contribuyente', p.verificadoContab ? siNo(p.esBuenContribuyente) : ''],
                               ] as [string, string][])

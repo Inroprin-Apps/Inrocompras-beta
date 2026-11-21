@@ -11,8 +11,8 @@ Para probar en el navegador:
 
 ```js
 import { como } from './scripts/local/e2e-helper.mjs';
-const { pagina, errores, cerrar } = await como('compras');   // admin, solicitante, gerente, pcp, tecnica, compras,
-await pagina.goto('http://localhost:3000/ordenes');          // importaciones, cg, gop, gaf, finanzas, contabilidad,
+const { pagina, errores, cerrar } = await como('compras'); // admin, solicitante, gerente, pcp, tecnica, compras,
+await pagina.goto('http://localhost:3000/ordenes'); // importaciones, cg, gop, gaf, finanzas, contabilidad,
 // ...                                                       // jefecompras, jefeimp
 await cerrar();
 ```

@@ -30,7 +30,10 @@ export function serieOC(o: { empresaId: string; clase: string; procedencia: stri
 
 /** Un nombre que Drive acepta y que se lee bien: sin barras ni saltos, sin espacios dobles, hasta 120 caracteres. */
 export function nombreSeguro(t: string, max = 120): string {
-    const limpio = t.replace(/[\\/\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const limpio = t
+        .replace(/[\\/\r\n\t]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
     return limpio.length > max ? limpio.slice(0, max).trimEnd() : limpio;
 }
 

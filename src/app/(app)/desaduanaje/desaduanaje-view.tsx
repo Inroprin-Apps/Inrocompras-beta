@@ -58,7 +58,9 @@ export function DesaduanajeView() {
         return (
             <>
                 <SectionTitle title="Desaduanaje" />
-                <ListaVacia titulo="El desaduanaje lleva montos">Tu perfil no ve precios. Pide a Importaciones el avance de tu importación o míralo en Seguimiento.</ListaVacia>
+                <ListaVacia titulo="El desaduanaje lleva montos">
+                    Tu perfil no ve precios. Pide a Importaciones el avance de tu importación o míralo en Seguimiento.
+                </ListaVacia>
             </>
         );
     }

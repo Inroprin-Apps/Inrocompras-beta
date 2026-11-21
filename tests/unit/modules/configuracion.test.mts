@@ -44,13 +44,33 @@ describe('parámetros de config', () => {
         );
         expect(v.get('USD')?.tc).toBe(3.8);
         expect(faltaEnConcepto('servicios', ['Servicios'])).toMatch(/ya existe/);
-        expect(totalesCola([{ estado: 'Error', tipo: 'a', cantidad: 2, masAntiguo: '' }, { estado: 'Error', tipo: 'b', cantidad: 1, masAntiguo: '' }]).Error).toBe(3);
+        expect(
+            totalesCola([
+                { estado: 'Error', tipo: 'a', cantidad: 2, masAntiguo: '' },
+                { estado: 'Error', tipo: 'b', cantidad: 1, masAntiguo: '' },
+            ]).Error,
+        ).toBe(3);
     });
 });
 
 describe('equipo', () => {
-    const m = (x: Partial<Miembro>): Miembro => ({ id: 'x', email: 'x@inroprin.com', nombre: 'X', area: 'Compras', jefeId: null, ambito: 'todas', activo: true, creado: '', roles: [], ...x });
-    const lista = [m({ id: 'a', nombre: 'Ana Pérez', roles: ['ADMIN'] }), m({ id: 'b', nombre: 'Beto', area: 'Sin área' }), m({ id: 'c', nombre: 'Ciro', activo: false })];
+    const m = (x: Partial<Miembro>): Miembro => ({
+        id: 'x',
+        email: 'x@inroprin.com',
+        nombre: 'X',
+        area: 'Compras',
+        jefeId: null,
+        ambito: 'todas',
+        activo: true,
+        creado: '',
+        roles: [],
+        ...x,
+    });
+    const lista = [
+        m({ id: 'a', nombre: 'Ana Pérez', roles: ['ADMIN'] }),
+        m({ id: 'b', nombre: 'Beto', area: 'Sin área' }),
+        m({ id: 'c', nombre: 'Ciro', activo: false }),
+    ];
     it('filtra por sin área, desactivadas y texto (también por rol)', () => {
         expect(filtrarEquipo(lista, 'sin-area', '').map((x) => x.id)).toEqual(['b']);
         expect(filtrarEquipo(lista, 'inactivas', '').map((x) => x.id)).toEqual(['c']);

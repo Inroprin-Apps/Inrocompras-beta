@@ -73,10 +73,7 @@ export function OrdenesView() {
     const pestanas = PESTANAS.filter((p) => (p === 'mias' ? perfil.es_compras : p === 'aprobar' ? aprobador : true));
     const tab: PestanaOrden = pestanas.includes(v.tab as PestanaOrden) ? (v.tab as PestanaOrden) : pestanas[0];
 
-    const porAprobar = useMemo(
-        () => new Set((teToca ?? []).filter((t) => t.tabla === 'ordenes' && PASOS_APROBAR.has(t.paso)).map((t) => t.id)),
-        [teToca],
-    );
+    const porAprobar = useMemo(() => new Set((teToca ?? []).filter((t) => t.tabla === 'ordenes' && PASOS_APROBAR.has(t.paso)).map((t) => t.id)), [teToca]);
     const todas = estado.data ?? [];
     const cuenta = (p: PestanaOrden) => dePestana(todas, p, perfil.id, porAprobar).length;
     const lista = useMemo(
@@ -91,7 +88,9 @@ export function OrdenesView() {
         return (
             <>
                 <SectionTitle title="Órdenes" />
-                <ListaVacia titulo="Las órdenes llevan montos">Tu perfil no ve precios. El avance de cada ítem (si tiene orden, su estado y si está pagado) está en Seguimiento.</ListaVacia>
+                <ListaVacia titulo="Las órdenes llevan montos">
+                    Tu perfil no ve precios. El avance de cada ítem (si tiene orden, su estado y si está pagado) está en Seguimiento.
+                </ListaVacia>
             </>
         );
     }
@@ -170,7 +169,17 @@ export function OrdenesView() {
                 estado={{ data: estado.data ? lista : null, error: estado.error }}
                 onReintentar={() => void ordenesStore.retry()}
                 vacia={
-                    <ListaVacia titulo={conFiltros ? 'Ninguna orden coincide' : tab === 'aprobar' ? 'No tienes órdenes por aprobar' : tab === 'mias' ? 'Aún no tienes órdenes' : 'Aún no hay órdenes'}>
+                    <ListaVacia
+                        titulo={
+                            conFiltros
+                                ? 'Ninguna orden coincide'
+                                : tab === 'aprobar'
+                                  ? 'No tienes órdenes por aprobar'
+                                  : tab === 'mias'
+                                    ? 'Aún no tienes órdenes'
+                                    : 'Aún no hay órdenes'
+                        }
+                    >
                         {conFiltros
                             ? 'Prueba con otra búsqueda o quita algún filtro.'
                             : tab === 'aprobar'
@@ -195,10 +204,15 @@ export function OrdenesView() {
                                             <span className="min-w-0 flex-1 truncate text-ui font-semibold">{nombreOrden(o)}</span>
                                             <span className="text-ui font-medium tabular-nums">{monto(o.monto, o.moneda)}</span>
                                         </div>
-                                        <div className="truncate text-small text-ink-2">{o.proveedor || 'Sin proveedor'}{o.proyecto && ` · ${o.proyecto}`}</div>
+                                        <div className="truncate text-small text-ink-2">
+                                            {o.proveedor || 'Sin proveedor'}
+                                            {o.proyecto && ` · ${o.proyecto}`}
+                                        </div>
                                         <div className="flex flex-wrap gap-1.5">
                                             <Chip tone={tonoEstatus(o.estatus)}>{o.estatus}</Chip>
-                                            {o.estadoAprobacion && o.estadoAprobacion !== o.estatus && <Chip tone={tonoAprobacion(o.estadoAprobacion)}>{o.estadoAprobacion}</Chip>}
+                                            {o.estadoAprobacion && o.estadoAprobacion !== o.estatus && (
+                                                <Chip tone={tonoAprobacion(o.estadoAprobacion)}>{o.estadoAprobacion}</Chip>
+                                            )}
                                         </div>
                                     </button>
                                 </li>

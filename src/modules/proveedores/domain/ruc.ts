@@ -16,7 +16,7 @@ export function rucValido(ruc: string): boolean {
 }
 
 /** Lo escrito sin espacios, puntos ni guiones (como se pega desde un PDF o un correo). */
-export const limpiarRuc = (t: string) => t.replace(/[\s.\-]/g, '');
+export const limpiarRuc = (t: string) => t.replace(/[\s.-]/g, '');
 
 /** Qué le pasa al RUC, en palabras para el campo (validación en vivo), o null si está bien. */
 export function motivoRuc(texto: string): string | null {

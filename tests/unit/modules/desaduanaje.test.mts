@@ -21,16 +21,49 @@ import {
 const sinChk: Checklist = { factura: false, bl: false, certOrigen: false, seguro: false, permiso: false };
 
 const d = (x: Partial<Desaduanaje>): Desaduanaje => ({
-    id: '1', numero: 'DES-2026-0001', romano: 'I', estado: 'Borrador', tipo: 'Marítimo', alcance: 'Total', ordenId: 'o1',
-    ordenNumero: 'INROPRIN-IMP-2026-0001', proveedor: 'Overseas Machinery', proyecto: '', nDam: '', blAwb: '', fechaEmbarque: null,
-    fechaLlegadaEst: null, fechaNumeracion: null, fechaLlegada: null, fechaLevante: null, fechaAlmacen: null, fi: null, versionCosteo: 0,
-    creado: '2026-11-01', ...x,
+    id: '1',
+    numero: 'DES-2026-0001',
+    romano: 'I',
+    estado: 'Borrador',
+    tipo: 'Marítimo',
+    alcance: 'Total',
+    ordenId: 'o1',
+    ordenNumero: 'INROPRIN-IMP-2026-0001',
+    proveedor: 'Overseas Machinery',
+    proyecto: '',
+    nDam: '',
+    blAwb: '',
+    fechaEmbarque: null,
+    fechaLlegadaEst: null,
+    fechaNumeracion: null,
+    fechaLlegada: null,
+    fechaLevante: null,
+    fechaAlmacen: null,
+    fi: null,
+    versionCosteo: 0,
+    creado: '2026-11-01',
+    ...x,
 });
 
 const g = (x: Partial<GastoDes>): GastoDes => ({
-    id: 'g', concepto: 'Flete internacional', entraCosto: true, emisor: '', rucEmisor: '', tipoComprobante: 'Factura', nComprobante: '',
-    fechaComprobante: null, moneda: 'USD', montoSinIgv: 100, tcCosteo: 3.8, montoS: 380, ocHijaId: null, ocHija: '', registradoPor: 'u',
-    fechaRegistro: '2026-11-20', comentario: '', ...x,
+    id: 'g',
+    concepto: 'Flete internacional',
+    entraCosto: true,
+    emisor: '',
+    rucEmisor: '',
+    tipoComprobante: 'Factura',
+    nComprobante: '',
+    fechaComprobante: null,
+    moneda: 'USD',
+    montoSinIgv: 100,
+    tcCosteo: 3.8,
+    montoS: 380,
+    ocHijaId: null,
+    ocHija: '',
+    registradoPor: 'u',
+    fechaRegistro: '2026-11-20',
+    comentario: '',
+    ...x,
 });
 
 describe('checklist (réplica de app.des_docs_faltantes)', () => {
@@ -40,10 +73,18 @@ describe('checklist (réplica de app.des_docs_faltantes)', () => {
         expect(checklist({ chk: sinChk, requierePermiso: false }, []).map((i) => i.campo)).not.toContain('permiso');
     });
     it('un documento subido cuenta igual que el check', () => {
-        const items = checklist({ chk: { ...sinChk, factura: true, bl: true }, requierePermiso: true }, ['Póliza de seguro', 'Certificado de origen', 'Packing list']);
+        const items = checklist({ chk: { ...sinChk, factura: true, bl: true }, requierePermiso: true }, [
+            'Póliza de seguro',
+            'Certificado de origen',
+            'Packing list',
+        ]);
         expect(items.find((i) => i.campo === 'seguro')).toMatchObject({ marcado: false, subido: true, cumple: true });
-        expect(faltantes({ chk: { ...sinChk, factura: true, bl: true }, requierePermiso: true }, ['Póliza de seguro', 'Certificado de origen'])).toEqual(['Permiso']);
-        expect(faltantes({ chk: { ...sinChk, factura: true, bl: true, permiso: true }, requierePermiso: true }, ['Póliza de seguro', 'Certificado de origen'])).toEqual([]);
+        expect(faltantes({ chk: { ...sinChk, factura: true, bl: true }, requierePermiso: true }, ['Póliza de seguro', 'Certificado de origen'])).toEqual([
+            'Permiso',
+        ]);
+        expect(
+            faltantes({ chk: { ...sinChk, factura: true, bl: true, permiso: true }, requierePermiso: true }, ['Póliza de seguro', 'Certificado de origen']),
+        ).toEqual([]);
     });
 });
 
@@ -60,10 +101,12 @@ describe('TC de costeo sugerido', () => {
         expect(tcVigente(tcs, 'USD', '2026-10-01')).toBeNull();
     });
     it('en soles es 1', () => expect(tcSugerido('PEN', '2026-11-20', des, tcs)).toMatchObject({ tc: 1, origen: 'soles' }));
-    it('antes de numerar la DAM: el vigente a la fecha del comprobante', () => expect(tcSugerido('USD', '2026-11-10', des, tcs)).toMatchObject({ tc: 3.7, origen: 'vigente' }));
+    it('antes de numerar la DAM: el vigente a la fecha del comprobante', () =>
+        expect(tcSugerido('USD', '2026-11-10', des, tcs)).toMatchObject({ tc: 3.7, origen: 'vigente' }));
     it('con la DAM numerada: el congelado, aunque haya otro vigente', () =>
         expect(tcSugerido('USD', '2026-11-20', { ...des, tcUsd: 3.8, fechaNumeracion: '2026-11-18' }, tcs)).toMatchObject({ tc: 3.8, origen: 'congelado' }));
-    it('sin TC de costeo: el referencial del desaduanaje', () => expect(tcSugerido('GBP', '2026-11-20', des, tcs)).toMatchObject({ tc: 4.6, origen: 'referencial' }));
+    it('sin TC de costeo: el referencial del desaduanaje', () =>
+        expect(tcSugerido('GBP', '2026-11-20', des, tcs)).toMatchObject({ tc: 4.6, origen: 'referencial' }));
 });
 
 describe('totales del costeo', () => {
@@ -109,7 +152,16 @@ describe('gastos: qué falta', () => {
 describe('lista', () => {
     const l = [
         d({ id: '1', numero: 'DES-2026-0001', estado: 'Costeo cerrado', creado: '2026-11-01', fechaLlegada: '2026-11-10' }),
-        d({ id: '2', numero: 'DES-2026-0002', estado: 'Llegada', tipo: 'Aéreo', proveedor: 'Máquinas Lejanas', nDam: '118-2026-10-555', creado: '2026-11-05', fechaLlegadaEst: '2026-11-08' }),
+        d({
+            id: '2',
+            numero: 'DES-2026-0002',
+            estado: 'Llegada',
+            tipo: 'Aéreo',
+            proveedor: 'Máquinas Lejanas',
+            nDam: '118-2026-10-555',
+            creado: '2026-11-05',
+            fechaLlegadaEst: '2026-11-08',
+        }),
     ];
     it('filtra por estado («sin costeo cerrado»), tipo y texto sin tildes (DAM, proveedor)', () => {
         expect(filtrarDes(l, { estado: 'abiertos', tipo: '', texto: '' }).map((x) => x.id)).toEqual(['2']);

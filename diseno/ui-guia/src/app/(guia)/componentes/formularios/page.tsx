@@ -19,9 +19,9 @@ export default function Formularios() {
                 title="Campos de formulario"
                 lead={
                     <>
-                        <Code>Field</Code> pone la etiqueta arriba y debajo la ayuda o el error, y conecta todo para el lector de pantalla (
-                        <Code>htmlFor</Code>, <Code>aria-invalid</Code>, <Code>aria-describedby</Code>). Los controles son el mismo <Code>CONTROL</Code> de los
-                        filtros. <i>Propuesta: nuevo, no está en INROCONTA.</i>
+                        <Code>Field</Code> pone la etiqueta arriba y debajo la ayuda o el error, y conecta todo para el lector de pantalla (<Code>htmlFor</Code>
+                        , <Code>aria-invalid</Code>, <Code>aria-describedby</Code>). Los controles son el mismo <Code>CONTROL</Code> de los filtros.{' '}
+                        <i>Propuesta: nuevo, no está en INROCONTA.</i>
                     </>
                 }
             />
@@ -100,9 +100,18 @@ export default function Formularios() {
             <Section title="Reglas">
                 <Rules
                     items={[
-                        ['Siempre etiqueta visible arriba; el placeholder es un ejemplo, no la etiqueta.', 'El placeholder desaparece al escribir y deja al usuario sin saber qué era el campo.'],
-                        ['Se marca lo opcional, no lo obligatorio.', 'En formularios de trabajo casi todo es obligatorio: un asterisco en cada campo es ruido.'],
-                        ['El error se muestra al salir del campo o al enviar, no con cada tecla.', 'Gritar «inválido» mientras se escribe el tercer dígito no ayuda.'],
+                        [
+                            'Siempre etiqueta visible arriba; el placeholder es un ejemplo, no la etiqueta.',
+                            'El placeholder desaparece al escribir y deja al usuario sin saber qué era el campo.',
+                        ],
+                        [
+                            'Se marca lo opcional, no lo obligatorio.',
+                            'En formularios de trabajo casi todo es obligatorio: un asterisco en cada campo es ruido.',
+                        ],
+                        [
+                            'El error se muestra al salir del campo o al enviar, no con cada tecla.',
+                            'Gritar «inválido» mientras se escribe el tercer dígito no ayuda.',
+                        ],
                         ['El error dice qué hacer: «El RUC tiene 11 dígitos; este tiene 10».', 'Nunca «Campo inválido».'],
                         ['Un campo por fila en móvil; en escritorio, dos columnas solo si son pareja (desde / hasta, moneda / monto).', ''],
                     ]}

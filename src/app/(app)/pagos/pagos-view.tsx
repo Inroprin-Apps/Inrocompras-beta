@@ -75,7 +75,10 @@ export function PagosView() {
     const todas = useMemo(() => estado.data ?? [], [estado.data]);
     const base = useMemo(() => dePestana(todas, tab, perfil.id), [todas, tab, perfil.id]);
     const lista = useMemo(() => ordenarPagos(filtrarPagos(base, v, hoy), v.orden), [base, v, hoy]);
-    const resumen = useMemo(() => (estado.data ? resumenPagos(dePestana(estado.data, tab === 'mias' ? 'mias' : 'todas', perfil.id), hoy) : null), [estado.data, tab, perfil.id, hoy]);
+    const resumen = useMemo(
+        () => (estado.data ? resumenPagos(dePestana(estado.data, tab === 'mias' ? 'mias' : 'todas', perfil.id), hoy) : null),
+        [estado.data, tab, perfil.id, hoy],
+    );
     const pag = usePaged(lista, lista, 25, vista$.usePage());
     const proveedores = useMemo(() => {
         const m = new Map<string, string>();
@@ -115,7 +118,10 @@ export function PagosView() {
                     <Segmented
                         value={tab}
                         onChange={(t) => vista$.set({ tab: t })}
-                        options={pestanas.map((p) => ({ value: p, label: `${NOMBRE_PESTANA[p]}${estado.data ? ` (${dePestana(todas, p, perfil.id).length})` : ''}` }))}
+                        options={pestanas.map((p) => ({
+                            value: p,
+                            label: `${NOMBRE_PESTANA[p]}${estado.data ? ` (${dePestana(todas, p, perfil.id).length})` : ''}`,
+                        }))}
                     />
                 </div>
             )}
@@ -181,7 +187,17 @@ export function PagosView() {
                 estado={{ data: estado.data ? lista : null, error: estado.error }}
                 onReintentar={() => void pagosStore.retry()}
                 vacia={
-                    <ListaVacia titulo={conFiltros ? 'Ninguna cuota coincide' : tab === 'atender' ? 'No hay pagos por atender' : tab === 'mias' ? 'Tus órdenes aún no tienen cuotas' : 'Aún no hay cuotas'}>
+                    <ListaVacia
+                        titulo={
+                            conFiltros
+                                ? 'Ninguna cuota coincide'
+                                : tab === 'atender'
+                                  ? 'No hay pagos por atender'
+                                  : tab === 'mias'
+                                    ? 'Tus órdenes aún no tienen cuotas'
+                                    : 'Aún no hay cuotas'
+                        }
+                    >
                         {conFiltros
                             ? 'Prueba con otra búsqueda o quita algún filtro.'
                             : tab === 'atender'
@@ -194,7 +210,15 @@ export function PagosView() {
                     <>
                         <ul className="flex flex-col gap-2 md:hidden">
                             {pag.rows.map((p) => (
-                                <TarjetaPago key={p.id} p={p} hoy={hoy} activa={v.ver === p.id} marcable={enBloque && seleccionable(p)} marcada={marcadas.has(p.id)} onMarcar={() => alternar(p.id)} />
+                                <TarjetaPago
+                                    key={p.id}
+                                    p={p}
+                                    hoy={hoy}
+                                    activa={v.ver === p.id}
+                                    marcable={enBloque && seleccionable(p)}
+                                    marcada={marcadas.has(p.id)}
+                                    onMarcar={() => alternar(p.id)}
+                                />
                             ))}
                         </ul>
                         <div className="hidden overflow-x-auto md:block">
@@ -224,7 +248,15 @@ export function PagosView() {
                                 </thead>
                                 <tbody>
                                     {pag.rows.map((p) => (
-                                        <FilaPago key={p.id} p={p} hoy={hoy} activa={v.ver === p.id} enBloque={enBloque} marcada={marcadas.has(p.id)} onMarcar={() => alternar(p.id)} />
+                                        <FilaPago
+                                            key={p.id}
+                                            p={p}
+                                            hoy={hoy}
+                                            activa={v.ver === p.id}
+                                            enBloque={enBloque}
+                                            marcada={marcadas.has(p.id)}
+                                            onMarcar={() => alternar(p.id)}
+                                        />
                                     ))}
                                 </tbody>
                             </table>
@@ -250,16 +282,48 @@ export function PagosView() {
 function Limite({ p, hoy }: { p: Pago; hoy: string }) {
     if (!p.fechaLimite) return <span className="text-ink-3">—</span>;
     const v = vencida(p, hoy);
-    return <span className={v ? 'font-medium text-danger-strong' : ''}>{dmy(p.fechaLimite)}{v && <span className="sr-only"> (vencida)</span>}</span>;
+    return (
+        <span className={v ? 'font-medium text-danger-strong' : ''}>
+            {dmy(p.fechaLimite)}
+            {v && <span className="sr-only"> (vencida)</span>}
+        </span>
+    );
 }
 
-function FilaPago({ p, hoy, activa, enBloque, marcada, onMarcar }: { p: Pago; hoy: string; activa: boolean; enBloque: boolean; marcada: boolean; onMarcar: () => void }) {
+function FilaPago({
+    p,
+    hoy,
+    activa,
+    enBloque,
+    marcada,
+    onMarcar,
+}: {
+    p: Pago;
+    hoy: string;
+    activa: boolean;
+    enBloque: boolean;
+    marcada: boolean;
+    onMarcar: () => void;
+}) {
     const abrir = () => vista$.set({ ver: p.id });
     return (
-        <tr tabIndex={0} className={`${T.row} cursor-pointer ${activa ? 'bg-primary-soft' : ''}`} onClick={abrir} onKeyDown={(e) => e.key === 'Enter' && abrir()}>
+        <tr
+            tabIndex={0}
+            className={`${T.row} cursor-pointer ${activa ? 'bg-primary-soft' : ''}`}
+            onClick={abrir}
+            onKeyDown={(e) => e.key === 'Enter' && abrir()}
+        >
             {enBloque && (
                 <td className={T.td} onClick={(e) => e.stopPropagation()}>
-                    {seleccionable(p) && <input type="checkbox" aria-label={`Marcar ${p.ordenNumero} cuota ${formatoCuota(p.nCuota)}`} checked={marcada} onChange={onMarcar} className="size-4 accent-primary" />}
+                    {seleccionable(p) && (
+                        <input
+                            type="checkbox"
+                            aria-label={`Marcar ${p.ordenNumero} cuota ${formatoCuota(p.nCuota)}`}
+                            checked={marcada}
+                            onChange={onMarcar}
+                            className="size-4 accent-primary"
+                        />
+                    )}
                 </td>
             )}
             <td className={T.td}>
@@ -298,12 +362,32 @@ function FilaPago({ p, hoy, activa, enBloque, marcada, onMarcar }: { p: Pago; ho
     );
 }
 
-function TarjetaPago({ p, hoy, activa, marcable, marcada, onMarcar }: { p: Pago; hoy: string; activa: boolean; marcable: boolean; marcada: boolean; onMarcar: () => void }) {
+function TarjetaPago({
+    p,
+    hoy,
+    activa,
+    marcable,
+    marcada,
+    onMarcar,
+}: {
+    p: Pago;
+    hoy: string;
+    activa: boolean;
+    marcable: boolean;
+    marcada: boolean;
+    onMarcar: () => void;
+}) {
     return (
         <li className={`flex items-stretch rounded-card border border-line ${activa ? 'bg-primary-soft' : 'bg-surface'}`}>
             {marcable && (
                 <label className="flex items-center pl-3.5">
-                    <input type="checkbox" aria-label={`Marcar ${p.ordenNumero} cuota ${formatoCuota(p.nCuota)}`} checked={marcada} onChange={onMarcar} className="size-5 accent-primary" />
+                    <input
+                        type="checkbox"
+                        aria-label={`Marcar ${p.ordenNumero} cuota ${formatoCuota(p.nCuota)}`}
+                        checked={marcada}
+                        onChange={onMarcar}
+                        className="size-5 accent-primary"
+                    />
                 </label>
             )}
             <button

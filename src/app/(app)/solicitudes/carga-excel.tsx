@@ -63,7 +63,8 @@ export function CargaExcel({ solicitudId, items, onCerrar }: { solicitudId: stri
         if (r.isErr()) return setError(r.error.message);
         const cargados = Number(r.value.cargados ?? 0);
         const mal = Number(r.value.con_error ?? 0);
-        if (mal) toast.warning(`${cargados} ítems cargados; ${mal} filas con error. Revísalas en la ficha: corrige el Excel y vuelve a subirlo, o descártalas.`);
+        if (mal)
+            toast.warning(`${cargados} ítems cargados; ${mal} filas con error. Revísalas en la ficha: corrige el Excel y vuelve a subirlo, o descártalas.`);
         else toast.success(`${cargados} ítems cargados.`);
         onCerrar();
     }
@@ -105,7 +106,8 @@ export function CargaExcel({ solicitudId, items, onCerrar }: { solicitudId: stri
                         <FileSpreadsheet size={16} className="text-success" aria-hidden /> {lectura.filas.length} filas con datos en «{archivo}»
                     </p>
                     <p className="text-ink-2">
-                        Entendí: {reconocidas.map((c) => (lectura.columnas[c.clave] === c.titulo ? c.titulo : `${lectura.columnas[c.clave]} → ${c.titulo}`)).join(' · ')}
+                        Entendí:{' '}
+                        {reconocidas.map((c) => (lectura.columnas[c.clave] === c.titulo ? c.titulo : `${lectura.columnas[c.clave]} → ${c.titulo}`)).join(' · ')}
                     </p>
                     {lectura.ignoradas.length > 0 && <p className="text-ink-3">No se usan: {lectura.ignoradas.join(', ')}.</p>}
                 </div>

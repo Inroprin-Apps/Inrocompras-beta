@@ -6,9 +6,13 @@ import { final, mensajeDe, reintentar, type Fallo } from '../domain/trabajo.ts';
 /** Errores de credenciales o permisos no se arreglan reintentando; la red y los 5xx/429, sí. */
 export function clasificar(e: unknown, que: string): Fallo {
     const m = `${que}: ${mensajeDe(e)}`;
-    const code = (e as { code?: unknown; status?: unknown; response?: { status?: unknown } })?.code ?? (e as { status?: unknown })?.status ?? (e as { response?: { status?: unknown } })?.response?.status;
+    const code =
+        (e as { code?: unknown; status?: unknown; response?: { status?: unknown } })?.code ??
+        (e as { status?: unknown })?.status ??
+        (e as { response?: { status?: unknown } })?.response?.status;
     const st = Number(code);
-    if (st === 401 || st === 403 || /invalid_grant|unauthorized|forbidden|permission|credentials|invalid api key|API key not valid|EAUTH/i.test(m)) return final(m);
+    if (st === 401 || st === 403 || /invalid_grant|unauthorized|forbidden|permission|credentials|invalid api key|API key not valid|EAUTH/i.test(m))
+        return final(m);
     if (st === 404) return final(m);
     return reintentar(m);
 }

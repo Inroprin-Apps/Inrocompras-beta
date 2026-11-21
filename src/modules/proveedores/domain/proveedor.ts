@@ -2,6 +2,7 @@
 // Las reglas de negocio (quién evalúa, quién verifica la retención, RUC al dar de alta) viven en la base
 // (0002, 0003 y 0020): la ficha muestra lo que devuelve acciones_disponibles.
 import { limpiarRuc, motivoRuc } from './ruc.ts';
+import { palabrasDe, plano } from '@/shared/texto.ts';
 
 export const ORIGENES = ['Nacional', 'Extranjero'] as const;
 export type Origen = (typeof ORIGENES)[number];
@@ -88,14 +89,16 @@ const vacia = (c: Cuenta) => !c.banco.trim() && !c.numero.trim() && !c.cci.trim(
 
 /** Las cuentas tal como se guardan: sin filas vacías y sin espacios de más. */
 export const cuentasLimpias = (cs: Cuenta[]): Cuenta[] =>
-    cs.filter((c) => !vacia(c)).map((c) => ({
-        banco: c.banco.trim(),
-        moneda: c.moneda,
-        numero: c.numero.trim(),
-        cci: c.cci.replace(/[\s-]/g, ''),
-        swift: c.swift.trim().toUpperCase(),
-        iban: c.iban.replace(/\s/g, '').toUpperCase(),
-    }));
+    cs
+        .filter((c) => !vacia(c))
+        .map((c) => ({
+            banco: c.banco.trim(),
+            moneda: c.moneda,
+            numero: c.numero.trim(),
+            cci: c.cci.replace(/[\s-]/g, ''),
+            swift: c.swift.trim().toUpperCase(),
+            iban: c.iban.replace(/\s/g, '').toUpperCase(),
+        }));
 
 /** Qué falta en una cuenta (en palabras), o null. `n` = su número en la lista. */
 export function faltaEnCuenta(c: Cuenta, n: number, origen: Origen): string | null {
@@ -134,7 +137,8 @@ export const rucParaGuardar = (p: NuevoProveedor) => (p.origen === 'Nacional' ? 
 
 export type TonoChip = 'ok' | 'warn' | 'danger' | 'info' | 'muted';
 export const tonoEvaluacion = (e: Evaluacion): TonoChip => (e === 'Aprobado' ? 'ok' : e === 'Observado' ? 'danger' : 'warn');
-export const etiquetaEvaluacion = (e: Evaluacion) => (e === 'Pendiente' ? 'Sin evaluar' : e === 'Aprobado' ? 'Aprobado por Finanzas' : 'Observado por Finanzas');
+export const etiquetaEvaluacion = (e: Evaluacion) =>
+    e === 'Pendiente' ? 'Sin evaluar' : e === 'Aprobado' ? 'Aprobado por Finanzas' : 'Observado por Finanzas';
 
 /** Lo que dice la columna de retención (solo aplica a nacionales). */
 export function retencion(p: Proveedor): { texto: string; tono: TonoChip } {
@@ -166,10 +170,8 @@ export interface FiltrosProveedor {
 }
 export const FILTROS_PROVEEDOR: FiltrosProveedor = { origen: '', evaluacion: '', verificado: '', texto: '' };
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-
 export function filtrarProveedores(lista: Proveedor[], f: FiltrosProveedor): Proveedor[] {
-    const palabras = plano(f.texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(f.texto);
     return lista.filter((p) => {
         if (f.origen && p.origen !== f.origen) return false;
         if (f.evaluacion && p.evaluacion !== f.evaluacion) return false;

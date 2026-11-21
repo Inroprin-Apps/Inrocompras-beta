@@ -8,10 +8,10 @@ Lee primero `CLAUDE.md` (reglas del repo) y `docs/` (alcance, roles, estados, pl
 
 ## Estado
 
-| Hito | Estado |
-|---|---|
+| Hito                                                          | Estado                                                                              |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | 0. Base: login con Google, menú por perfil, «Te toca», Equipo | Código listo y probado en local. Falta conectarlo a Supabase y Vercel (pasos abajo) |
-| 1–8 | Pendientes (`docs/08_PLAN_DE_TRABAJO.md`) |
+| 1–8                                                           | Pendientes (`docs/08_PLAN_DE_TRABAJO.md`)                                           |
 
 ## Desarrollo
 

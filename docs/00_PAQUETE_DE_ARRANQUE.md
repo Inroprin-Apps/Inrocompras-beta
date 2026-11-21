@@ -31,14 +31,14 @@ Este paquete es para el chat de Claude (o la persona) que va a **construir de ve
 
 ## Contenido
 
-| Carpeta | Qué hay |
-|---|---|
-| `CLAUDE.md` | Reglas del repositorio: stack, convenciones, seguridad, qué no hacer |
-| `docs/` | Alcance, roles, estados, modelo de datos, plan de compras, diseño, integraciones, plan de trabajo, criterios de aceptación, decisiones abiertas y mejoras sobre el AppSheet |
-| `supabase/` | Migraciones (esquema, seguridad, acciones, piezas de Supabase), catálogos y la prueba del flujo |
-| `ejemplos/integraciones/` | Código TypeScript: Drive, correo, lector de PDF, PDF de la OC, cola, rutas |
-| `diseno/` | Guía UI de INROPRIN (código fuente) y la hoja de estilos del prototipo v3 |
-| `referencia/` | AppSheet v2 extraído por máquina (tablas, columnas, fórmulas, acciones, vistas), reglas de Listas, casuísticas, mapa de campos del SIDIGE, prototipo v3 y diagrama BPMN |
+| Carpeta                   | Qué hay                                                                                                                                                                     |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CLAUDE.md`               | Reglas del repositorio: stack, convenciones, seguridad, qué no hacer                                                                                                        |
+| `docs/`                   | Alcance, roles, estados, modelo de datos, plan de compras, diseño, integraciones, plan de trabajo, criterios de aceptación, decisiones abiertas y mejoras sobre el AppSheet |
+| `supabase/`               | Migraciones (esquema, seguridad, acciones, piezas de Supabase), catálogos y la prueba del flujo                                                                             |
+| `ejemplos/integraciones/` | Código TypeScript: Drive, correo, lector de PDF, PDF de la OC, cola, rutas                                                                                                  |
+| `diseno/`                 | Guía UI de INROPRIN (código fuente) y la hoja de estilos del prototipo v3                                                                                                   |
+| `referencia/`             | AppSheet v2 extraído por máquina (tablas, columnas, fórmulas, acciones, vistas), reglas de Listas, casuísticas, mapa de campos del SIDIGE, prototipo v3 y diagrama BPMN     |
 
 ## Lo que se verificó antes de entregar
 

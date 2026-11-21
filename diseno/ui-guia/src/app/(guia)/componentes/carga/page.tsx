@@ -17,8 +17,8 @@ export default function Carga() {
                 title="Carga (huecos)"
                 lead={
                     <>
-                        Mientras un valor viaja, en su sitio hay un <Code>Hueco</Code> del mismo tamaño. Solo cubre lo que depende del dato: títulos,
-                        etiquetas, botones y la forma de la tarjeta son código y se dibujan de verdad. La pantalla de carga ES la pantalla final.
+                        Mientras un valor viaja, en su sitio hay un <Code>Hueco</Code> del mismo tamaño. Solo cubre lo que depende del dato: títulos, etiquetas,
+                        botones y la forma de la tarjeta son código y se dibujan de verdad. La pantalla de carga ES la pantalla final.
                     </>
                 }
             />
@@ -53,7 +53,9 @@ export default function Carga() {
                             {['Proveedor Andino SAC', 'Tintas Lima Norte SAC', 'Cartones Huallaga SA'].map((n, i) => (
                                 <div key={n} className="flex items-center justify-between border-b border-divider py-2.5 last:border-0">
                                     <span className="text-ui">{loading ? <Hueco className="h-3.5 w-44" /> : n}</span>
-                                    <span className="text-ui tabular-nums">{loading ? <Hueco className="h-3.5 w-20" /> : `S/ ${(1240.5 * (i + 1)).toFixed(2)}`}</span>
+                                    <span className="text-ui tabular-nums">
+                                        {loading ? <Hueco className="h-3.5 w-20" /> : `S/ ${(1240.5 * (i + 1)).toFixed(2)}`}
+                                    </span>
                                 </div>
                             ))}
                         </Card>

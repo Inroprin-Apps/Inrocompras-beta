@@ -65,7 +65,8 @@ export function FichaRequerimiento({ id, anulacionMarcada, onCerrar }: { id: str
     return <FichaCargada key={data.requerimiento.id} d={data} anulacionMarcada={anulacionMarcada} onCerrar={onCerrar} />;
 }
 
-type Dialogo = { tipo: 'cabecera' } | { tipo: 'item'; item: ItemRequerimiento } | { tipo: 'sku'; item: ItemRequerimiento } | { tipo: 'anular'; itemId: string | null };
+type Dialogo =
+    { tipo: 'cabecera' } | { tipo: 'item'; item: ItemRequerimiento } | { tipo: 'sku'; item: ItemRequerimiento } | { tipo: 'anular'; itemId: string | null };
 
 function FichaCargada({ d, anulacionMarcada, onCerrar }: { d: RequerimientoDetalle; anulacionMarcada: string; onCerrar: () => void }) {
     const { requerimiento: r, items, anulaciones, solicitud } = d;
@@ -282,7 +283,9 @@ function FilaAnulacion({ a, items, marcada, nombre }: { a: Anulacion; items: Ite
                 {a.aprobadoPor && ` · decidió ${nombre(a.aprobadoPor)} ${a.fechaAprobacion ? dayTime(a.fechaAprobacion) : ''}`}
             </div>
             {a.motivoRechazo && <div className="mt-1 text-small text-ink-2">Respuesta: «{a.motivoRechazo}»</div>}
-            {a.estado === 'En Compras' && <div className="mt-1 text-small text-warning-strong">Aprobada, pero el ítem tiene órdenes vivas: Compras debe anularlas primero.</div>}
+            {a.estado === 'En Compras' && (
+                <div className="mt-1 text-small text-warning-strong">Aprobada, pero el ítem tiene órdenes vivas: Compras debe anularlas primero.</div>
+            )}
             {a.estado === 'Pendiente' && (
                 <div className="mt-3">
                     <PanelAcciones

@@ -69,7 +69,12 @@ export class LectorAdapter implements LectorPort {
                   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
                   const r = await ai.models.generateContent({
                       model: process.env.GEMINI_MODEL?.trim() || 'gemini-2.5-flash',
-                      contents: [{ role: 'user', parts: [{ inlineData: { mimeType: mime, data: Buffer.from(archivo).toString('base64') } }, { text: instruccion(propios) }] }],
+                      contents: [
+                          {
+                              role: 'user',
+                              parts: [{ inlineData: { mimeType: mime, data: Buffer.from(archivo).toString('base64') } }, { text: instruccion(propios) }],
+                          },
+                      ],
                       config: { responseMimeType: 'application/json', responseSchema: ESQUEMA, temperature: 0 },
                   });
                   const datos = JSON.parse(r.text ?? '{}') as Partial<LecturaDocumento>;

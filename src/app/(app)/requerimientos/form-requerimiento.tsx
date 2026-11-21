@@ -77,10 +77,22 @@ export function FormCabecera({ req, onCerrar }: { req: Requerimiento; onCerrar: 
     }
 
     return (
-        <Dialog abierto onCerrar={onCerrar} titulo="Completar el requerimiento" pie={<Pie onCerrar={onCerrar} onGuardar={() => void guardar()} guardando={guardando} texto="Guardar" />}>
+        <Dialog
+            abierto
+            onCerrar={onCerrar}
+            titulo="Completar el requerimiento"
+            pie={<Pie onCerrar={onCerrar} onGuardar={() => void guardar()} guardando={guardando} texto="Guardar" />}
+        >
             <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Empresa">
-                    {(p) => <SelectMenu {...p} value={f.empresaId} onChange={(empresaId) => set({ empresaId })} options={empresas.map((e) => ({ value: e.id, label: e.razonSocial }))} />}
+                    {(p) => (
+                        <SelectMenu
+                            {...p}
+                            value={f.empresaId}
+                            onChange={(empresaId) => set({ empresaId })}
+                            options={empresas.map((e) => ({ value: e.id, label: e.razonSocial }))}
+                        />
+                    )}
                 </Field>
                 <Field label="Tipo de compra">
                     {(p) => (

@@ -68,7 +68,18 @@ function FechaHora() {
     );
 }
 
-const CLIENTES = ['Cliente Norte SAC', 'Corporación Sur SA', 'Comercial Este EIRL', 'Industrias Oeste SAC', 'Papeles del Pacífico EIRL', 'Tintas Lima Norte SAC', 'Transportes Rímac SRL', 'Cartones Huallaga SA', 'Logística Callao SAC', 'Imprenta Barranco SRL'];
+const CLIENTES = [
+    'Cliente Norte SAC',
+    'Corporación Sur SA',
+    'Comercial Este EIRL',
+    'Industrias Oeste SAC',
+    'Papeles del Pacífico EIRL',
+    'Tintas Lima Norte SAC',
+    'Transportes Rímac SRL',
+    'Cartones Huallaga SA',
+    'Logística Callao SAC',
+    'Imprenta Barranco SRL',
+];
 
 function SeleccionMultiple() {
     const [values, setValues] = useState<string[]>([]);
@@ -148,7 +159,11 @@ function TextoQueSeDesliza() {
         <div className="flex flex-col gap-2">
             <p className="text-small text-ink-2">Pasa el cursor sobre una fila: la que no cabe se desliza hasta el final; la que cabe no se mueve.</p>
             <ul className="w-72 divide-y divide-divider rounded-control border border-line text-ui">
-                {['Papeles del Pacífico Exportaciones e Importaciones EIRL', 'Tintas Lima Norte SAC', 'Distribuidora Mayorista de Insumos Gráficos Chavín del Sur SAC'].map((t) => (
+                {[
+                    'Papeles del Pacífico Exportaciones e Importaciones EIRL',
+                    'Tintas Lima Norte SAC',
+                    'Distribuidora Mayorista de Insumos Gráficos Chavín del Sur SAC',
+                ].map((t) => (
                     <li key={t} className="marquee-host px-3 py-2 hover:bg-surface-2">
                         <HoverMarquee text={t} />
                     </li>

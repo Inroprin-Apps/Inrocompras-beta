@@ -36,7 +36,8 @@ const vista$ = urlState(
 export function ValidacionesView() {
     const perfil = usePerfil();
     const estado = tecnicaStore.use();
-    const proyectos = proyectosStore.use().data ?? [];
+    const proyectosLeidos = proyectosStore.use().data;
+    const proyectos = useMemo(() => proyectosLeidos ?? [], [proyectosLeidos]);
     const v = vista$.use();
     const [marcados, setMarcados] = useState<Set<string>>(new Set());
     const [dialogo, setDialogo] = useState(false);
@@ -60,8 +61,9 @@ export function ValidacionesView() {
     const alternar = (ids: string[], on: boolean) =>
         setMarcados((m) => {
             const n = new Set(m);
-            for (const id of ids) if (on) n.add(id);
-            else n.delete(id);
+            for (const id of ids)
+                if (on) n.add(id);
+                else n.delete(id);
             return n;
         });
 
@@ -200,7 +202,9 @@ function FilaTecnica({
     onAbrir: () => void;
 }) {
     return (
-        <li className={`flex items-start gap-3 border-b border-divider px-4 py-3 last:border-b-0 ${abierto ? 'bg-primary-soft' : marcado ? 'bg-surface-2' : ''}`}>
+        <li
+            className={`flex items-start gap-3 border-b border-divider px-4 py-3 last:border-b-0 ${abierto ? 'bg-primary-soft' : marcado ? 'bg-surface-2' : ''}`}
+        >
             {valida && (
                 <input
                     type="checkbox"
@@ -216,7 +220,9 @@ function FilaTecnica({
                     {i.descripcion}
                 </div>
                 <div className="text-small text-ink-2">
-                    {[`${fmtNum.format(i.cantidad)} ${i.unidad}`, i.tipo, i.codigoCliente, i.codigoSidige && `SKU ${i.codigoSidige}`, i.canal].filter(Boolean).join(' · ')}
+                    {[`${fmtNum.format(i.cantidad)} ${i.unidad}`, i.tipo, i.codigoCliente, i.codigoSidige && `SKU ${i.codigoSidige}`, i.canal]
+                        .filter(Boolean)
+                        .join(' · ')}
                 </div>
                 {(i.marca || i.modelo) && <div className="text-small text-ink-2">{[i.marca, i.modelo].filter(Boolean).join(' · ')}</div>}
                 {i.validacionTecnica === 'Observado' && i.tecMotivo && <div className="text-small text-warning-strong">«{i.tecMotivo}»</div>}

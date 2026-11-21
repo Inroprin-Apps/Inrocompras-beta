@@ -1,6 +1,8 @@
 // Proyectos y sus etapas (AppSheet: Proyectos, Proyecto_Etapas). PURO: tipos, filtros, orden y reglas de
 // presentación. Las reglas de negocio (quién marca ganado, quién edita) viven en la base (0002/0003).
 
+import { palabrasDe, plano } from '@/shared/texto.ts';
+
 export const ESTADOS_PROYECTO = ['Estudio de mercado', 'Ganado', 'Perdido', 'Cerrado'] as const;
 export type EstadoProyecto = (typeof ESTADOS_PROYECTO)[number];
 
@@ -48,10 +50,8 @@ export interface FiltrosProyecto {
 }
 export const FILTROS_PROYECTO: FiltrosProyecto = { estado: '', texto: '' };
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-
 export function filtrarProyectos(lista: Proyecto[], f: FiltrosProyecto): Proyecto[] {
-    const palabras = plano(f.texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(f.texto);
     return lista.filter((p) => {
         if (f.estado && p.estado !== f.estado) return false;
         if (!palabras.length) return true;

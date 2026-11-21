@@ -34,7 +34,11 @@ export function SeccionMonedas({ tasas, tc }: { tasas: boolean; tc: boolean }) {
     return (
         <div className="flex flex-col gap-5">
             <Card title="Tasas a soles" note="Las usa la orden para calcular su monto en soles (y con eso, su ruta de aprobación).">
-                <Lista estado={{ data: estado.data?.monedas ?? null, error: estado.error }} onReintentar={() => void configuracionStore.retry()} vacia={<ListaVacia titulo="Sin monedas" />}>
+                <Lista
+                    estado={{ data: estado.data?.monedas ?? null, error: estado.error }}
+                    onReintentar={() => void configuracionStore.retry()}
+                    vacia={<ListaVacia titulo="Sin monedas" />}
+                >
                     {(ms) => (
                         <div className="overflow-x-auto">
                             <table className={T.table}>
@@ -43,7 +47,11 @@ export function SeccionMonedas({ tasas, tc }: { tasas: boolean; tc: boolean }) {
                                         <th className={T.th}>Moneda</th>
                                         <th className={T.thNum}>Tasa a soles</th>
                                         <th className={T.th}>Actualizada</th>
-                                        {tasas && <th className={T.th}><span className="sr-only">Editar</span></th>}
+                                        {tasas && (
+                                            <th className={T.th}>
+                                                <span className="sr-only">Editar</span>
+                                            </th>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -91,7 +99,9 @@ export function SeccionMonedas({ tasas, tc }: { tasas: boolean; tc: boolean }) {
                 <Lista
                     estado={{ data: estado.data?.tcCosteo ?? null, error: estado.error }}
                     onReintentar={() => void configuracionStore.retry()}
-                    vacia={<ListaVacia titulo="Sin tipos de cambio de costeo">Regístralo con «Registrar TC»: queda quién lo puso y desde cuándo vale.</ListaVacia>}
+                    vacia={
+                        <ListaVacia titulo="Sin tipos de cambio de costeo">Regístralo con «Registrar TC»: queda quién lo puso y desde cuándo vale.</ListaVacia>
+                    }
                 >
                     {(ts) => (
                         <div className="overflow-x-auto">
@@ -203,8 +213,19 @@ function FormTc({ monedas, onCerrar }: { monedas: Moneda[]; onCerrar: () => void
             }
         >
             <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Moneda">{(p) => <SelectMenu {...p} value={moneda} onChange={setMoneda} options={monedas.map((m) => ({ value: m.id, label: `${m.id} · ${m.nombre}` }))} />}</Field>
-                <Field label="TC (en soles)">{(p) => <Input {...p} inputMode="decimal" value={texto} onChange={(e) => (setTexto(e.target.value), setError(null))} />}</Field>
+                <Field label="Moneda">
+                    {(p) => (
+                        <SelectMenu
+                            {...p}
+                            value={moneda}
+                            onChange={setMoneda}
+                            options={monedas.map((m) => ({ value: m.id, label: `${m.id} · ${m.nombre}` }))}
+                        />
+                    )}
+                </Field>
+                <Field label="TC (en soles)">
+                    {(p) => <Input {...p} inputMode="decimal" value={texto} onChange={(e) => (setTexto(e.target.value), setError(null))} />}
+                </Field>
             </div>
             <Field label="Vale desde">{(p) => <Input {...p} type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />}</Field>
             <Field label="Comentario" optional hint="Por ejemplo: cierre de mes, TC SBS del día.">

@@ -26,7 +26,9 @@ export function FichaPago({ id, onCerrar }: { id: string; onCerrar: () => void }
     if (!p)
         return (
             <Ficha titulo={error ? 'No se pudo abrir la cuota' : 'Cargando la cuota…'} onCerrar={onCerrar}>
-                <div className="flex flex-col gap-3 px-5 py-4">{error ? <p className="text-ui text-danger-strong">{error}</p> : [1, 2, 3].map((i) => <Hueco key={i} className="h-16 w-full" />)}</div>
+                <div className="flex flex-col gap-3 px-5 py-4">
+                    {error ? <p className="text-ui text-danger-strong">{error}</p> : [1, 2, 3].map((i) => <Hueco key={i} className="h-16 w-full" />)}
+                </div>
             </Ficha>
         );
     return <FichaCargada p={p} onCerrar={onCerrar} />;
@@ -65,7 +67,9 @@ function FichaCargada({ p, onCerrar }: { p: Pago; onCerrar: () => void }) {
                     <Total k="Neto a pagar" v={monto(p.neto ?? p.monto - p.retencion, p.moneda)} />
                     <Total k="En soles" v={monto(p.montoSoles)} />
                 </dl>
-                {!p.aplicaRetencion && p.estado === 'Plan' && <p className="mt-2 text-small text-ink-3">La retención se calcula al solicitar la cuota, con la factura.</p>}
+                {!p.aplicaRetencion && p.estado === 'Plan' && (
+                    <p className="mt-2 text-small text-ink-3">La retención se calcula al solicitar la cuota, con la factura.</p>
+                )}
             </FichaSeccion>
 
             <FichaSeccion titulo="Datos de la cuota">
@@ -78,9 +82,22 @@ function FichaCargada({ p, onCerrar }: { p: Pago; onCerrar: () => void }) {
                             </Link>,
                         ],
                         ['Estatus de la orden', p.ordenEstatus],
-                        ['Cuota', `${formatoCuota(p.nCuota)} · ${p.tipo}${p.porcentaje != null && p.porcentaje < 1 ? ` (${Math.round(p.porcentaje * 100)} %)` : ''}`],
+                        [
+                            'Cuota',
+                            `${formatoCuota(p.nCuota)} · ${p.tipo}${p.porcentaje != null && p.porcentaje < 1 ? ` (${Math.round(p.porcentaje * 100)} %)` : ''}`,
+                        ],
                         ['Hito', p.hito],
-                        ['Fecha límite', p.fechaLimite ? <span className={venc ? 'font-medium text-danger-strong' : ''}>{dmy(p.fechaLimite)}{venc ? ' (vencida)' : ''}</span> : ''],
+                        [
+                            'Fecha límite',
+                            p.fechaLimite ? (
+                                <span className={venc ? 'font-medium text-danger-strong' : ''}>
+                                    {dmy(p.fechaLimite)}
+                                    {venc ? ' (vencida)' : ''}
+                                </span>
+                            ) : (
+                                ''
+                            ),
+                        ],
                         ['Programada para', p.fechaProgramada ? dmy(p.fechaProgramada) : ''],
                         ['Pagada', p.fechaPago ? dayTime(p.fechaPago) : ''],
                         ['N° de operación', p.nOperacion],
@@ -112,7 +129,13 @@ function FichaCargada({ p, onCerrar }: { p: Pago; onCerrar: () => void }) {
 
             <FichaSeccion titulo="Documentos de la orden">
                 <p className="mb-2 text-small text-ink-2">Aquí van la factura, la guía, el acta de conformidad y el voucher de pago.</p>
-                <Documentos dueno={{ ordenId: p.ordenId }} tipos={TIPOS_ORDEN} puedeSubir={subeDocs} tocadas={['pagos', 'ordenes', 'acciones']} moneda={p.moneda} />
+                <Documentos
+                    dueno={{ ordenId: p.ordenId }}
+                    tipos={TIPOS_ORDEN}
+                    puedeSubir={subeDocs}
+                    tocadas={['pagos', 'ordenes', 'acciones']}
+                    moneda={p.moneda}
+                />
             </FichaSeccion>
 
             <FichaSeccion titulo="Historial">

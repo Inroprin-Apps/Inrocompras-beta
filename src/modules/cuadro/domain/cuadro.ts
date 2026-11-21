@@ -2,6 +2,8 @@
 // Las 35 columnas salen de la vista public.v_cuadro_aprobaciones (0040), con sus nombres exactos y en su orden:
 // la pantalla y la exportación usan este mismo arreglo. D-05: faltan 2 columnas por confirmar contra la hoja real.
 
+import { palabrasDe, plano } from '@/shared/texto.ts';
+
 export type TipoColumna = 'texto' | 'numero' | 'moneda' | 'fecha' | 'si_no' | 'pct' | 'url' | 'entero';
 
 export interface ColumnaCuadro {
@@ -74,10 +76,8 @@ export interface FiltrosCuadro {
 }
 export const FILTROS_CUADRO: FiltrosCuadro = { estatus: '', aprobacion: '', procedencia: '', empresa: '', desde: '', hasta: '', texto: '' };
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-
 export function filtrarCuadro(filas: FilaCuadro[], f: FiltrosCuadro): FilaCuadro[] {
-    const palabras = plano(f.texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(f.texto);
     return filas.filter((r) => {
         const v = r.valores;
         if (f.estatus && v['Estatus Compra'] !== f.estatus) return false;
@@ -95,11 +95,15 @@ export function filtrarCuadro(filas: FilaCuadro[], f: FiltrosCuadro): FilaCuadro
 
 /** Las más recientes primero (por fecha y luego por número). */
 export function ordenarCuadro(filas: FilaCuadro[]): FilaCuadro[] {
-    return [...filas].sort((a, b) => txt(b.valores['Fecha']).localeCompare(txt(a.valores['Fecha'])) || txt(b.valores['OC']).localeCompare(txt(a.valores['OC']), 'es', { numeric: true }));
+    return [...filas].sort(
+        (a, b) =>
+            txt(b.valores['Fecha']).localeCompare(txt(a.valores['Fecha'])) || txt(b.valores['OC']).localeCompare(txt(a.valores['OC']), 'es', { numeric: true }),
+    );
 }
 
 /** Valores distintos de una columna (para las opciones de un filtro). */
-export const distintos = (filas: FilaCuadro[], t: TituloCuadro) => [...new Set(filas.map((r) => txt(r.valores[t])).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+export const distintos = (filas: FilaCuadro[], t: TituloCuadro) =>
+    [...new Set(filas.map((r) => txt(r.valores[t])).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
 
 // ── Presentación ──
 const num = new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

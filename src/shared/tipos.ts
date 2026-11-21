@@ -1,8 +1,20 @@
 // Tipos y catálogos compartidos. Las listas son las mismas que validan los «check» de la base (0001_esquema.sql).
 
 export const AREAS = [
-    'Compras', 'Importaciones', 'Finanzas', 'Contabilidad', 'Control de Gestión', 'Gerencia', 'Planeamiento',
-    'Comercial', 'Técnica', 'Costos', 'Proyectos', 'Administración', 'Almacén', 'Sin área',
+    'Compras',
+    'Importaciones',
+    'Finanzas',
+    'Contabilidad',
+    'Control de Gestión',
+    'Gerencia',
+    'Planeamiento',
+    'Comercial',
+    'Técnica',
+    'Costos',
+    'Proyectos',
+    'Administración',
+    'Almacén',
+    'Sin área',
 ] as const;
 export type Area = (typeof AREAS)[number];
 

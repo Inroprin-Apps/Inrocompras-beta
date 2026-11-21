@@ -17,13 +17,10 @@ import {
     type TipoItem,
     type TipoSolicitud,
 } from '../domain/solicitud.ts';
+import { nn, s, sn, type Fila } from '@/shared/supabase/filas.ts';
 
-type Fila = Record<string, unknown>;
-const s = (v: unknown) => (v == null ? '' : String(v));
-const sn = (v: unknown) => (v == null || v === '' ? null : String(v));
-const nn = (v: unknown) => (v == null || v === '' ? null : Number(v));
-
-const COLS = 'id,numero,tipo,proyecto_id,etapa_id,jefe_id,solicitante_id,sustento,estado,liberado_por,fecha_liberacion,motivo_rechazo,motivo_observacion,motivo_cancelacion,nueva_solicitud_id,requerimiento_id,estado_carga,lote_actual,creado';
+const COLS =
+    'id,numero,tipo,proyecto_id,etapa_id,jefe_id,solicitante_id,sustento,estado,liberado_por,fecha_liberacion,motivo_rechazo,motivo_observacion,motivo_cancelacion,nueva_solicitud_id,requerimiento_id,estado_carga,lote_actual,creado';
 
 function solicitud(f: Fila): Solicitud {
     const conteo = f.solicitud_items as { count: number }[] | null | undefined;
@@ -130,7 +127,12 @@ export class SupabaseSolicitudesAdapter implements SolicitudesPort {
         const [it, ca, rq] = await Promise.all([
             this.db.from('solicitud_items').select('*').eq('solicitud_id', id).order('n_item', { ascending: true, nullsFirst: false }),
             sol.loteActual
-                ? this.db.from('carga_items').select('id,lote_id,n_fila,datos,estado_fila,errores').eq('solicitud_id', id).eq('lote_id', sol.loteActual).order('n_fila')
+                ? this.db
+                      .from('carga_items')
+                      .select('id,lote_id,n_fila,datos,estado_fila,errores')
+                      .eq('solicitud_id', id)
+                      .eq('lote_id', sol.loteActual)
+                      .order('n_fila')
                 : Promise.resolve({ data: [] as Fila[], error: null }),
             sol.requerimientoId
                 ? this.db.from('requerimientos').select('numero,estado').eq('id', sol.requerimientoId).maybeSingle()
@@ -153,7 +155,11 @@ export class SupabaseSolicitudesAdapter implements SolicitudesPort {
 
     async crear(x: NuevaSolicitud): Promise<Result<string, ErrorFuente>> {
         const yo = await this.yo();
-        const r = await this.db.from('solicitudes').insert({ ...aFila(x), solicitante_id: yo }).select('id').single();
+        const r = await this.db
+            .from('solicitudes')
+            .insert({ ...aFila(x), solicitante_id: yo })
+            .select('id')
+            .single();
         return resultadoUno<Fila>(r).map((f) => s(f.id));
     }
 

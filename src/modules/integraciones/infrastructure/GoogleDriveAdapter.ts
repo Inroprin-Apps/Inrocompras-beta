@@ -32,7 +32,14 @@ export class GoogleDriveAdapter implements DrivePort {
 
     private async buscar(nombre: string, padre: string): Promise<string | null> {
         const q = `name = '${escaparConsultaDrive(nombre)}' and '${padre}' in parents and mimeType = '${CARPETA}' and trashed = false`;
-        const r = await this.api().files.list({ q, fields: 'files(id)', includeItemsFromAllDrives: true, corpora: 'drive', driveId: process.env.DRIVE_UNIDAD_ID, ...comunes });
+        const r = await this.api().files.list({
+            q,
+            fields: 'files(id)',
+            includeItemsFromAllDrives: true,
+            corpora: 'drive',
+            driveId: process.env.DRIVE_UNIDAD_ID,
+            ...comunes,
+        });
         return r.data.files?.[0]?.id ?? null;
     }
 

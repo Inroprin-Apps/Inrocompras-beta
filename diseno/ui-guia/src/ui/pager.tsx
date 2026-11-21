@@ -93,10 +93,22 @@ export function Pager<T>({ paged, className = 'mt-3' }: { paged: Paged<T>; class
                 <span className="flex items-center gap-2 px-1.5 tabular-nums">
                     Página <PageInput key={page} page={page} pages={pages} setPage={setPage} /> de {pages}
                 </span>
-                <button type="button" className={`${BTN} flex h-7 items-center gap-0.5 pr-1.5 pl-3`} disabled={page === pages} onClick={() => setPage(page + 1)}>
+                <button
+                    type="button"
+                    className={`${BTN} flex h-7 items-center gap-0.5 pr-1.5 pl-3`}
+                    disabled={page === pages}
+                    onClick={() => setPage(page + 1)}
+                >
                     Siguiente <ChevronRight size={16} />
                 </button>
-                <button type="button" className={ICON_BTN} disabled={page === pages} onClick={() => setPage(pages)} aria-label="Última página" title="Última página">
+                <button
+                    type="button"
+                    className={ICON_BTN}
+                    disabled={page === pages}
+                    onClick={() => setPage(pages)}
+                    aria-label="Última página"
+                    title="Última página"
+                >
                     <ChevronsRight size={16} />
                 </button>
             </div>

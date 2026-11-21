@@ -41,9 +41,18 @@ export default function Principios() {
             <Section title="Reglas de pintura" blurb="Las que más se rompen sin darse cuenta.">
                 <Rules
                     items={[
-                        ['Se pinta con un rol: bg-primary, text-ink-2, border-line.', 'Nunca un hex, un valor de marca (bg-brand-red) ni la paleta de Tailwind (gray-500, text-white).'],
-                        ['Se escribe con un paso de la escala: text-ui, text-small.', 'Nunca text-[13px]. Si ningún paso sirve, se discute la escala, no se inventa un tamaño.'],
-                        ['Deshabilitado es gris, nunca opacidad.', 'Una opacidad sobre azul da un azul lavado que se lee como otro estado, y sigue pareciendo clicable.'],
+                        [
+                            'Se pinta con un rol: bg-primary, text-ink-2, border-line.',
+                            'Nunca un hex, un valor de marca (bg-brand-red) ni la paleta de Tailwind (gray-500, text-white).',
+                        ],
+                        [
+                            'Se escribe con un paso de la escala: text-ui, text-small.',
+                            'Nunca text-[13px]. Si ningún paso sirve, se discute la escala, no se inventa un tamaño.',
+                        ],
+                        [
+                            'Deshabilitado es gris, nunca opacidad.',
+                            'Una opacidad sobre azul da un azul lavado que se lee como otro estado, y sigue pareciendo clicable.',
+                        ],
                         ['Una acción principal (botón azul) por pantalla.', 'Si hay dos azules, ninguno es el principal.'],
                         ['El foco de teclado siempre se ve.', 'Anillo azul afuera con focus-visible: aparece con Tab, no con el clic del mouse.'],
                     ]}

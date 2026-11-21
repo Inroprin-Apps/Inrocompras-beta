@@ -2,6 +2,8 @@
 // TC_Costeo). PURO: tipos, filtros, orden y cálculos de pantalla. Las reglas (quién avanza, el TC que se congela al
 // numerar la DAM, el reparto del costeo, quién reabre) viven en la base: 0003 (ac_des_*) y 0050.
 
+import { palabrasDe, plano } from '@/shared/texto.ts';
+
 export const ESTADOS_DES = ['Borrador', 'Documentos completos', 'DAM numerada', 'Llegada', 'Levante', 'En almacén', 'Costeo cerrado'] as const;
 export type EstadoDes = (typeof ESTADOS_DES)[number];
 export const TIPOS_DES = ['Marítimo', 'Aéreo', 'Courier'] as const;
@@ -208,7 +210,9 @@ export function checklist(d: { chk: Checklist; requierePermiso: boolean }, tipos
 
 /** Lo que falta, con las mismas palabras que la base (app.des_docs_faltantes). */
 export const faltantes = (d: { chk: Checklist; requierePermiso: boolean }, tiposSubidos: readonly string[]) =>
-    checklist(d, tiposSubidos).filter((i) => !i.cumple).map((i) => i.falta);
+    checklist(d, tiposSubidos)
+        .filter((i) => !i.cumple)
+        .map((i) => i.falta);
 
 // ───────────────────────── TC de costeo ─────────────────────────
 export type OrigenTc = 'soles' | 'congelado' | 'vigente' | 'referencial';
@@ -267,7 +271,10 @@ const r2 = (n: number) => Math.round(n * 100) / 100;
  * Los totales con lo calculado en la base (exw_s y ad_valorem_s de cada producto, que escribe app.des_calcular)
  * y los gastos registrados hasta ahora: así se ve qué cambia si se vuelve a calcular.
  */
-export function totalesCosteo(productos: readonly Pick<ProductoDes, 'exwS' | 'adValoremS'>[], gastos: readonly Pick<GastoDes, 'entraCosto' | 'montoS' | 'tipoComprobante'>[]): TotalesCosteo {
+export function totalesCosteo(
+    productos: readonly Pick<ProductoDes, 'exwS' | 'adValoremS'>[],
+    gastos: readonly Pick<GastoDes, 'entraCosto' | 'montoS' | 'tipoComprobante'>[],
+): TotalesCosteo {
     const exwS = r2(productos.reduce((a, p) => a + (p.exwS ?? 0), 0));
     const adValoremS = r2(productos.reduce((a, p) => a + (p.adValoremS ?? 0), 0));
     const gastosCostoS = r2(gastos.filter((g) => g.entraCosto).reduce((a, g) => a + signo(g) * g.montoS, 0));
@@ -328,10 +335,8 @@ export interface FiltrosDes {
 }
 export const FILTROS_DES: FiltrosDes = { estado: '', tipo: '', texto: '' };
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-
 export function filtrarDes(lista: readonly Desaduanaje[], f: FiltrosDes): Desaduanaje[] {
-    const palabras = plano(f.texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(f.texto);
     return lista.filter((d) => {
         if (f.estado === 'abiertos' ? d.estado === 'Costeo cerrado' : f.estado && d.estado !== f.estado) return false;
         if (f.tipo && d.tipo !== f.tipo) return false;
@@ -366,7 +371,7 @@ export function fechaDelEstado(d: Desaduanaje): { etiqueta: string; fecha: strin
 }
 
 export function filtrarOcs(lista: readonly OcElegible[], texto: string): OcElegible[] {
-    const palabras = plano(texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(texto);
     if (!palabras.length) return [...lista];
     return lista.filter((o) => {
         const t = plano(`${o.numero} ${o.proveedor} ${o.proyecto}`);
@@ -378,15 +383,18 @@ export function filtrarOcs(lista: readonly OcElegible[], texto: string): OcElegi
 const fmt = new Map<string, Intl.NumberFormat>();
 export function monto(n: number, moneda = 'PEN'): string {
     try {
-        if (!fmt.has(moneda)) fmt.set(moneda, new Intl.NumberFormat('es-PE', { style: 'currency', currency: moneda, minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+        if (!fmt.has(moneda))
+            fmt.set(moneda, new Intl.NumberFormat('es-PE', { style: 'currency', currency: moneda, minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         return fmt.get(moneda)!.format(n);
     } catch {
         return `${moneda} ${n.toFixed(2)}`;
     }
 }
 export const numero = (n: number, dec = 3) => new Intl.NumberFormat('es-PE', { maximumFractionDigits: dec }).format(n);
-export const porcentaje = (n: number | null) => (n == null ? '—' : new Intl.NumberFormat('es-PE', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 2 }).format(n));
-export const factor = (n: number | null) => (n == null ? '—' : new Intl.NumberFormat('es-PE', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).format(n));
+export const porcentaje = (n: number | null) =>
+    n == null ? '—' : new Intl.NumberFormat('es-PE', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 2 }).format(n);
+export const factor = (n: number | null) =>
+    n == null ? '—' : new Intl.NumberFormat('es-PE', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).format(n);
 export const tc = (n: number | null) => (n == null ? '—' : new Intl.NumberFormat('es-PE', { minimumFractionDigits: 3, maximumFractionDigits: 6 }).format(n));
 
 /** Lee un número escrito a mano («1,234.5», «1234,5»). */

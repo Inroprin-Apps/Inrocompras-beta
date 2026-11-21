@@ -31,7 +31,16 @@ export function Portada() {
         const celdas = q('.p-cubo .celda');
         gsap.set(celdas, { svgOrigin: (i: number, t: Element) => `${t.getAttribute('data-cx')} ${t.getAttribute('data-cy')}` });
         gsap.set(q('.p-cubo polygon'), { fillOpacity: 0 });
-        gsap.from(celdas, { x: () => gsap.utils.random(-420, 420), y: () => gsap.utils.random(-380, 380), rotation: () => gsap.utils.random(-200, 200), scale: 0.3, opacity: 0, duration: 1.3, stagger: 0.1, ease: 'power3.out' });
+        gsap.from(celdas, {
+            x: () => gsap.utils.random(-420, 420),
+            y: () => gsap.utils.random(-380, 380),
+            rotation: () => gsap.utils.random(-200, 200),
+            scale: 0.3,
+            opacity: 0,
+            duration: 1.3,
+            stagger: 0.1,
+            ease: 'power3.out',
+        });
         gsap.from(q('.p-titulo > *'), { y: 46, opacity: 0, duration: 0.8, stagger: 0.16, ease: 'power2.out', delay: 0.2 });
         gsap.from(q('.p-pista'), { opacity: 0, duration: 0.6, delay: 1.6 });
         const tl = gsap
@@ -42,27 +51,26 @@ export function Portada() {
         registrarEstados(tl.scrollTrigger, tl, [0, tl.duration()]); // contorno armado · relleno de color
     });
     return (
-
         <div ref={raiz}>
-                    <Escena id="portada">
-                        <div className={FIJA}>
-                            <div className="mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.1fr_1fr]">
-                                <div className="p-titulo flex flex-col gap-5">
-                                    <Rombos size={20} />
-                                    <h1 className="font-semibold" style={TITULAR}>
-                                        Cómo se ven y cómo se comportan las apps de INROPRIN
-                                    </h1>
-                                    <p className="max-w-xl text-ink-2" style={SUBTITULAR}>
-                                        Un manual para diseñar y construir con el mismo criterio: la marca, el color, la forma y cada pieza, con su ejemplo vivo.
-                                    </p>
-                                </div>
-                                <div className="flex justify-center">
-                                    <Cubo clase="p-cubo" size={460} />
-                                </div>
-                            </div>
-                            <p className="p-pista absolute bottom-8 left-1/2 -translate-x-1/2 text-small text-ink-2">Baja para recorrerlo ↓</p>
+            <Escena id="portada">
+                <div className={FIJA}>
+                    <div className="mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.1fr_1fr]">
+                        <div className="p-titulo flex flex-col gap-5">
+                            <Rombos size={20} />
+                            <h1 className="font-semibold" style={TITULAR}>
+                                Cómo se ven y cómo se comportan las apps de INROPRIN
+                            </h1>
+                            <p className="max-w-xl text-ink-2" style={SUBTITULAR}>
+                                Un manual para diseñar y construir con el mismo criterio: la marca, el color, la forma y cada pieza, con su ejemplo vivo.
+                            </p>
                         </div>
-                    </Escena>
+                        <div className="flex justify-center">
+                            <Cubo clase="p-cubo" size={460} />
+                        </div>
+                    </div>
+                    <p className="p-pista absolute bottom-8 left-1/2 -translate-x-1/2 text-small text-ink-2">Baja para recorrerlo ↓</p>
+                </div>
+            </Escena>
         </div>
     );
 }

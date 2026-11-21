@@ -44,7 +44,9 @@ export function crearDocx({ paginas, cuerpo, titulo }) {
         .map((p, i) => {
             const rid = `rIdImg${i + 1}`;
             medios.push({ nombre: `word/media/fondo${i + 1}.png`, datos: p.png });
-            relaciones.push(`<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/fondo${i + 1}.png"/>`);
+            relaciones.push(
+                `<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/fondo${i + 1}.png"/>`,
+            );
             let xml = parrafoChico(fondoXml(i + 1, rid, p.w, p.h));
             xml += p.campos.map(campoXml).join('');
             if (cuerpo && i === 0) {

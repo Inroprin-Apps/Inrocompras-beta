@@ -3,9 +3,7 @@ import type { Result } from 'neverthrow';
 import { resultado, resultadoUno, type ErrorFuente } from '@/shared/errores.ts';
 import type { ProyectosPort } from '../application/ports/ProyectosPort.ts';
 import type { EstadoProyecto, NuevoProyecto, Proyecto } from '../domain/proyecto.ts';
-
-type Fila = Record<string, unknown>;
-const s = (v: unknown) => (v == null ? '' : String(v));
+import { s, type Fila } from '@/shared/supabase/filas.ts';
 
 const aFila = (p: NuevoProyecto) => ({
     codigo: p.codigo.trim() || null,
@@ -45,7 +43,11 @@ export class SupabaseProyectosAdapter implements ProyectosPort {
 
     async crear(p: NuevoProyecto): Promise<Result<string, ErrorFuente>> {
         const { data: u } = await this.db.auth.getUser();
-        const r = await this.db.from('proyectos').insert({ ...aFila(p), creado_por: u.user?.id }).select('id').single();
+        const r = await this.db
+            .from('proyectos')
+            .insert({ ...aFila(p), creado_por: u.user?.id })
+            .select('id')
+            .single();
         return resultadoUno<Fila>(r).map((f) => s(f.id));
     }
 

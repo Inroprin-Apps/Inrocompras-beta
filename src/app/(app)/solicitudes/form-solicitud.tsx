@@ -118,7 +118,10 @@ export function FormSolicitud({ solicitud, onCerrar, onCreado }: { solicitud?: S
                     </Field>
                 </>
             ) : (
-                <Field label="Jefe que la libera" hint={miJefe ? 'Tu jefe según Equipo. Cámbialo solo si corresponde a otra persona.' : 'Elige a tu jefe directo.'}>
+                <Field
+                    label="Jefe que la libera"
+                    hint={miJefe ? 'Tu jefe según Equipo. Cámbialo solo si corresponde a otra persona.' : 'Elige a tu jefe directo.'}
+                >
                     {(p) => (
                         <SelectMenu
                             {...p}

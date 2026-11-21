@@ -3,7 +3,15 @@
 // Registrar la validación técnica de uno o varios ítems (ac_item_tecnica, uno por uno). Validado lleva marca y modelo;
 // Observado, el motivo; No aplica, nada. Si algún ítem falla, se dice cuál y por qué (el texto de la base).
 import { useState } from 'react';
-import { RESULTADOS_TECNICA, TECNICA_VACIA, faltaEnTecnica, paramsTecnica, type FormTecnica, type ItemTecnica, type ResultadoTecnica } from '@/modules/requerimientos/application/views.ts';
+import {
+    RESULTADOS_TECNICA,
+    TECNICA_VACIA,
+    faltaEnTecnica,
+    paramsTecnica,
+    type FormTecnica,
+    type ItemTecnica,
+    type ResultadoTecnica,
+} from '@/modules/requerimientos/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
 import { Segmented } from '@/shared/ui/card.tsx';
 import { Dialog } from '@/shared/ui/dialog.tsx';
@@ -19,7 +27,11 @@ export function CamposTecnica({ f, onChange }: { f: FormTecnica; onChange: (f: F
         <>
             <div className="flex flex-col gap-1.5">
                 <span className="text-ui font-medium">Resultado</span>
-                <Segmented<ResultadoTecnica> options={RESULTADOS_TECNICA.map((r) => ({ value: r, label: r }))} value={f.resultado} onChange={(resultado) => set({ resultado })} />
+                <Segmented<ResultadoTecnica>
+                    options={RESULTADOS_TECNICA.map((r) => ({ value: r, label: r }))}
+                    value={f.resultado}
+                    onChange={(resultado) => set({ resultado })}
+                />
             </div>
             {f.resultado === 'Validado' && (
                 <div className="grid gap-4 sm:grid-cols-2">

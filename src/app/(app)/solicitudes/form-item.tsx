@@ -61,7 +61,13 @@ export function FormItem({
         refrescar(['solicitud_items', 'acciones']);
         if (otro) {
             setError(null);
-            setF({ ...ITEM_VACIO, nItem: (f.nItem ?? siguienteNItem(items)) + 1, plazoAdquisicion: f.plazoAdquisicion, canal: f.canal, monedaPpto: f.monedaPpto });
+            setF({
+                ...ITEM_VACIO,
+                nItem: (f.nItem ?? siguienteNItem(items)) + 1,
+                plazoAdquisicion: f.plazoAdquisicion,
+                canal: f.canal,
+                monedaPpto: f.monedaPpto,
+            });
         } else onCerrar();
     }
 
@@ -89,11 +95,23 @@ export function FormItem({
             <div className="grid grid-cols-[5rem_1fr] gap-4">
                 <Field label="N°">
                     {(p) => (
-                        <Input {...p} inputMode="numeric" value={f.nItem ?? ''} onChange={(e) => set({ nItem: e.target.value.replace(/\D/g, '') ? Number(e.target.value.replace(/\D/g, '')) : null })} />
+                        <Input
+                            {...p}
+                            inputMode="numeric"
+                            value={f.nItem ?? ''}
+                            onChange={(e) => set({ nItem: e.target.value.replace(/\D/g, '') ? Number(e.target.value.replace(/\D/g, '')) : null })}
+                        />
                     )}
                 </Field>
                 <Field label="Tipo">
-                    {(p) => <SelectMenu {...p} value={f.tipo} onChange={(t) => set({ tipo: t as TipoItem })} options={TIPOS_ITEM.map((t) => ({ value: t, label: t }))} />}
+                    {(p) => (
+                        <SelectMenu
+                            {...p}
+                            value={f.tipo}
+                            onChange={(t) => set({ tipo: t as TipoItem })}
+                            options={TIPOS_ITEM.map((t) => ({ value: t, label: t }))}
+                        />
+                    )}
                 </Field>
             </div>
             <Field label="Descripción" hint="Como la pide el cliente o el área.">
@@ -138,23 +156,39 @@ export function FormItem({
                             {(p) => <Input {...p} inputMode="decimal" value={f.presupuestoUnit} onChange={(e) => set({ presupuestoUnit: e.target.value })} />}
                         </Field>
                         <Field label="Moneda">
-                            {(p) => <SelectMenu {...p} value={f.monedaPpto ?? 'PEN'} onChange={(monedaPpto) => set({ monedaPpto })} options={monedas.map((m) => ({ value: m.id, label: m.id }))} />}
+                            {(p) => (
+                                <SelectMenu
+                                    {...p}
+                                    value={f.monedaPpto ?? 'PEN'}
+                                    onChange={(monedaPpto) => set({ monedaPpto })}
+                                    options={monedas.map((m) => ({ value: m.id, label: m.id }))}
+                                />
+                            )}
                         </Field>
                     </div>
                 )}
-                <Field label="Incluido en" optional hint={tieneHijos ? 'Tiene accesorios incluidos: no puede ir dentro de otro.' : 'Accesorio que viene con su equipo: no se compra aparte.'}>
+                <Field
+                    label="Incluido en"
+                    optional
+                    hint={tieneHijos ? 'Tiene accesorios incluidos: no puede ir dentro de otro.' : 'Accesorio que viene con su equipo: no se compra aparte.'}
+                >
                     {(p) => (
                         <SelectMenu
                             {...p}
                             disabled={tieneHijos}
                             value={f.incluidoEn ?? ''}
                             onChange={(x) => set({ incluidoEn: x || null })}
-                            options={[{ value: '', label: 'Se compra aparte' }, ...contenedores.map((i) => ({ value: i.id, label: `${i.nItem ?? '—'} · ${i.descripcion}` }))]}
+                            options={[
+                                { value: '', label: 'Se compra aparte' },
+                                ...contenedores.map((i) => ({ value: i.id, label: `${i.nItem ?? '—'} · ${i.descripcion}` })),
+                            ]}
                         />
                     )}
                 </Field>
                 <Field label="Link de referencia" optional>
-                    {(p) => <Input {...p} type="url" value={f.referenciaLink} onChange={(e) => set({ referenciaLink: e.target.value })} placeholder="https://" />}
+                    {(p) => (
+                        <Input {...p} type="url" value={f.referenciaLink} onChange={(e) => set({ referenciaLink: e.target.value })} placeholder="https://" />
+                    )}
                 </Field>
             </div>
             {error && (

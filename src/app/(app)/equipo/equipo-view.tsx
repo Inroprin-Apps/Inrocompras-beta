@@ -75,7 +75,12 @@ function EquipoAdmin({ yo }: { yo: string }) {
                 <SearchBox value={v.texto} onChange={(texto) => vista$.set({ texto })} placeholder="Busca por nombre, correo, área o rol" />
                 <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar">
                     {FILTROS_EQUIPO.map((k) => (
-                        <Button key={k} variant={v.filtro === k ? 'primary' : 'secondary'} onClick={() => vista$.set({ filtro: k })} aria-pressed={v.filtro === k}>
+                        <Button
+                            key={k}
+                            variant={v.filtro === k ? 'primary' : 'secondary'}
+                            onClick={() => vista$.set({ filtro: k })}
+                            aria-pressed={v.filtro === k}
+                        >
                             {etiquetas[k]}
                         </Button>
                     ))}
@@ -185,7 +190,9 @@ function FichaMiembro({ persona, personas, nombre, onCerrar }: { persona: Miembr
         >
             <FichaSeccion titulo="Área, jefe y roles">
                 <div className="flex flex-col gap-4">
-                    <Field label="Área">{(p) => <SelectMenu {...p} value={d.area} onChange={(area) => set({ area })} options={AREAS.map((a) => ({ value: a, label: a }))} />}</Field>
+                    <Field label="Área">
+                        {(p) => <SelectMenu {...p} value={d.area} onChange={(area) => set({ area })} options={AREAS.map((a) => ({ value: a, label: a }))} />}
+                    </Field>
                     <Field label="Jefe" optional hint="Libera las solicitudes administrativas y decide anulaciones por error de emisión.">
                         {(p) => (
                             <SelectMenu
@@ -193,12 +200,22 @@ function FichaMiembro({ persona, personas, nombre, onCerrar }: { persona: Miembr
                                 value={d.jefeId ?? ''}
                                 onChange={(j) => set({ jefeId: j || null })}
                                 placeholder="Sin jefe"
-                                options={[{ value: '', label: 'Sin jefe' }, ...personas.filter((x) => x.id !== persona.id && x.activo).map((x) => ({ value: x.id, label: x.nombre }))]}
+                                options={[
+                                    { value: '', label: 'Sin jefe' },
+                                    ...personas.filter((x) => x.id !== persona.id && x.activo).map((x) => ({ value: x.id, label: x.nombre })),
+                                ]}
                             />
                         )}
                     </Field>
                     <Field label="Ámbito" hint="Qué compras ve en su bandeja y su menú.">
-                        {(p) => <SelectMenu {...p} value={d.ambito} onChange={(ambito) => set({ ambito })} options={AMBITOS.map((a) => ({ value: a.value, label: a.label }))} />}
+                        {(p) => (
+                            <SelectMenu
+                                {...p}
+                                value={d.ambito}
+                                onChange={(ambito) => set({ ambito })}
+                                options={AMBITOS.map((a) => ({ value: a.value, label: a.label }))}
+                            />
+                        )}
                     </Field>
                     <fieldset className="flex flex-col gap-2.5">
                         <legend className="mb-1.5 text-ui font-medium">Roles</legend>
@@ -212,7 +229,12 @@ function FichaMiembro({ persona, personas, nombre, onCerrar }: { persona: Miembr
                             />
                         ))}
                     </fieldset>
-                    <Checkbox label="Activo" hint="Desactivada, la persona no hace acciones ni ve precios." checked={d.activo} onChange={(e) => set({ activo: e.target.checked })} />
+                    <Checkbox
+                        label="Activo"
+                        hint="Desactivada, la persona no hace acciones ni ve precios."
+                        checked={d.activo}
+                        onChange={(e) => set({ activo: e.target.checked })}
+                    />
                     {error && (
                         <p role="alert" className="text-small font-medium text-danger-strong">
                             {error}
@@ -234,7 +256,8 @@ function FichaMiembro({ persona, personas, nombre, onCerrar }: { persona: Miembr
                     <ul className="flex flex-col gap-2">
                         {hist.data.map((c) => (
                             <li key={c.id} className="text-small">
-                                <span className="font-medium">{etiquetaCambio(c.accion)}</span>: {valorCambio(c, c.de, (id) => nombre.get(id))} → {valorCambio(c, c.a, (id) => nombre.get(id))}
+                                <span className="font-medium">{etiquetaCambio(c.accion)}</span>: {valorCambio(c, c.de, (id) => nombre.get(id))} →{' '}
+                                {valorCambio(c, c.a, (id) => nombre.get(id))}
                                 <div className="text-caption text-ink-3">
                                     {dayTime(c.ts)} · {c.usuarioId ? (nombre.get(c.usuarioId) ?? 'Otra persona') : 'Sistema'}
                                 </div>

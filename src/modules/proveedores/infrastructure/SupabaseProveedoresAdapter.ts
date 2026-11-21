@@ -2,18 +2,31 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { err, ok, type Result } from 'neverthrow';
 import { resultado, resultadoUno, type ErrorFuente } from '@/shared/errores.ts';
 import type { ProveedoresPort } from '../application/ports/ProveedoresPort.ts';
-import { cuentasLimpias, rucParaGuardar, type Cuenta, type DatosProveedor, type Evaluacion, type NuevoProveedor, type Origen, type Proveedor } from '../domain/proveedor.ts';
-
-type Fila = Record<string, unknown>;
-const s = (v: unknown) => (v == null ? '' : String(v));
-const sn = (v: unknown) => (v == null ? null : String(v));
+import {
+    cuentasLimpias,
+    rucParaGuardar,
+    type Cuenta,
+    type DatosProveedor,
+    type Evaluacion,
+    type NuevoProveedor,
+    type Origen,
+    type Proveedor,
+} from '../domain/proveedor.ts';
+import { s, sn, type Fila } from '@/shared/supabase/filas.ts';
 
 const COLUMNAS =
     'id,ruc,razon_social,origen,pais,correo,telefono,contacto,cuentas,es_agente_retencion,es_buen_contribuyente,verificado_contab,verificado_por,fecha_verificacion,evaluacion_fin,evaluacion_fin_por,evaluacion_fin_fecha,evaluacion_fin_nota,creado_por,creado';
 
 function cuentas(v: unknown): Cuenta[] {
     if (!Array.isArray(v)) return [];
-    return v.map((c: Fila) => ({ banco: s(c?.banco), moneda: s(c?.moneda) || 'PEN', numero: s(c?.numero), cci: s(c?.cci), swift: s(c?.swift), iban: s(c?.iban) }));
+    return v.map((c: Fila) => ({
+        banco: s(c?.banco),
+        moneda: s(c?.moneda) || 'PEN',
+        numero: s(c?.numero),
+        cci: s(c?.cci),
+        swift: s(c?.swift),
+        iban: s(c?.iban),
+    }));
 }
 
 function proveedor(f: Fila): Proveedor {
@@ -74,7 +87,12 @@ export class SupabaseProveedoresAdapter implements ProveedoresPort {
         const r = await this.db.from('proveedores').update(aFila(d)).eq('id', id).select('id');
         // RLS deja el UPDATE en 0 filas (sin error) cuando no le toca: se dice igual que un permiso negado.
         return resultado<Fila[]>(r).andThen((fs) =>
-            fs.length ? ok(null) : err<null, ErrorFuente>({ kind: 'permiso', message: 'No tienes permiso para editar este proveedor. Lo editan Compras, Importaciones o Finanzas.' }),
+            fs.length
+                ? ok(null)
+                : err<null, ErrorFuente>({
+                      kind: 'permiso',
+                      message: 'No tienes permiso para editar este proveedor. Lo editan Compras, Importaciones o Finanzas.',
+                  }),
         );
     }
 }

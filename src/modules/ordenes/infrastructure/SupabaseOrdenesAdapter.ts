@@ -3,10 +3,8 @@ import { err, ok, type Result } from 'neverthrow';
 import { errorFuente, resultado, resultadoUno, type ErrorFuente } from '@/shared/errores.ts';
 import type { OrdenesPort } from '../application/ports/OrdenesPort.ts';
 import type { Cabecera, Cuota, Edicion, FormaPago, Linea, NuevaOrden, Orden, OrdenDetalle, Procedencia, Proveedor } from '../domain/orden.ts';
+import { n, s, type Fila } from '@/shared/supabase/filas.ts';
 
-type Fila = Record<string, unknown>;
-const s = (v: unknown) => (v == null ? '' : String(v));
-const n = (v: unknown) => (v == null || v === '' ? 0 : Number(v));
 const nOrNull = (v: unknown) => (v == null || v === '' ? null : Number(v));
 const sOrNull = (v: unknown) => (v == null || v === '' ? null : String(v));
 const uno = <T extends Fila>(v: unknown): T | null => (Array.isArray(v) ? ((v[0] as T) ?? null) : ((v as T) ?? null));
@@ -165,7 +163,7 @@ export class SupabaseOrdenesAdapter implements OrdenesPort {
         const r = await this.db.rpc('oc_edicion', { p_id: id });
         return resultado<Fila | null>(r).map((f) => ({
             editar: f ? sOrNull(f.editar) : 'Tu usuario no está activo.',
-            demasia: ((f?.demasia as Record<string, string | null>) ?? {}),
+            demasia: (f?.demasia as Record<string, string | null>) ?? {},
         }));
     }
 
@@ -189,7 +187,12 @@ export class SupabaseOrdenesAdapter implements OrdenesPort {
             p_proveedor: o.proveedorId,
             p_procedencia: o.procedencia,
             p_moneda: o.moneda,
-            p_lineas: o.lineas.map((l) => ({ item_id: l.itemId, cantidad: l.cantidad, precio_unit: l.precioUnit, descripcion_prov: l.descripcionProv.trim() || null })),
+            p_lineas: o.lineas.map((l) => ({
+                item_id: l.itemId,
+                cantidad: l.cantidad,
+                precio_unit: l.precioUnit,
+                descripcion_prov: l.descripcionProv.trim() || null,
+            })),
             p_proyecto: o.proyectoId,
             p_forma_pago: o.formaPago,
         });
@@ -203,7 +206,8 @@ export class SupabaseOrdenesAdapter implements OrdenesPort {
     /** Un UPDATE que RLS filtra no da error: sin filas devueltas, no se pudo. */
     private sinFilas(r: { data: unknown; error: { message?: string; code?: string } | null }): Result<null, ErrorFuente> {
         if (r.error) return err(errorFuente(r.error));
-        if (!Array.isArray(r.data) || r.data.length === 0) return err({ kind: 'permiso', message: 'La orden ya no se puede editar. Actualiza la página para ver su estado.' });
+        if (!Array.isArray(r.data) || r.data.length === 0)
+            return err({ kind: 'permiso', message: 'La orden ya no se puede editar. Actualiza la página para ver su estado.' });
         return ok(null);
     }
 
@@ -213,7 +217,11 @@ export class SupabaseOrdenesAdapter implements OrdenesPort {
         return this.recalcular(id);
     }
 
-    async guardarLinea(ordenId: string, lineaId: string, l: { cantidad: number; precioUnit: number; descripcionProv: string }): Promise<Result<null, ErrorFuente>> {
+    async guardarLinea(
+        ordenId: string,
+        lineaId: string,
+        l: { cantidad: number; precioUnit: number; descripcionProv: string },
+    ): Promise<Result<null, ErrorFuente>> {
         const r = this.sinFilas(
             await this.db
                 .from('oc_lineas')

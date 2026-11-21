@@ -120,10 +120,22 @@ export function DateField({
                         </button>
                         {view === 'days' && (
                             <span className="flex items-center gap-1">
-                                <button type="button" onClick={() => step(-1)} disabled={monthIndex(month) <= firstMonth} aria-label="Mes anterior" className={NAV_BUTTON}>
+                                <button
+                                    type="button"
+                                    onClick={() => step(-1)}
+                                    disabled={monthIndex(month) <= firstMonth}
+                                    aria-label="Mes anterior"
+                                    className={NAV_BUTTON}
+                                >
                                     <ChevronLeft size={16} aria-hidden="true" />
                                 </button>
-                                <button type="button" onClick={() => step(1)} disabled={monthIndex(month) >= lastMonth} aria-label="Mes siguiente" className={NAV_BUTTON}>
+                                <button
+                                    type="button"
+                                    onClick={() => step(1)}
+                                    disabled={monthIndex(month) >= lastMonth}
+                                    aria-label="Mes siguiente"
+                                    className={NAV_BUTTON}
+                                >
                                     <ChevronRight size={16} aria-hidden="true" />
                                 </button>
                             </span>
@@ -213,7 +225,13 @@ function YearGrid({ from, to, active, onPick }: { from: number; to: number; acti
     return (
         <div ref={center} className="relative grid max-h-60 grid-cols-4 gap-1 overflow-y-auto pr-1">
             {years.map((year) => (
-                <button key={year} type="button" data-on={year === active ? '' : undefined} onClick={() => onPick(year)} className={`${GRID_BUTTON} ${year === active ? GRID_ON : ''}`}>
+                <button
+                    key={year}
+                    type="button"
+                    data-on={year === active ? '' : undefined}
+                    onClick={() => onPick(year)}
+                    className={`${GRID_BUTTON} ${year === active ? GRID_ON : ''}`}
+                >
                     {year}
                 </button>
             ))}
@@ -246,7 +264,8 @@ const CALENDAR_CLASSES = {
     weekday: 'w-9 pb-1 text-center text-caption font-medium uppercase text-ink-2',
     week: 'flex',
     day: 'p-0 text-center',
-    day_button: 'grid h-9 w-9 place-items-center rounded-inner outline-none transition-colors hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-primary',
+    day_button:
+        'grid h-9 w-9 place-items-center rounded-inner outline-none transition-colors hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-primary',
     // `!` porque un día elegido también puede ser hoy, y los dos pelearían por el color.
     selected: '[&>button]:bg-primary! [&>button]:font-medium [&>button]:text-on-fill! [&>button]:hover:bg-primary-hover',
     today: '[&>button]:font-semibold [&>button]:text-primary',

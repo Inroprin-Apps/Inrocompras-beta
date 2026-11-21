@@ -18,14 +18,9 @@ import type {
     R,
     RepositorioPort,
 } from '../application/ports/IntegracionesPort.ts';
+import { n, nn, s, sn, type Fila, uno } from '@/shared/supabase/filas.ts';
 
-type Fila = Record<string, unknown>;
 type Respuesta = { data: unknown; error: { message?: string; code?: string } | null };
-const s = (v: unknown) => (v == null ? '' : String(v));
-const sn = (v: unknown) => (v == null || v === '' ? null : String(v));
-const n = (v: unknown) => (v == null ? 0 : Number(v));
-const nn = (v: unknown) => (v == null ? null : Number(v));
-const uno = (v: unknown): Fila | null => (Array.isArray(v) ? ((v[0] as Fila) ?? null) : ((v as Fila) ?? null));
 
 /** Un error de la base: la red o un 5xx se reintentan; una regla o un dato malo, no. */
 function falloDe(e: { message?: string; code?: string }, que: string): Fallo {
@@ -52,7 +47,8 @@ function documento(f: Fila): DocumentoCola {
         carpetaId: sn(des?.carpeta_drive_id) ?? sn(oc?.carpeta_drive_id),
     };
 }
-const COLS_DOC = 'id,tipo_doc,nombre_archivo,mime,storage_path,drive_file_id,estado,orden_id,desaduanaje_id,ordenes(carpeta_drive_id),desaduanajes(carpeta_drive_id)';
+const COLS_DOC =
+    'id,tipo_doc,nombre_archivo,mime,storage_path,drive_file_id,estado,orden_id,desaduanaje_id,ordenes(carpeta_drive_id),desaduanajes(carpeta_drive_id)';
 
 export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
     constructor(private readonly db: SupabaseClient) {}
@@ -89,30 +85,52 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
         );
         return r.map((f) =>
             f
-                ? { numero: sn(f.numero), empresaId: s(f.empresa_id), procedencia: s(f.procedencia), clase: s(f.clase), fecha: sn(f.fecha), proveedor: s(uno(f.proveedores)?.razon_social) }
+                ? {
+                      numero: sn(f.numero),
+                      empresaId: s(f.empresa_id),
+                      procedencia: s(f.procedencia),
+                      clase: s(f.clase),
+                      fecha: sn(f.fecha),
+                      proveedor: s(uno(f.proveedores)?.razon_social),
+                  }
                 : null,
         );
     }
 
     async guardarCarpetaOrden(id: string, c: CarpetaDrive): R<null> {
-        return res<null>(await this.db.from('ordenes').update({ carpeta_drive_id: c.id, carpeta_drive_url: c.url }).eq('id', id), 'No se pudo guardar la carpeta').map(() => null);
+        return res<null>(
+            await this.db.from('ordenes').update({ carpeta_drive_id: c.id, carpeta_drive_url: c.url }).eq('id', id),
+            'No se pudo guardar la carpeta',
+        ).map(() => null);
     }
 
     async documentosSinArchivar(ordenId: string): R<string[]> {
         const r = res<Fila[]>(
-            await this.db.from('documentos').select('id').eq('orden_id', ordenId).in('estado', ['Subido', 'Error']).is('drive_file_id', null).not('storage_path', 'is', null),
+            await this.db
+                .from('documentos')
+                .select('id')
+                .eq('orden_id', ordenId)
+                .in('estado', ['Subido', 'Error'])
+                .is('drive_file_id', null)
+                .not('storage_path', 'is', null),
             'No se pudo leer los documentos',
         );
         return r.map((fs) => fs.map((f) => s(f.id)));
     }
 
     async desaduanajeCarpeta(id: string): R<{ numero: string | null; romano: string | null; carpetaOC: string | null } | null> {
-        const r = res<Fila | null>(await this.db.from('desaduanajes').select('numero,romano,ordenes(carpeta_drive_id)').eq('id', id).maybeSingle(), 'No se pudo leer el desaduanaje');
+        const r = res<Fila | null>(
+            await this.db.from('desaduanajes').select('numero,romano,ordenes(carpeta_drive_id)').eq('id', id).maybeSingle(),
+            'No se pudo leer el desaduanaje',
+        );
         return r.map((f) => (f ? { numero: sn(f.numero), romano: sn(f.romano), carpetaOC: sn(uno(f.ordenes)?.carpeta_drive_id) } : null));
     }
 
     async guardarCarpetaDes(id: string, c: CarpetaDrive): R<null> {
-        return res<null>(await this.db.from('desaduanajes').update({ carpeta_drive_id: c.id, carpeta_drive_url: c.url }).eq('id', id), 'No se pudo guardar la carpeta').map(() => null);
+        return res<null>(
+            await this.db.from('desaduanajes').update({ carpeta_drive_id: c.id, carpeta_drive_url: c.url }).eq('id', id),
+            'No se pudo guardar la carpeta',
+        ).map(() => null);
     }
 
     // ── Documentos ──
@@ -122,12 +140,19 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
     }
 
     async marcarArchivado(id: string, c: CarpetaDrive): R<null> {
-        return res<null>(await this.db.from('documentos').update({ drive_file_id: c.id, drive_url: c.url, estado: 'Archivado' }).eq('id', id), 'No se pudo marcar el documento').map(() => null);
+        return res<null>(
+            await this.db.from('documentos').update({ drive_file_id: c.id, drive_url: c.url, estado: 'Archivado' }).eq('id', id),
+            'No se pudo marcar el documento',
+        ).map(() => null);
     }
 
     async guardarLectura(id: string, lectura: LecturaDocumento): R<null> {
         // Propuesta: lectura_estado = 'Leído'. Solo ac_documento_confirmar_lectura la pasa a 'Confirmado'.
-        const r = await this.db.from('documentos').update({ lectura, lectura_estado: 'Leído' }).eq('id', id).or('lectura_estado.is.null,lectura_estado.neq.Confirmado');
+        const r = await this.db
+            .from('documentos')
+            .update({ lectura, lectura_estado: 'Leído' })
+            .eq('id', id)
+            .or('lectura_estado.is.null,lectura_estado.neq.Confirmado');
         return res<null>(r, 'No se pudo guardar la lectura').map(() => null);
     }
 
@@ -142,7 +167,9 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
         const r = res<Fila | null>(
             await this.db
                 .from('ordenes')
-                .select('*, empresas(razon_social,ruc,direccion), proveedores(razon_social,ruc,pais), proyectos(codigo,nombre), oc_lineas(*), comprador:usuarios!ordenes_comprador_id_fkey(id,nombre)')
+                .select(
+                    '*, empresas(razon_social,ruc,direccion), proveedores(razon_social,ruc,pais), proyectos(codigo,nombre), oc_lineas(*), comprador:usuarios!ordenes_comprador_id_fkey(id,nombre)',
+                )
                 .eq('id', id)
                 .maybeSingle(),
             'No se pudo leer la orden',
@@ -214,14 +241,25 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
         const ins = res<Fila>(
             await this.db
                 .from('documentos')
-                .insert({ orden_id: o.id, tipo_doc: tipo, nombre_archivo: nombre, mime: 'application/pdf', storage_path: ruta, subido_por: o.comprador.id, lectura_estado: 'No aplica' })
+                .insert({
+                    orden_id: o.id,
+                    tipo_doc: tipo,
+                    nombre_archivo: nombre,
+                    mime: 'application/pdf',
+                    storage_path: ruta,
+                    subido_por: o.comprador.id,
+                    lectura_estado: 'No aplica',
+                })
                 .select('id')
                 .single(),
             'No se pudo registrar el PDF',
         );
         if (ins.isErr()) return err(ins.error);
         const id = s(ins.value.id);
-        const enl = await this.db.from('ordenes').update(version === 'interna' ? { pdf_interna_doc: id } : { pdf_proveedor_doc: id }).eq('id', o.id);
+        const enl = await this.db
+            .from('ordenes')
+            .update(version === 'interna' ? { pdf_interna_doc: id } : { pdf_proveedor_doc: id })
+            .eq('id', o.id);
         return enl.error ? err(falloDe(enl.error, 'No se pudo enlazar el PDF a la orden')) : ok(id);
     }
 
@@ -230,7 +268,9 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
         const r = res<Fila | null>(
             await this.db
                 .from('ordenes')
-                .select('id,numero,procedencia,correo_envio,pdf_proveedor_doc,empresas(razon_social),proveedores(razon_social),comprador:usuarios!ordenes_comprador_id_fkey(nombre,email)')
+                .select(
+                    'id,numero,procedencia,correo_envio,pdf_proveedor_doc,empresas(razon_social),proveedores(razon_social),comprador:usuarios!ordenes_comprador_id_fkey(nombre,email)',
+                )
                 .eq('id', id)
                 .maybeSingle(),
             'No se pudo leer la orden',
@@ -293,7 +333,9 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
         const r = res<Fila | null>(
             await this.db
                 .from('pagos')
-                .select('id,n_cuota,monto_pago,monto_retencion,neto_referencial,fecha_limite_pago,factura_id,ordenes(numero,moneda,proveedores(razon_social,ruc,cuentas))')
+                .select(
+                    'id,n_cuota,monto_pago,monto_retencion,neto_referencial,fecha_limite_pago,factura_id,ordenes(numero,moneda,proveedores(razon_social,ruc,cuentas))',
+                )
                 .eq('id', id)
                 .maybeSingle(),
             'No se pudo leer el pago',
@@ -324,7 +366,13 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
     }
 
     async inropayActualizar(e: EventoInroPay): R<null> {
-        const r = await this.db.rpc('inropay_actualizar', { p_pago: e.pago_id, p_estado: e.estado, p_fecha: e.fecha, p_n_operacion: e.n_operacion, p_ref: e.ref });
+        const r = await this.db.rpc('inropay_actualizar', {
+            p_pago: e.pago_id,
+            p_estado: e.estado,
+            p_fecha: e.fecha,
+            p_n_operacion: e.n_operacion,
+            p_ref: e.ref,
+        });
         return res<unknown>(r, 'InroPay').map(() => null);
     }
 }

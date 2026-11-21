@@ -37,7 +37,8 @@ const vista$ = urlState(
 
 export function RequerimientosView() {
     const estado = requerimientosStore.use();
-    const proyectos = proyectosStore.use().data ?? [];
+    const proyectosLeidos = proyectosStore.use().data;
+    const proyectos = useMemo(() => proyectosLeidos ?? [], [proyectosLeidos]);
     const v = vista$.use();
     const deAnulacion = anulacionReqStore.use(v.anulacion || null);
 

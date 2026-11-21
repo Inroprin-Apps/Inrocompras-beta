@@ -6,12 +6,24 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-process.on('unhandledRejection', (e) => { console.log('ERROR:', e.message, e.where || ''); process.exit(1); });
+process.on('unhandledRejection', (e) => {
+    console.log('ERROR:', e.message, e.where || '');
+    process.exit(1);
+});
 const aqui = path.dirname(fileURLToPath(import.meta.url));
 const leer = (f) => fs.readFileSync(path.join(aqui, '..', f), 'utf8');
 const db = new PGlite();
-let ok = 0, mal = 0;
-const check = (cond, msg) => { if (cond) { ok++; console.log('  ✓', msg); } else { mal++; console.log('  ✗', msg); } };
+let ok = 0,
+    mal = 0;
+const check = (cond, msg) => {
+    if (cond) {
+        ok++;
+        console.log('  ✓', msg);
+    } else {
+        mal++;
+        console.log('  ✗', msg);
+    }
+};
 
 await db.exec(`
   create schema auth;
@@ -34,21 +46,33 @@ await db.exec(`insert into public.config (clave, valor) values ('admins_iniciale
 
 const id = (n) => `22222222-0000-0000-0000-${String(n).padStart(12, '0')}`;
 async function alta(n, email, nombre) {
-  await db.query(`insert into auth.users (id, email, raw_user_meta_data) values ($1, $2, $3)`, [id(n), email, { full_name: nombre }]);
+    await db.query(`insert into auth.users (id, email, raw_user_meta_data) values ($1, $2, $3)`, [id(n), email, { full_name: nombre }]);
 }
 async function como(n, sql, params = []) {
-  await db.exec(`reset role; select set_config('test.uid', '${id(n)}', false); set role authenticated;`);
-  try { return (await db.query(sql, params)).rows; } finally { await db.exec('reset role'); }
+    await db.exec(`reset role; select set_config('test.uid', '${id(n)}', false); set role authenticated;`);
+    try {
+        return (await db.query(sql, params)).rows;
+    } finally {
+        await db.exec('reset role');
+    }
 }
 async function falla(n, sql, params, msg) {
-  try { await como(n, sql, params); check(false, msg + ' (debió fallar)'); }
-  catch (e) { check(true, msg + ' → «' + e.message.split('\n')[0] + '»'); }
+    try {
+        await como(n, sql, params);
+        check(false, msg + ' (debió fallar)');
+    } catch (e) {
+        check(true, msg + ' → «' + e.message.split('\n')[0] + '»');
+    }
 }
 const adm = async (sql, p) => (await db.query(sql, p)).rows;
 
 console.log('\n0. Acceso');
-try { await alta(9, 'alguien@gmail.com', 'De fuera'); check(false, 'Una cuenta de otro dominio no entra (debió fallar)'); }
-catch (e) { check(/Solo cuentas @inroprin\.com/.test(e.message), 'Una cuenta de otro dominio no entra → «' + e.message + '»'); }
+try {
+    await alta(9, 'alguien@gmail.com', 'De fuera');
+    check(false, 'Una cuenta de otro dominio no entra (debió fallar)');
+} catch (e) {
+    check(/Solo cuentas @inroprin\.com/.test(e.message), 'Una cuenta de otro dominio no entra → «' + e.message + '»');
+}
 check((await adm(`select count(*)::int n from public.usuarios`))[0].n === 0, 'Y no queda registrada');
 
 await alta(1, 'Jefa@Inroprin.com', 'Jefa de Sistemas');
@@ -57,7 +81,10 @@ await alta(3, 'compras@inroprin.com', 'Persona de Compras');
 const p1 = (await como(1, `select public.mi_perfil() p`))[0].p;
 check(p1.es_admin && p1.roles.includes('ADMIN') && p1.email === 'jefa@inroprin.com', 'El correo de admins_iniciales entra como administrador');
 const p2 = (await como(2, `select public.mi_perfil() p`))[0].p;
-check(p2.area === 'Sin área' && p2.roles.length === 0 && !p2.ve_precios && p2.nombre === 'Persona Nueva', 'Una persona nueva entra «Sin área», sin roles y sin ver precios');
+check(
+    p2.area === 'Sin área' && p2.roles.length === 0 && !p2.ve_precios && p2.nombre === 'Persona Nueva',
+    'Una persona nueva entra «Sin área», sin roles y sin ver precios',
+);
 check((await como(2, `select * from public.ordenes`)).length === 0, 'La persona nueva no ve órdenes');
 check((await como(2, `select * from public.acciones_disponibles('ordenes', gen_random_uuid())`)).length === 0, 'Un registro que no existe no ofrece acciones');
 
@@ -71,10 +98,16 @@ check((await adm(`select nombre from public.usuarios where id = $1`, [id(2)]))[0
 
 await como(1, `select public.ac_equipo_guardar($1, 'Compras', $2, 'nac', true, '{JEFE_COMPRAS_N}')`, [id(3), id(1)]);
 const p3 = (await como(3, `select public.mi_perfil() p`))[0].p;
-check(p3.area === 'Compras' && p3.roles.includes('JEFE_COMPRAS_N') && p3.ve_precios && p3.es_compras && p3.ambito === 'nac', 'El admin asigna área, jefe, ámbito y roles');
+check(
+    p3.area === 'Compras' && p3.roles.includes('JEFE_COMPRAS_N') && p3.ve_precios && p3.es_compras && p3.ambito === 'nac',
+    'El admin asigna área, jefe, ámbito y roles',
+);
 const h = await como(1, `select accion, de, a, usuario_id from public.historial where tabla = 'usuarios' and registro_id = $1 order by id`, [id(3)]);
-check(h.some((x) => x.accion === 'equipo_area' && x.de === 'Sin área' && x.a === 'Compras' && x.usuario_id === id(1))
-   && h.some((x) => x.accion === 'equipo_roles' && x.a === 'JEFE_COMPRAS_N'), 'Queda en el historial: quién, de y a (' + h.length + ' registros)');
+check(
+    h.some((x) => x.accion === 'equipo_area' && x.de === 'Sin área' && x.a === 'Compras' && x.usuario_id === id(1)) &&
+        h.some((x) => x.accion === 'equipo_roles' && x.a === 'JEFE_COMPRAS_N'),
+    'Queda en el historial: quién, de y a (' + h.length + ' registros)',
+);
 await como(1, `select public.ac_equipo_guardar($1, 'Compras', $2, 'nac', true, '{}')`, [id(3), id(1)]);
 check((await adm(`select count(*)::int n from public.usuario_roles where usuario_id = $1`, [id(3)]))[0].n === 0, 'Quitar roles también funciona');
 
@@ -90,9 +123,16 @@ await como(2, `select public.ac_equipo_guardar($1, 'Compras', null, 'todas', fal
 await falla(3, `select public.ac_solicitud_emitir(gen_random_uuid())`, [], 'Una persona desactivada no hace acciones');
 check(!(await como(3, `select public.mi_perfil() p`))[0].p.ve_precios, 'Y deja de ver precios');
 
-const proy = (await adm(`insert into public.proyectos (codigo, nombre, cliente, estado) values ('P-900','Proyecto de prueba','Cliente','Estudio de mercado') returning id`))[0].id;
+const proy = (
+    await adm(
+        `insert into public.proyectos (codigo, nombre, cliente, estado) values ('P-900','Proyecto de prueba','Cliente','Estudio de mercado') returning id`,
+    )
+)[0].id;
 await alta(4, 'sinarea@inroprin.com', 'Sin Área');
-check((await como(4, `select * from public.acciones_disponibles('proyectos', $1)`, [proy])).length === 0, 'Sin área ni roles: no tiene acciones sobre un proyecto sin gerente');
+check(
+    (await como(4, `select * from public.acciones_disponibles('proyectos', $1)`, [proy])).length === 0,
+    'Sin área ni roles: no tiene acciones sobre un proyecto sin gerente',
+);
 await falla(4, `select public.ac_proyecto_resultado($1, true)`, [proy], 'Ni puede marcarlo ganado');
 await como(2, `select public.ac_equipo_guardar($1, 'Comercial', null, 'todas', true, '{}')`, [id(4)]);
 check((await como(4, `select * from public.acciones_disponibles('proyectos', $1)`, [proy])).length === 2, 'Con área Comercial, sí (ganado / perdido)');
@@ -104,10 +144,22 @@ const priv = async (rol, fn) => (await adm(`select has_function_privilege($1, $2
 check(!(await priv('anon', 'public.inropay_actualizar(uuid, text, date, text, text)')), 'Sin sesión (anon) nadie marca pagos como pagados');
 check(!(await priv('authenticated', 'public.inropay_actualizar(uuid, text, date, text, text)')), 'Con sesión tampoco: solo el servidor');
 check(!(await priv('anon', 'public.ac_oc_aprobar_gop(uuid, boolean)')), 'anon no ejecuta acciones');
-check(await priv('authenticated', 'public.ac_oc_aprobar_gop(uuid, boolean)') && await priv('authenticated', 'public.mi_perfil()'), 'authenticated sí ejecuta las acciones y mi_perfil');
+check(
+    (await priv('authenticated', 'public.ac_oc_aprobar_gop(uuid, boolean)')) && (await priv('authenticated', 'public.mi_perfil()')),
+    'authenticated sí ejecuta las acciones y mi_perfil',
+);
 check(!(await adm(`select has_table_privilege('anon', 'public.ordenes', 'select') p`))[0].p, 'anon no lee tablas');
-check(!(await priv('anon', 'public.mi_perfil()')) && !(await priv('anon', 'public.ac_equipo_guardar(uuid, text, uuid, text, boolean, text[])')) && !(await priv('anon', 'public.acciones_disponibles(text, uuid)')), 'Las funciones de Equipo tampoco quedan abiertas sin sesión');
-const abiertas = (await adm(`select count(*)::int n from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') and p.proname not like 'pglite%'`))[0].n;
+check(
+    !(await priv('anon', 'public.mi_perfil()')) &&
+        !(await priv('anon', 'public.ac_equipo_guardar(uuid, text, uuid, text, boolean, text[])')) &&
+        !(await priv('anon', 'public.acciones_disponibles(text, uuid)')),
+    'Las funciones de Equipo tampoco quedan abiertas sin sesión',
+);
+const abiertas = (
+    await adm(
+        `select count(*)::int n from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') and p.proname not like 'pglite%'`,
+    )
+)[0].n;
 check(abiertas === 0, 'Ninguna función de public queda abierta a anon (' + abiertas + ')');
 
 console.log(`\n${ok} correctas, ${mal} con error`);

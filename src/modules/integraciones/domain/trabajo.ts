@@ -42,7 +42,11 @@ export const noConfigurado = (servicio: string, falta: string[]): Fallo =>
     final(`${servicio} no configurado: falta ${falta.join(', ')}. Configúralo en Vercel y reintenta el trabajo.`);
 
 /** Los argumentos de app.cola_terminar(id, ok, error, final) para un desenlace o un fallo. */
-export function cierre(r: { ok: true; valor: Desenlace } | { ok: false; fallo: Fallo }): { ok: boolean; mensaje: string | null; final: 'Error' | 'Descartado' | null } {
+export function cierre(r: { ok: true; valor: Desenlace } | { ok: false; fallo: Fallo }): {
+    ok: boolean;
+    mensaje: string | null;
+    final: 'Error' | 'Descartado' | null;
+} {
     if (r.ok) return { ok: true, mensaje: r.valor.nota, final: r.valor.estado === 'Descartado' ? 'Descartado' : null };
     return { ok: false, mensaje: r.fallo.mensaje.slice(0, 1000), final: r.fallo.tipo === 'final' ? 'Error' : null };
 }

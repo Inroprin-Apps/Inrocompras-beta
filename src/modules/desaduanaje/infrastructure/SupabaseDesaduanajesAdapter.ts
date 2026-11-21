@@ -20,14 +20,11 @@ import type {
     TipoDes,
     VersionCosteo,
 } from '../domain/desaduanaje.ts';
+import { filas, n, s, type Fila } from '@/shared/supabase/filas.ts';
 
-type Fila = Record<string, unknown>;
-const s = (v: unknown) => (v == null ? '' : String(v));
-const n = (v: unknown) => (v == null || v === '' ? 0 : Number(v));
 const nOrNull = (v: unknown) => (v == null || v === '' ? null : Number(v));
 const sOrNull = (v: unknown) => (v == null || v === '' ? null : String(v));
 const uno = <T extends Fila>(v: unknown): T | null => (Array.isArray(v) ? ((v[0] as T) ?? null) : ((v as T) ?? null));
-const filas = (v: unknown) => (Array.isArray(v) ? (v as Fila[]) : []);
 
 const OC = 'ordenes!orden_duena_id(numero,moneda,proveedores(razon_social),proyectos(codigo,nombre))';
 const LISTA = `id,numero,romano,estado,tipo,alcance,orden_duena_id,n_dam,bl_awb,fecha_embarque,fecha_llegada_est,fecha_numeracion,fecha_llegada,fecha_levante,fecha_almacen,fi,version_costeo,creado,${OC}`;
@@ -38,8 +35,7 @@ const NADA: ErrorFuente = {
     kind: 'regla',
     message: 'No se guardó: el costeo está cerrado (pide a la jefatura de Importaciones que lo reabra) o tu perfil no edita este desaduanaje.',
 };
-const alMenosUna = (r: Result<Fila[] | null, ErrorFuente>): Result<null, ErrorFuente> =>
-    r.andThen((fs) => ((fs ?? []).length ? ok(null) : err(NADA)));
+const alMenosUna = (r: Result<Fila[] | null, ErrorFuente>): Result<null, ErrorFuente> => r.andThen((fs) => ((fs ?? []).length ? ok(null) : err(NADA)));
 
 function desaduanaje(f: Fila): Desaduanaje {
     const o = uno(f.ordenes);
@@ -165,8 +161,12 @@ function detalle(f: Fila): DesaduanajeDetalle {
         fechaCierre: sOrNull(f.fecha_cierre),
         motivoReapertura: s(f.motivo_reapertura),
         creadoPor: s(f.creado_por),
-        productos: filas(f.des_productos).map(producto).sort((a, b) => a.descripcion.localeCompare(b.descripcion, 'es')),
-        gastos: filas(f.des_gastos).map(gasto).sort((a, b) => a.fechaRegistro.localeCompare(b.fechaRegistro)),
+        productos: filas(f.des_productos)
+            .map(producto)
+            .sort((a, b) => a.descripcion.localeCompare(b.descripcion, 'es')),
+        gastos: filas(f.des_gastos)
+            .map(gasto)
+            .sort((a, b) => a.fechaRegistro.localeCompare(b.fechaRegistro)),
         versiones: versiones(filas(f.des_costeo_hist)),
     };
 }
@@ -259,7 +259,11 @@ export class SupabaseDesaduanajesAdapter implements DesaduanajesPort {
     }
 
     async marcar(id: string, campo: keyof Checklist, valor: boolean): Promise<Result<null, ErrorFuente>> {
-        const r = await this.db.from('desaduanajes').update({ [COLUMNA_CHK[campo]]: valor }).eq('id', id).select('id');
+        const r = await this.db
+            .from('desaduanajes')
+            .update({ [COLUMNA_CHK[campo]]: valor })
+            .eq('id', id)
+            .select('id');
         return alMenosUna(resultado<Fila[]>(r));
     }
 

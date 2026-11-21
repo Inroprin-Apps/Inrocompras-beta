@@ -1,4 +1,21 @@
-import { AlertTriangle, ArrowRight, Calendar, Check, ChevronDown, Download, ExternalLink, FileText, Filter, Info, Plus, RefreshCw, Search, Trash2, Upload, X } from 'lucide-react';
+import {
+    AlertTriangle,
+    ArrowRight,
+    Calendar,
+    Check,
+    ChevronDown,
+    Download,
+    ExternalLink,
+    FileText,
+    Filter,
+    Info,
+    Plus,
+    RefreshCw,
+    Search,
+    Trash2,
+    Upload,
+    X,
+} from 'lucide-react';
 import { Code, DocTable, DoDont, Page, PageHeader, Rules, Section } from '../../../../guia/doc.tsx';
 import { Example } from '../../../../guia/example.tsx';
 import { buttonClass } from '../../../../ui/button.tsx';

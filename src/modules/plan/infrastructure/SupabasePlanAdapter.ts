@@ -3,9 +3,8 @@ import type { Result } from 'neverthrow';
 import { resultado, type ErrorFuente } from '@/shared/errores.ts';
 import type { AlcancePlan, PlanPort } from '../application/ports/PlanPort.ts';
 import type { Canal, LineaPlan, OcDeLinea } from '../domain/plan.ts';
+import { s, type Fila } from '@/shared/supabase/filas.ts';
 
-type Fila = Record<string, unknown>;
-const s = (v: unknown) => (v == null ? '' : String(v));
 const sOrNull = (v: unknown) => (v == null || v === '' ? null : String(v));
 const nOrNull = (v: unknown) => (v == null || v === '' ? null : Number(v));
 

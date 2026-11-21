@@ -59,7 +59,8 @@ export function MultiChoice({
     const q = query.trim().toLowerCase();
     const visible = q === '' ? options : options.filter((o) => `${o.label} ${o.detail ?? ''}`.toLowerCase().includes(q));
 
-    const row = 'flex w-full items-center justify-between gap-3 rounded-inner px-2.5 py-1.5 text-left text-ui hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none';
+    const row =
+        'flex w-full items-center justify-between gap-3 rounded-inner px-2.5 py-1.5 text-left text-ui hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none';
 
     return (
         <div ref={rootRef} className={`relative ${className}`}>

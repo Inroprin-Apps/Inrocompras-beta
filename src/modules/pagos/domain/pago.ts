@@ -2,6 +2,8 @@
 // Las reglas (quién solicita, programa, paga, observa, subsana, divide) viven en la base (0003 ac_pago_*):
 // la pantalla pregunta acciones_disponibles('pagos', id) y muestra lo que devuelve.
 
+import { palabrasDe, plano } from '@/shared/texto.ts';
+
 export const ESTADOS_PAGO = ['Plan', 'Solicitado', 'Programado', 'Pagado', 'Observado Finanzas', 'Anulado'] as const;
 export type EstadoPago = (typeof ESTADOS_PAGO)[number];
 export const TIPOS_PAGO = ['Adelanto', 'Valorización', 'Pago parcial', 'Saldo', 'Pago total', 'Caja chica', 'Reembolso'] as const;
@@ -86,10 +88,8 @@ export interface FiltrosPago {
 }
 export const FILTROS_PAGO: FiltrosPago = { estado: '', vence: '', proveedor: '', moneda: '', texto: '' };
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-
 export function filtrarPagos(lista: Pago[], f: FiltrosPago, hoy: string): Pago[] {
-    const palabras = plano(f.texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(f.texto);
     const semana = sumarDias(hoy, 7);
     const mes = sumarDias(hoy, 30);
     return lista.filter((p) => {
@@ -123,7 +123,12 @@ export function ordenarPagos(lista: Pago[], o: OrdenPago): Pago[] {
     if (o === 'orden') return c.sort((a, b) => a.ordenNumero.localeCompare(b.ordenNumero, 'es', { numeric: true }) || a.nCuota - b.nCuota);
     if (o === 'recientes') return c.sort((a, b) => b.creado.localeCompare(a.creado));
     // Por fecha límite: lo que vence antes arriba; sin fecha al final.
-    return c.sort((a, b) => (a.fechaLimite ?? '9999').localeCompare(b.fechaLimite ?? '9999') || a.ordenNumero.localeCompare(b.ordenNumero, 'es', { numeric: true }) || a.nCuota - b.nCuota);
+    return c.sort(
+        (a, b) =>
+            (a.fechaLimite ?? '9999').localeCompare(b.fechaLimite ?? '9999') ||
+            a.ordenNumero.localeCompare(b.ordenNumero, 'es', { numeric: true }) ||
+            a.nCuota - b.nCuota,
+    );
 }
 
 // ── KPIs ──
@@ -195,7 +200,8 @@ export function fasePago(e: string): number {
 
 /** Una nota junto a las fases, según el estado. */
 export function notaPago(p: Pick<Pago, 'estado' | 'motivoObs' | 'detalleObs' | 'factura' | 'sustento' | 'tipo'>): string | null {
-    if (p.estado === 'Observado Finanzas') return `Finanzas observó la cuota: ${p.motivoObs || 'sin motivo'}${p.detalleObs ? ` («${p.detalleObs}»)` : ''}. Corrige lo que pide y subsánala.`;
+    if (p.estado === 'Observado Finanzas')
+        return `Finanzas observó la cuota: ${p.motivoObs || 'sin motivo'}${p.detalleObs ? ` («${p.detalleObs}»)` : ''}. Corrige lo que pide y subsánala.`;
     if (p.estado === 'Plan' && !p.factura && p.tipo !== 'Adelanto' && p.tipo !== 'Caja chica')
         return 'Sube la factura con el monto de la cuota y se solicita sola. Sin factura, al solicitar escribe el sustento.';
     if (p.estado === 'Anulado') return 'La cuota quedó anulada.';

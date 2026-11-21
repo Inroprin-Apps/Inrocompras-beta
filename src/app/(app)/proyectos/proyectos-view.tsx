@@ -83,7 +83,9 @@ export function ProyectosView() {
                 onReintentar={() => void proyectosStore.retry()}
                 vacia={
                     <ListaVacia titulo={estado.data?.length ? 'Ningún proyecto coincide' : 'Aún no hay proyectos'}>
-                        {estado.data?.length ? 'Prueba con otra búsqueda o quita el filtro de estado.' : 'Comercial, Control de Gestión o Planeamiento los dan de alta con «Nuevo proyecto».'}
+                        {estado.data?.length
+                            ? 'Prueba con otra búsqueda o quita el filtro de estado.'
+                            : 'Comercial, Control de Gestión o Planeamiento los dan de alta con «Nuevo proyecto».'}
                     </ListaVacia>
                 }
             >

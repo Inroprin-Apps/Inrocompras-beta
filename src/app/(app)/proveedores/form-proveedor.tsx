@@ -169,19 +169,35 @@ export function FormProveedor({
                     <div key={i} className="flex flex-col gap-3 rounded-card border border-line p-3">
                         <div className="flex items-end gap-2">
                             <div className="min-w-0 flex-1">
-                                <Field label={`Banco ${i + 1}`}>{(p) => <Input {...p} value={c.banco} onChange={(e) => setCuenta(i, { banco: e.target.value })} />}</Field>
+                                <Field label={`Banco ${i + 1}`}>
+                                    {(p) => <Input {...p} value={c.banco} onChange={(e) => setCuenta(i, { banco: e.target.value })} />}
+                                </Field>
                             </div>
                             <div className="w-28">
                                 <Field label="Moneda">
-                                    {(p) => <SelectMenu {...p} value={c.moneda} onChange={(moneda) => setCuenta(i, { moneda })} options={MONEDAS_CUENTA.map((m) => ({ value: m, label: m }))} />}
+                                    {(p) => (
+                                        <SelectMenu
+                                            {...p}
+                                            value={c.moneda}
+                                            onChange={(moneda) => setCuenta(i, { moneda })}
+                                            options={MONEDAS_CUENTA.map((m) => ({ value: m, label: m }))}
+                                        />
+                                    )}
                                 </Field>
                             </div>
-                            <Button variant="ghost" iconOnly aria-label={`Quitar la cuenta ${i + 1}`} onClick={() => set({ cuentas: f.cuentas.filter((_, j) => j !== i) })}>
+                            <Button
+                                variant="ghost"
+                                iconOnly
+                                aria-label={`Quitar la cuenta ${i + 1}`}
+                                onClick={() => set({ cuentas: f.cuentas.filter((_, j) => j !== i) })}
+                            >
                                 <Trash2 size={15} />
                             </Button>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-2">
-                            <Field label="N° de cuenta">{(p) => <Input {...p} value={c.numero} onChange={(e) => setCuenta(i, { numero: e.target.value })} />}</Field>
+                            <Field label="N° de cuenta">
+                                {(p) => <Input {...p} value={c.numero} onChange={(e) => setCuenta(i, { numero: e.target.value })} />}
+                            </Field>
                             {nacional ? (
                                 <Field label="CCI" optional hint="20 dígitos.">
                                     {(p) => <Input {...p} value={c.cci} inputMode="numeric" onChange={(e) => setCuenta(i, { cci: e.target.value })} />}

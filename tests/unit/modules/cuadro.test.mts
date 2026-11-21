@@ -32,8 +32,25 @@ describe('cuadro de aprobaciones', () => {
     });
     it('filtra por estatus, aprobación, procedencia, empresa, fechas y texto', () => {
         const l = [
-            fila('a', { OC: 'INROPRIN-NAC-2026-0001', 'Estatus Compra': 'Pago pendiente', 'Estado de Aprobación3': 'Aprobado para Compra', Procedencia: 'Nacional', Fecha: '2026-11-02', Proveedor: 'Ácido SAC' }),
-            fila('b', { OC: 'INROPRIN-IMP-2026-0001', 'Estatus Compra': 'Pendiente de aprobación', 'Estado de Aprobación3': 'Observado por GOP', Procedencia: 'Importación', Fecha: '2026-11-15' }, 'INROPLAS'),
+            fila('a', {
+                OC: 'INROPRIN-NAC-2026-0001',
+                'Estatus Compra': 'Pago pendiente',
+                'Estado de Aprobación3': 'Aprobado para Compra',
+                Procedencia: 'Nacional',
+                Fecha: '2026-11-02',
+                Proveedor: 'Ácido SAC',
+            }),
+            fila(
+                'b',
+                {
+                    OC: 'INROPRIN-IMP-2026-0001',
+                    'Estatus Compra': 'Pendiente de aprobación',
+                    'Estado de Aprobación3': 'Observado por GOP',
+                    Procedencia: 'Importación',
+                    Fecha: '2026-11-15',
+                },
+                'INROPLAS',
+            ),
         ];
         const ids = (f: Partial<typeof FILTROS_CUADRO>) => filtrarCuadro(l, { ...FILTROS_CUADRO, ...f }).map((x) => x.id);
         expect(ids({ estatus: 'Pago pendiente' })).toEqual(['a']);
@@ -66,12 +83,35 @@ describe('cuadro de aprobaciones', () => {
     });
     it('tarjetas por firmar: ruta, quién ya firmó y lo que más espera primero', () => {
         const o = (id: string, x: Partial<OrdenPorAprobar> = {}): OrdenPorAprobar => ({
-            id, numero: id, proveedor: 'P', proyecto: '', compradorId: 'c', moneda: 'PEN', monto: 1, montoSoles: 1, tipoAprobacion: 'Aprobación Conjunta',
-            estadoAprobacion: 'Falta Aprobación', aprobacionPpto: 'Presupuestado', ppto: { valor: 'Presupuestado', por: 'cg', fecha: null },
-            gop: { valor: 'Aprobado', por: 'gop', fecha: null }, gaf: { valor: null, por: null, fecha: null }, demasias: [], fechaEmision: null, lineas: 1, ...x,
+            id,
+            numero: id,
+            proveedor: 'P',
+            proyecto: '',
+            compradorId: 'c',
+            moneda: 'PEN',
+            monto: 1,
+            montoSoles: 1,
+            tipoAprobacion: 'Aprobación Conjunta',
+            estadoAprobacion: 'Falta Aprobación',
+            aprobacionPpto: 'Presupuestado',
+            ppto: { valor: 'Presupuestado', por: 'cg', fecha: null },
+            gop: { valor: 'Aprobado', por: 'gop', fecha: null },
+            gaf: { valor: null, por: null, fecha: null },
+            demasias: [],
+            fechaEmision: null,
+            lineas: 1,
+            ...x,
         });
         expect(yaFirmaron(o('a')).map((f) => f.quien)).toEqual(['Control de Gestión', 'GOP']);
         expect(textoRuta('Aprobación Única')).toMatch(/basta la GOP/);
-        expect(ordenarPorAprobar([o('a'), o('b')], new Map([['a', '2026-11-10'], ['b', '2026-11-01']])).map((x) => x.id)).toEqual(['b', 'a']);
+        expect(
+            ordenarPorAprobar(
+                [o('a'), o('b')],
+                new Map([
+                    ['a', '2026-11-10'],
+                    ['b', '2026-11-01'],
+                ]),
+            ).map((x) => x.id),
+        ).toEqual(['b', 'a']);
     });
 });

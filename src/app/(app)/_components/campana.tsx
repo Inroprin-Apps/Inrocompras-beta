@@ -22,7 +22,10 @@ export function Campana() {
     function alternar() {
         const abrir = !abierta;
         setAbierta(abrir);
-        if (abrir && sinLeer.length) void bandeja().marcarLeidas(sinLeer.map((n) => n.id)).then(() => refrescar(['notificaciones']));
+        if (abrir && sinLeer.length)
+            void bandeja()
+                .marcarLeidas(sinLeer.map((n) => n.id))
+                .then(() => refrescar(['notificaciones']));
     }
     return (
         <div ref={ref} className="relative">
@@ -49,7 +52,11 @@ export function Campana() {
                         <ul className="max-h-[60dvh] overflow-y-auto">
                             {data.map((n) => (
                                 <li key={n.id} className="border-b border-divider last:border-b-0">
-                                    <Link href={rutaDe(n.tabla, n.refId)} onClick={() => setAbierta(false)} className="block px-4 py-2.5 text-ink no-underline hover:bg-surface-2">
+                                    <Link
+                                        href={rutaDe(n.tabla, n.refId)}
+                                        onClick={() => setAbierta(false)}
+                                        className="block px-4 py-2.5 text-ink no-underline hover:bg-surface-2"
+                                    >
                                         <div className={`text-ui ${n.leida ? '' : 'font-semibold'}`}>{n.titulo}</div>
                                         {n.cuerpo && <div className="truncate text-small text-ink-2">{n.cuerpo}</div>}
                                         <div className="text-caption text-ink-3">{dayTime(n.creado)}</div>

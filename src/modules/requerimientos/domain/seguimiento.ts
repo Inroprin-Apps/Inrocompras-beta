@@ -1,6 +1,8 @@
 // Seguimiento de ítems SIN montos (C-18): lo que devuelve seguimiento_items(). Para Técnica, Planeamiento, Almacén,
 // Comercial y los solicitantes: qué es, si tiene OC, en qué estado y si está pagado. PURO.
 
+import { palabrasDe, plano } from '@/shared/texto.ts';
+
 export interface FilaSeguimiento {
     itemId: string;
     proyecto: string;
@@ -33,15 +35,15 @@ export interface FiltrosSeguimiento {
 }
 export const FILTROS_SEGUIMIENTO: FiltrosSeguimiento = { proyecto: '', estado: '', texto: '' };
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-
 /** El proyecto se filtra en la base (parámetro de seguimiento_items); aquí, el estado y el texto. */
 export function filtrarSeguimiento(lista: FilaSeguimiento[], f: Pick<FiltrosSeguimiento, 'estado' | 'texto'>): FilaSeguimiento[] {
-    const palabras = plano(f.texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(f.texto);
     return lista.filter((x) => {
         if (f.estado && estadoCompra(x) !== f.estado) return false;
         if (!palabras.length) return true;
-        const t = plano(`${x.descripcion} ${x.codigoCliente} ${x.codigoSidige} ${x.requerimiento} ${x.rqSidige} ${x.ordenes} ${x.proyecto} ${x.marca} ${x.modelo}`);
+        const t = plano(
+            `${x.descripcion} ${x.codigoCliente} ${x.codigoSidige} ${x.requerimiento} ${x.rqSidige} ${x.ordenes} ${x.proyecto} ${x.marca} ${x.modelo}`,
+        );
         return palabras.every((w) => t.includes(w));
     });
 }

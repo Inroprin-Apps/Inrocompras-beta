@@ -1,6 +1,17 @@
 import type { Result } from 'neverthrow';
 import type { ErrorFuente } from '@/shared/errores.ts';
-import type { Alcance, Checklist, ConceptoGasto, DatosDes, Desaduanaje, DesaduanajeDetalle, NuevoGasto, OcElegible, TcCosteo, TipoDes } from '../../domain/desaduanaje.ts';
+import type {
+    Alcance,
+    Checklist,
+    ConceptoGasto,
+    DatosDes,
+    Desaduanaje,
+    DesaduanajeDetalle,
+    NuevoGasto,
+    OcElegible,
+    TcCosteo,
+    TipoDes,
+} from '../../domain/desaduanaje.ts';
 
 export interface DesaduanajesPort {
     listar(): Promise<Result<Desaduanaje[], ErrorFuente>>;

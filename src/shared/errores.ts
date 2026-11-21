@@ -11,7 +11,8 @@ export interface ErrorFuente {
 /** Traduce un error de Supabase/PostgREST/Postgres a un ErrorFuente con mensaje para la persona. */
 export function errorFuente(e: { message?: string; code?: string } | null | undefined): ErrorFuente {
     const m = e?.message?.trim() ?? '';
-    if (/Failed to fetch|NetworkError|fetch failed|Load failed/i.test(m)) return { kind: 'conexion', message: 'Sin conexión. Revisa tu internet e inténtalo otra vez.' };
+    if (/Failed to fetch|NetworkError|fetch failed|Load failed/i.test(m))
+        return { kind: 'conexion', message: 'Sin conexión. Revisa tu internet e inténtalo otra vez.' };
     if (e?.code === '42501' && /no est[aá] activo/i.test(m)) return { kind: 'permiso', message: m };
     if (e?.code === '42501' || /permission denied|row-level security/i.test(m))
         return { kind: 'permiso', message: 'No tienes permiso para hacer esto. Si crees que deberías, pídelo al administrador.' };
@@ -28,7 +29,10 @@ export function resultado<T>(r: { data: T | null; error: { message?: string; cod
 }
 
 /** Igual, para lo que SIEMPRE debe venir (una fila pedida por id). */
-export function resultadoUno<T>(r: { data: T | null; error: { message?: string; code?: string } | null }, queNoEsta = 'No se encontró.'): Result<T, ErrorFuente> {
+export function resultadoUno<T>(
+    r: { data: T | null; error: { message?: string; code?: string } | null },
+    queNoEsta = 'No se encontró.',
+): Result<T, ErrorFuente> {
     if (r.error) return err(errorFuente(r.error));
     if (r.data == null) return err({ kind: 'no-encontrado', message: queNoEsta });
     return ok(r.data);

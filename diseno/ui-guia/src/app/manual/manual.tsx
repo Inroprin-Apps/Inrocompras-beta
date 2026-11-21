@@ -54,7 +54,11 @@ export function Manual() {
             gsap.ticker.lagSmoothing(0);
 
             // --- Barra de progreso de todo el manual ---
-            gsap.to(el.querySelector('.barra'), { scaleX: 1, ease: 'none', scrollTrigger: { trigger: document.documentElement, start: 'top top', end: 'max', scrub: 0.3 } });
+            gsap.to(el.querySelector('.barra'), {
+                scaleX: 1,
+                ease: 'none',
+                scrollTrigger: { trigger: document.documentElement, start: 'top top', end: 'max', scrub: 0.3 },
+            });
 
             // La altura de las escenas depende de la fuente: se recalcula cuando carga.
             document.fonts?.ready.then(() => ScrollTrigger.refresh());
@@ -119,7 +123,10 @@ export function Manual() {
             saltar();
             return;
         }
-        gsap.timeline().to(velo, { opacity: 1, duration: 0.45, ease: 'power1.inOut' }).call(saltar).to(velo, { opacity: 0, duration: 0.7, ease: 'power1.inOut' }, '>+0.25');
+        gsap.timeline()
+            .to(velo, { opacity: 1, duration: 0.45, ease: 'power1.inOut' })
+            .call(saltar)
+            .to(velo, { opacity: 0, duration: 0.7, ease: 'power1.inOut' }, '>+0.25');
     };
 
     return (
@@ -145,11 +152,16 @@ export function Manual() {
                                 activo === i.id ? 'font-semibold text-primary' : padre === i.id ? 'font-medium text-ink' : 'text-ink-2 hover:text-ink'
                             }`}
                         >
-                            <span aria-hidden className={`size-1.5 flex-none rounded-full ${activo === i.id ? 'bg-primary' : padre === i.id ? 'bg-ink-3' : 'bg-control'}`} />
+                            <span
+                                aria-hidden
+                                className={`size-1.5 flex-none rounded-full ${activo === i.id ? 'bg-primary' : padre === i.id ? 'bg-ink-3' : 'bg-control'}`}
+                            />
                             {i.titulo}
                         </button>
                         {/* El paso exacto en que se está, bajo la escena activa */}
-                        {activo === i.id && paso?.id === i.id && <span className={`pb-1 text-caption text-ink-3 ${i.nivel ? 'pl-[2.6rem]' : 'pl-[1.4rem]'}`}>{paso.texto}</span>}
+                        {activo === i.id && paso?.id === i.id && (
+                            <span className={`pb-1 text-caption text-ink-3 ${i.nivel ? 'pl-[2.6rem]' : 'pl-[1.4rem]'}`}>{paso.texto}</span>
+                        )}
                     </div>
                 ))}
             </nav>
@@ -162,7 +174,12 @@ export function Manual() {
                 </svg>
                 <span>
                     Desarrollado por{' '}
-                    <a href="https://github.com/FaureGalliard" target="_blank" rel="noopener noreferrer" className="font-medium text-ink hover:text-primary hover:underline focus-visible:outline-2 focus-visible:outline-primary">
+                    <a
+                        href="https://github.com/FaureGalliard"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-ink hover:text-primary hover:underline focus-visible:outline-2 focus-visible:outline-primary"
+                    >
                         Angel Gabriel Crispin Valdivia
                     </a>
                 </span>

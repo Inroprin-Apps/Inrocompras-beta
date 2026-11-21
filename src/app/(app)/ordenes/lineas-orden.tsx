@@ -36,7 +36,12 @@ export function LineasOrden({ o, edicion }: { o: OrdenDetalle; edicion: Edicion 
                                 </div>
                                 {l.descripcionProv && <div className="text-small text-ink-2">Proveedor: {l.descripcionProv}</div>}
                                 <div className="text-caption text-ink-3">
-                                    {[l.codigoCliente && `Cód. ${l.codigoCliente}`, l.sku && `SKU ${l.sku}`, l.requerimiento, [l.marca, l.modelo].filter(Boolean).join(' ')]
+                                    {[
+                                        l.codigoCliente && `Cód. ${l.codigoCliente}`,
+                                        l.sku && `SKU ${l.sku}`,
+                                        l.requerimiento,
+                                        [l.marca, l.modelo].filter(Boolean).join(' '),
+                                    ]
                                         .filter(Boolean)
                                         .join(' · ')}
                                 </div>
@@ -50,7 +55,10 @@ export function LineasOrden({ o, edicion }: { o: OrdenDetalle; edicion: Edicion 
                         </div>
                         <div className="flex flex-wrap items-center gap-1.5">
                             {l.esDemasia && (
-                                <Chip tone={l.demasiaEstado === 'Aprobada' ? 'ok' : l.demasiaEstado === 'Rechazada' ? 'danger' : 'warn'} title={l.demasiaMotivo}>
+                                <Chip
+                                    tone={l.demasiaEstado === 'Aprobada' ? 'ok' : l.demasiaEstado === 'Rechazada' ? 'danger' : 'warn'}
+                                    title={l.demasiaMotivo}
+                                >
                                     Demasía {(l.demasiaEstado ?? '').toLowerCase()}
                                 </Chip>
                             )}
@@ -85,7 +93,19 @@ export function LineasOrden({ o, edicion }: { o: OrdenDetalle; edicion: Edicion 
     );
 }
 
-function Pie({ onCerrar, onOk, ocupado, texto, peligro = false }: { onCerrar: () => void; onOk: () => void; ocupado: boolean; texto: string; peligro?: boolean }) {
+function Pie({
+    onCerrar,
+    onOk,
+    ocupado,
+    texto,
+    peligro = false,
+}: {
+    onCerrar: () => void;
+    onOk: () => void;
+    ocupado: boolean;
+    texto: string;
+    peligro?: boolean;
+}) {
     return (
         <>
             <Button variant="secondary" onClick={onCerrar} disabled={ocupado}>
@@ -126,7 +146,13 @@ function FormLinea({ o, l, onCerrar }: { o: OrdenDetalle; l: Linea; onCerrar: ()
         onCerrar();
     }
     return (
-        <Dialog abierto onCerrar={onCerrar} titulo="Editar línea" descripcion={l.descripcion} pie={<Pie onCerrar={onCerrar} onOk={() => void guardar()} ocupado={ocupado} texto="Guardar línea" />}>
+        <Dialog
+            abierto
+            onCerrar={onCerrar}
+            titulo="Editar línea"
+            descripcion={l.descripcion}
+            pie={<Pie onCerrar={onCerrar} onOk={() => void guardar()} ocupado={ocupado} texto="Guardar línea" />}
+        >
             <div className="grid grid-cols-2 gap-4">
                 <Field label={`Cantidad (${l.unidad})`} hint="Hasta el saldo; lo demás va como demasía.">
                     {(p) => <Input {...p} inputMode="decimal" value={cant} onChange={(e) => setCant(e.target.value)} />}
@@ -168,7 +194,9 @@ function FormDemasia({ o, l, onCerrar }: { o: OrdenDetalle; l: Linea; onCerrar: 
             descripcion={`${l.descripcion}: lo que pidas por encima del saldo, al mismo precio (${monto(l.precioUnit, o.moneda)}).`}
             pie={<Pie onCerrar={onCerrar} onOk={() => void guardar()} ocupado={ocupado} texto="Agregar demasía" />}
         >
-            <Field label={`Cantidad adicional (${l.unidad})`}>{(p) => <Input {...p} inputMode="decimal" value={cant} onChange={(e) => setCant(e.target.value)} />}</Field>
+            <Field label={`Cantidad adicional (${l.unidad})`}>
+                {(p) => <Input {...p} inputMode="decimal" value={cant} onChange={(e) => setCant(e.target.value)} />}
+            </Field>
             <Field label="Motivo" hint="Por ejemplo: el proveedor vende por caja de 12.">
                 {(p) => <Textarea {...p} rows={3} value={motivo} onChange={(e) => setMotivo(e.target.value)} />}
             </Field>

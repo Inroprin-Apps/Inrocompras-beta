@@ -5,7 +5,23 @@
 // mes, el desglose por tipo y la tabla. Solo lleva piezas aprobadas; los datos son inventados y dos secciones están
 // dibujadas (Resumen y Facturas sin OC): las demás muestran un hueco.
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Bot, Boxes, Building2, FileSearch, FileWarning, FolderOpen, IdCard, Landmark, LayoutDashboard, Layers, LogOut, Percent, CircleDollarSign, Tag, Users } from 'lucide-react';
+import {
+    Bot,
+    Boxes,
+    Building2,
+    FileSearch,
+    FileWarning,
+    FolderOpen,
+    IdCard,
+    Landmark,
+    LayoutDashboard,
+    Layers,
+    LogOut,
+    Percent,
+    CircleDollarSign,
+    Tag,
+    Users,
+} from 'lucide-react';
 import { BarRow, Notice, SearchBox, SortTh, T } from '../../../ui/bits.tsx';
 import { Button } from '../../../ui/button.tsx';
 import { Card, Chip, Kpi, KpiNote, Segmented } from '../../../ui/card.tsx';
@@ -28,7 +44,13 @@ const MENU: SidebarGroup[] = [
         items: [
             { key: 'resumen', label: 'Resumen', href: '#resumen', icon: <LayoutDashboard size={ICONO} /> },
             { key: 'impuestos', label: 'Impuestos', href: '#impuestos', icon: <Percent size={ICONO} /> },
-            { key: 'detracciones', label: 'Detracciones', href: '#detracciones', icon: <Landmark size={ICONO} />, badge: { count: 12, title: '12 por depositar' } },
+            {
+                key: 'detracciones',
+                label: 'Detracciones',
+                href: '#detracciones',
+                icon: <Landmark size={ICONO} />,
+                badge: { count: 12, title: '12 por depositar' },
+            },
             { key: 'retenciones', label: 'Retenciones', href: '#retenciones', icon: <CircleDollarSign size={ICONO} /> },
             { key: 'factura', label: 'Buscar factura', href: '#factura', icon: <FileSearch size={ICONO} /> },
             { key: 'ruc', label: 'Consulta RUC', href: '#ruc', icon: <IdCard size={ICONO} /> },
@@ -41,7 +63,13 @@ const MENU: SidebarGroup[] = [
         title: 'Compras y legajo',
         items: [
             { key: 'legajo', label: 'Legajo por OC', href: '#legajo', icon: <FolderOpen size={ICONO} /> },
-            { key: 'sinoc', label: 'Facturas sin OC', href: '#sinoc', icon: <FileWarning size={ICONO} />, badge: { count: 27, title: '27 sin orden de compra' } },
+            {
+                key: 'sinoc',
+                label: 'Facturas sin OC',
+                href: '#sinoc',
+                icon: <FileWarning size={ICONO} />,
+                badge: { count: 27, title: '27 sin orden de compra' },
+            },
             { key: 'kardex', label: 'Kardex', href: '#kardex', icon: <Boxes size={ICONO} /> },
             { key: 'cambios', label: 'Cambios del robot', href: '#cambios', icon: <Bot size={ICONO} />, badge: { count: 3, title: '3 cambios nuevos' } },
         ],
@@ -65,7 +93,13 @@ const POR_MES: ChartOption = {
     color: ['var(--color-chart-ink)'],
     grid: { left: 4, right: 12, top: 12, bottom: 4, containLabel: true },
     tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: ['jun', 'jul', 'ago', 'set', 'oct', 'nov'], axisLine: { lineStyle: { color: 'var(--color-control)' } }, axisTick: { show: false }, axisLabel: EJE },
+    xAxis: {
+        type: 'category',
+        data: ['jun', 'jul', 'ago', 'set', 'oct', 'nov'],
+        axisLine: { lineStyle: { color: 'var(--color-control)' } },
+        axisTick: { show: false },
+        axisLabel: EJE,
+    },
     yAxis: { type: 'value', axisLabel: EJE, splitLine: { lineStyle: { color: 'var(--color-divider)' } } },
     series: [{ name: 'Compras', type: 'bar', data: [512, 586, 640, 598, 671, 722], barWidth: 28, itemStyle: { borderRadius: [3, 3, 0, 0] } }],
 };
@@ -123,7 +157,13 @@ function Tabla({ docs, filas = 6 }: { docs: Doc[]; filas?: number }) {
     );
     const paged = usePaged(lista, `${sort.col}${sort.dir}${docs.length}`, filas);
     const th = (col: Col, label: string, fit = false) => (
-        <SortTh label={label} fit={fit} active={sort.col === col} dir={sort.dir} onSort={() => setSort((s) => (s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' }))} />
+        <SortTh
+            label={label}
+            fit={fit}
+            active={sort.col === col}
+            dir={sort.dir}
+            onSort={() => setSort((s) => (s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' }))}
+        />
     );
     return (
         <>
@@ -177,7 +217,13 @@ function Resumen() {
     const [periodo, setPeriodo] = useState('m202611');
     const [estado, setEstado] = useState('todos');
     const [q, setQ] = useState('');
-    const docs = useMemo(() => DOCS.filter((d) => (estado === 'todos' || d.estado === estado) && (!q || `${d.nombre} ${d.ruc} ${d.serie}`.toLowerCase().includes(q.toLowerCase()))), [estado, q]);
+    const docs = useMemo(
+        () =>
+            DOCS.filter(
+                (d) => (estado === 'todos' || d.estado === estado) && (!q || `${d.nombre} ${d.ruc} ${d.serie}`.toLowerCase().includes(q.toLowerCase())),
+            ),
+        [estado, q],
+    );
     return (
         <>
             <Titulo

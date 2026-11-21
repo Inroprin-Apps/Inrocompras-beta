@@ -76,7 +76,9 @@ export function Tabs({
                         >
                             {t.label}
                             {t.count !== undefined && (
-                                <span className={`rounded-full px-1.5 text-small font-medium tabular-nums ${on && !chips ? 'bg-primary-soft text-primary-strong' : chips && on ? 'bg-primary-hover text-on-fill' : 'bg-surface-3 text-ink'}`}>
+                                <span
+                                    className={`rounded-full px-1.5 text-small font-medium tabular-nums ${on && !chips ? 'bg-primary-soft text-primary-strong' : chips && on ? 'bg-primary-hover text-on-fill' : 'bg-surface-3 text-ink'}`}
+                                >
                                     {t.count}
                                 </span>
                             )}

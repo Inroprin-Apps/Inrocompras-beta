@@ -64,7 +64,10 @@ export default function Graficos() {
                 </Example>
             </Section>
 
-            <Section title="Colores de barra" blurb="Siempre un rol: primary la serie principal, teal la segunda, y los de estado solo si la barra habla de un estado.">
+            <Section
+                title="Colores de barra"
+                blurb="Siempre un rol: primary la serie principal, teal la segunda, y los de estado solo si la barra habla de un estado."
+            >
                 <Example code={`<BarRow label="Pagado" figures="72%" pct={72} color="success" />`}>
                     <div className="max-w-md">
                         {BARS.map((c, i) => (

@@ -97,10 +97,21 @@ export function FormCabecera({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () =>
                 <Field label="Moneda">{(p) => <SelectMenu {...p} value={c.moneda} onChange={(moneda) => set({ moneda })} options={op(MONEDAS)} />}</Field>
                 {imp ? (
                     <Field label="Incoterm" optional>
-                        {(p) => <SelectMenu {...p} value={c.incoterm} onChange={(incoterm) => set({ incoterm })} options={[{ value: '', label: 'Sin incoterm' }, ...op(INCOTERMS)]} />}
+                        {(p) => (
+                            <SelectMenu
+                                {...p}
+                                value={c.incoterm}
+                                onChange={(incoterm) => set({ incoterm })}
+                                options={[{ value: '', label: 'Sin incoterm' }, ...op(INCOTERMS)]}
+                            />
+                        )}
                     </Field>
                 ) : (
-                    <Field label="Impuesto">{(p) => <SelectMenu {...p} value={c.tipoImpuesto} onChange={(tipoImpuesto) => set({ tipoImpuesto })} options={op(IMPUESTOS_NACIONAL)} />}</Field>
+                    <Field label="Impuesto">
+                        {(p) => (
+                            <SelectMenu {...p} value={c.tipoImpuesto} onChange={(tipoImpuesto) => set({ tipoImpuesto })} options={op(IMPUESTOS_NACIONAL)} />
+                        )}
+                    </Field>
                 )}
                 <Field label="Forma de pago">
                     {(p) => <SelectMenu {...p} value={c.formaPago} onChange={(f) => set({ formaPago: f as FormaPago })} options={op(FORMAS_PAGO)} />}
@@ -115,13 +126,27 @@ export function FormCabecera({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () =>
                 )}
                 {pideAdelanto(c.formaPago) && (
                     <Field label="Hito del saldo">
-                        {(p) => <SelectMenu {...p} value={c.hitoSaldo} onChange={(hitoSaldo) => set({ hitoSaldo })} options={[{ value: '', label: 'Contra entrega' }, ...op(HITOS_SALDO.slice(1))]} />}
+                        {(p) => (
+                            <SelectMenu
+                                {...p}
+                                value={c.hitoSaldo}
+                                onChange={(hitoSaldo) => set({ hitoSaldo })}
+                                options={[{ value: '', label: 'Contra entrega' }, ...op(HITOS_SALDO.slice(1))]}
+                            />
+                        )}
                     </Field>
                 )}
-                <Field label="Condición">{(p) => <SelectMenu {...p} value={c.condicion} onChange={(condicion) => set({ condicion })} options={op(CONDICIONES)} />}</Field>
+                <Field label="Condición">
+                    {(p) => <SelectMenu {...p} value={c.condicion} onChange={(condicion) => set({ condicion })} options={op(CONDICIONES)} />}
+                </Field>
                 <Field label="Concepto" optional>
                     {(p) => (
-                        <SelectMenu {...p} value={c.concepto} onChange={(concepto) => set({ concepto })} options={[{ value: '', label: 'Sin concepto' }, ...conceptos.map((x) => ({ value: x.id, label: x.id }))]} />
+                        <SelectMenu
+                            {...p}
+                            value={c.concepto}
+                            onChange={(concepto) => set({ concepto })}
+                            options={[{ value: '', label: 'Sin concepto' }, ...conceptos.map((x) => ({ value: x.id, label: x.id }))]}
+                        />
                     )}
                 </Field>
                 <Field label="Plazo de entrega (días)" optional>

@@ -3,13 +3,10 @@ import type { Result } from 'neverthrow';
 import { resultado, resultadoUno, type ErrorFuente } from '@/shared/errores.ts';
 import type { PagosPort } from '../application/ports/PagosPort.ts';
 import type { EstadoPago, FacturaPago, Pago } from '../domain/pago.ts';
+import { n, s, type Fila, uno } from '@/shared/supabase/filas.ts';
 
-type Fila = Record<string, unknown>;
-const s = (v: unknown) => (v == null ? '' : String(v));
-const n = (v: unknown) => (v == null || v === '' ? 0 : Number(v));
 const nOrNull = (v: unknown) => (v == null || v === '' ? null : Number(v));
 const sOrNull = (v: unknown) => (v == null || v === '' ? null : String(v));
-const uno = (v: unknown): Fila | null => (Array.isArray(v) ? ((v[0] as Fila) ?? null) : ((v as Fila) ?? null));
 
 const SELECT =
     '*,ordenes!inner(numero,estatus,procedencia,proveedor_id,comprador_id,moneda,monto,monto_soles,proveedores(razon_social)),factura:documentos!pagos_factura_id_fkey(id,numero,fecha_doc,monto_doc,moneda)';

@@ -2,11 +2,18 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { err, type Result } from 'neverthrow';
 import { errorFuente, resultado, resultadoUno, type ErrorFuente } from '@/shared/errores.ts';
 import type { DocumentosPort } from '../application/ports/DocumentosPort.ts';
-import { problemaArchivo, rutaStorage, type Documento, type Dueno, type EstadoDoc, type EstadoLectura, type Lectura, type NuevoDocumento, type TipoDoc } from '../domain/documento.ts';
-
-type Fila = Record<string, unknown>;
-const s = (v: unknown) => (v == null ? '' : String(v));
-const n = (v: unknown) => (v == null ? null : Number(v));
+import {
+    problemaArchivo,
+    rutaStorage,
+    type Documento,
+    type Dueno,
+    type EstadoDoc,
+    type EstadoLectura,
+    type Lectura,
+    type NuevoDocumento,
+    type TipoDoc,
+} from '../domain/documento.ts';
+import { nn as n, s, type Fila } from '@/shared/supabase/filas.ts';
 
 function documento(f: Fila): Documento {
     return {
@@ -30,7 +37,11 @@ function documento(f: Fila): Documento {
         creado: s(f.creado),
     };
 }
-const columna = (d: Dueno) => ('ordenId' in d ? ['orden_id', d.ordenId] : 'desaduanajeId' in d ? ['desaduanaje_id', d.desaduanajeId] : ['solicitud_item_id', d.solicitudItemId]) as [string, string];
+const columna = (d: Dueno) =>
+    ('ordenId' in d ? ['orden_id', d.ordenId] : 'desaduanajeId' in d ? ['desaduanaje_id', d.desaduanajeId] : ['solicitud_item_id', d.solicitudItemId]) as [
+        string,
+        string,
+    ];
 
 export class SupabaseDocumentosAdapter implements DocumentosPort {
     constructor(private readonly db: SupabaseClient) {}
@@ -75,8 +86,18 @@ export class SupabaseDocumentosAdapter implements DocumentosPort {
         return r.error ? err(errorFuente(r.error)) : resultadoUno({ data: r.data?.signedUrl ?? null, error: null });
     }
 
-    async confirmarLectura(id: string, d: { numero: string; fecha: string | null; monto: number | null; moneda: string | null; ruc: string | null }): Promise<Result<null, ErrorFuente>> {
-        const r = await this.db.rpc('ac_documento_confirmar_lectura', { p_id: id, p_numero: d.numero, p_fecha: d.fecha, p_monto: d.monto, p_moneda: d.moneda, p_ruc: d.ruc });
+    async confirmarLectura(
+        id: string,
+        d: { numero: string; fecha: string | null; monto: number | null; moneda: string | null; ruc: string | null },
+    ): Promise<Result<null, ErrorFuente>> {
+        const r = await this.db.rpc('ac_documento_confirmar_lectura', {
+            p_id: id,
+            p_numero: d.numero,
+            p_fecha: d.fecha,
+            p_monto: d.monto,
+            p_moneda: d.moneda,
+            p_ruc: d.ruc,
+        });
         return resultado(r).map(() => null);
     }
 }

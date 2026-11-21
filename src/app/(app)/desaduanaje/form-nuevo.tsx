@@ -66,10 +66,16 @@ export function FormNuevo({ onCerrar, onCreado }: { onCerrar: () => void; onCrea
                     <Hueco className="h-24 w-full" />
                 ) : lista.length === 0 ? (
                     <p className="text-small text-ink-3">
-                        {ocs.data.length ? 'Ninguna orden coincide con la búsqueda.' : 'No hay órdenes de importación aprobadas. Una orden aparece aquí cuando la gerencia la aprueba.'}
+                        {ocs.data.length
+                            ? 'Ninguna orden coincide con la búsqueda.'
+                            : 'No hay órdenes de importación aprobadas. Una orden aparece aquí cuando la gerencia la aprueba.'}
                     </p>
                 ) : (
-                    <ul role="listbox" aria-label="Órdenes de importación" className="flex max-h-60 flex-col divide-y divide-divider overflow-y-auto rounded-control border border-line">
+                    <ul
+                        role="listbox"
+                        aria-label="Órdenes de importación"
+                        className="flex max-h-60 flex-col divide-y divide-divider overflow-y-auto rounded-control border border-line"
+                    >
                         {lista.map((o) => (
                             <li key={o.id} role="option" aria-selected={o.id === oc}>
                                 <button
@@ -79,11 +85,17 @@ export function FormNuevo({ onCerrar, onCreado }: { onCerrar: () => void; onCrea
                                 >
                                     <div className="min-w-0 flex-1">
                                         <div className="text-ui font-medium">{o.numero}</div>
-                                        <div className="truncate text-small text-ink-2">{[o.proveedor || 'Sin proveedor', o.proyecto].filter(Boolean).join(' · ')}</div>
+                                        <div className="truncate text-small text-ink-2">
+                                            {[o.proveedor || 'Sin proveedor', o.proyecto].filter(Boolean).join(' · ')}
+                                        </div>
                                     </div>
                                     <div className="text-right text-small">
                                         <div className="tabular-nums">{monto(o.monto, o.moneda)}</div>
-                                        {o.desaduanajes > 0 && <div className="text-ink-3">{o.desaduanajes} ya creado{o.desaduanajes > 1 ? 's' : ''}</div>}
+                                        {o.desaduanajes > 0 && (
+                                            <div className="text-ink-3">
+                                                {o.desaduanajes} ya creado{o.desaduanajes > 1 ? 's' : ''}
+                                            </div>
+                                        )}
                                     </div>
                                 </button>
                             </li>

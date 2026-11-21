@@ -1,4 +1,5 @@
 ## Contexto común (léelo entero)
+
 Repo: INROCOMPRAS (Next.js 16 + Supabase), app de Compras e Importaciones de INROPRIN que reemplaza un AppSheet. Todo en español
 (código, textos de UI de tú, sin exclamaciones; los errores dicen qué hacer). Producción 01/01/2027.
 
@@ -7,6 +8,7 @@ y el doc de tu hito. Las reglas de negocio YA están en la base: `supabase/migra
 `public.ac_*` por acción + `acciones_disponibles(tabla,id)` + `te_toca()` + `seguimiento_items()`). La UI NO repite reglas.
 
 **Patrón obligatorio (cópialo de la referencia):** `src/modules/proyectos/**` + `src/app/(app)/proyectos/**`:
+
 - `src/modules/<ctx>/domain/*.ts` PURO (tipos camelCase, filtros, orden, cálculos de pantalla; sin React/Supabase/neverthrow).
 - `application/ports/XPort.ts` (Result<T, ErrorFuente> de neverthrow) y `application/views.ts` (re-exporta el dominio).
 - `infrastructure/SupabaseXAdapter.ts` recibe `SupabaseClient`, mapea filas snake_case → entidades; usa `resultado/resultadoUno` de `@/shared/errores.ts`.
@@ -27,6 +29,7 @@ y el doc de tu hito. Las reglas de negocio YA están en la base: `supabase/migra
   Datos editables (columnas permitidas por `app.proteger` en 0002): update directo con RLS.
 
 **Reglas de convivencia (trabajas EN LA MISMA COPIA `/home/user/Inrocompras-beta` que otro agente, en paralelo):**
+
 - Solo creas/editas archivos de TU alcance (abajo). NO edites: `src/app/(app)/_lib/*`, `_acciones/*`, `_documentos/*`, `_components/*`,
   archivos existentes de `src/shared/**` (puedes AGREGAR archivos nuevos en `src/shared/ui/` si de verdad hacen falta), `package.json`,
   `pnpm-lock.yaml`, migraciones 0001–0008, `CLAUDE.md`. Si necesitas un cambio ahí o una dependencia nueva, NO lo hagas: dilo en tu informe.

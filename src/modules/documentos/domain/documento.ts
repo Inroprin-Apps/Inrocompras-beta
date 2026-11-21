@@ -3,12 +3,26 @@
 // Drive y, si es cotización o factura, su lectura (app.al_registrar_documento).
 
 export const TIPOS_ORDEN = [
-    'Cotización', 'Factura', 'Guía de remisión', 'Correo de sustento', 'Validación técnica', 'Acta de conformidad',
-    'Nota de crédito', 'Voucher de pago', 'Otro',
+    'Cotización',
+    'Factura',
+    'Guía de remisión',
+    'Correo de sustento',
+    'Validación técnica',
+    'Acta de conformidad',
+    'Nota de crédito',
+    'Voucher de pago',
+    'Otro',
 ] as const;
 export const TIPOS_DESADUANAJE = [
-    'Factura comercial', 'Packing list', 'BL / AWB', 'Certificado de origen', 'Póliza de seguro', 'Permiso (MTC / DIGESA)', 'DAM',
-    'Comprobante de gasto', 'Otro',
+    'Factura comercial',
+    'Packing list',
+    'BL / AWB',
+    'Certificado de origen',
+    'Póliza de seguro',
+    'Permiso (MTC / DIGESA)',
+    'DAM',
+    'Comprobante de gasto',
+    'Otro',
 ] as const;
 export type TipoDoc = (typeof TIPOS_ORDEN)[number] | (typeof TIPOS_DESADUANAJE)[number] | 'Ficha técnica' | 'PDF OC interna' | 'PDF OC proveedor';
 
@@ -61,7 +75,14 @@ export interface NuevoDocumento {
 }
 
 const LIMITE = 25 * 1024 * 1024; // = file_size_limit del bucket (0004_supabase.sql)
-const MIMES = ['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+const MIMES = [
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'application/xml',
+    'text/xml',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+];
 export const ACEPTA = '.pdf,.jpg,.jpeg,.png,.xml,.xlsx';
 
 /** Por qué no se puede subir este archivo (en palabras), o null. */
@@ -73,7 +94,12 @@ export function problemaArchivo(a: { name: string; size: number; type: string })
 
 /** Ruta en Storage: la primera carpeta es el uid (lo exige la política «subir a mi carpeta»). */
 export function rutaStorage(uid: string, nombre: string, id: string): string {
-    const limpio = nombre.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-').replace(/-+/g, '-').slice(-80);
+    const limpio = nombre
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^A-Za-z0-9._-]+/g, '-')
+        .replace(/-+/g, '-')
+        .slice(-80);
     return `${uid}/${id}-${limpio}`;
 }
 
@@ -82,4 +108,5 @@ export const pideMonto = (t: TipoDoc) => t === 'Factura' || t === 'Nota de créd
 
 export const tonoDoc = (d: Documento): 'ok' | 'warn' | 'danger' | 'muted' | 'info' =>
     d.estado === 'Archivado' ? 'ok' : d.estado === 'Error' ? 'danger' : d.estado === 'Reemplazado' ? 'muted' : 'info';
-export const etiquetaEstadoDoc = (d: Documento) => (d.estado === 'Archivado' ? 'En Drive' : d.estado === 'Subido' || d.estado === 'Archivando' ? 'Pasando a Drive' : d.estado);
+export const etiquetaEstadoDoc = (d: Documento) =>
+    d.estado === 'Archivado' ? 'En Drive' : d.estado === 'Subido' || d.estado === 'Archivando' ? 'Pasando a Drive' : d.estado;

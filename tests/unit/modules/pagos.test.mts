@@ -18,11 +18,37 @@ import {
 } from '@/modules/pagos/domain/pago.ts';
 
 const base: Pago = {
-    id: 'p1', ordenId: 'o1', ordenNumero: 'INROPRIN-NAC-2026-0001', ordenEstatus: 'Pago pendiente', procedencia: 'Nacional',
-    proveedorId: 'v1', proveedor: 'Proveedor Uno', compradorId: 'c1', moneda: 'PEN', nCuota: 1, tipo: 'Pago total', hito: 'Contado',
-    porcentaje: 1, monto: 1000, montoSoles: 1000, aplicaRetencion: false, retencion: 0, neto: null, fechaLimite: '2026-11-25',
-    fechaProgramada: null, fechaPago: null, estado: 'Solicitado', factura: null, sustento: '', nOperacion: '', voucherId: null,
-    motivoObs: '', detalleObs: '', inropayRef: '', comentario: '', creado: '2026-11-20T10:00:00Z',
+    id: 'p1',
+    ordenId: 'o1',
+    ordenNumero: 'INROPRIN-NAC-2026-0001',
+    ordenEstatus: 'Pago pendiente',
+    procedencia: 'Nacional',
+    proveedorId: 'v1',
+    proveedor: 'Proveedor Uno',
+    compradorId: 'c1',
+    moneda: 'PEN',
+    nCuota: 1,
+    tipo: 'Pago total',
+    hito: 'Contado',
+    porcentaje: 1,
+    monto: 1000,
+    montoSoles: 1000,
+    aplicaRetencion: false,
+    retencion: 0,
+    neto: null,
+    fechaLimite: '2026-11-25',
+    fechaProgramada: null,
+    fechaPago: null,
+    estado: 'Solicitado',
+    factura: null,
+    sustento: '',
+    nOperacion: '',
+    voucherId: null,
+    motivoObs: '',
+    detalleObs: '',
+    inropayRef: '',
+    comentario: '',
+    creado: '2026-11-20T10:00:00Z',
 };
 const p = (x: Partial<Pago>): Pago => ({ ...base, ...x });
 const HOY = '2026-11-20';
@@ -57,13 +83,22 @@ describe('pagos', () => {
         expect(ids({ texto: 'op-778' })).toEqual(['d']);
     });
     it('pestañas: por atender (solicitado y programado), mías (sin anuladas) y todas', () => {
-        const l = [p({ id: 'a' }), p({ id: 'b', estado: 'Programado' }), p({ id: 'c', estado: 'Plan', compradorId: 'yo' }), p({ id: 'd', estado: 'Anulado', compradorId: 'yo' })];
+        const l = [
+            p({ id: 'a' }),
+            p({ id: 'b', estado: 'Programado' }),
+            p({ id: 'c', estado: 'Plan', compradorId: 'yo' }),
+            p({ id: 'd', estado: 'Anulado', compradorId: 'yo' }),
+        ];
         expect(dePestana(l, 'atender', 'yo').map((x) => x.id)).toEqual(['a', 'b']);
         expect(dePestana(l, 'mias', 'yo').map((x) => x.id)).toEqual(['c']);
         expect(dePestana(l, 'todas', 'yo')).toHaveLength(4);
     });
     it('ordena por fecha límite (sin fecha al final), monto y orden', () => {
-        const l = [p({ id: 'a', fechaLimite: null, montoSoles: 5 }), p({ id: 'b', fechaLimite: '2026-12-01', montoSoles: 50 }), p({ id: 'c', fechaLimite: '2026-11-01', montoSoles: 10 })];
+        const l = [
+            p({ id: 'a', fechaLimite: null, montoSoles: 5 }),
+            p({ id: 'b', fechaLimite: '2026-12-01', montoSoles: 50 }),
+            p({ id: 'c', fechaLimite: '2026-11-01', montoSoles: 10 }),
+        ];
         expect(ordenarPagos(l, 'limite').map((x) => x.id)).toEqual(['c', 'b', 'a']);
         expect(ordenarPagos(l, 'monto').map((x) => x.id)).toEqual(['b', 'c', 'a']);
         const cuotas = [p({ id: 'x', nCuota: 2 }), p({ id: 'y', nCuota: 1 })];
@@ -92,7 +127,10 @@ describe('pagos', () => {
     it('en bloque se marcan las solicitadas; el resumen separa las que fallaron', () => {
         expect(seleccionable({ estado: 'Solicitado' })).toBe(true);
         expect(seleccionable({ estado: 'Programado' })).toBe(false);
-        const r = resumenBloque([{ id: 'a', nombre: 'A', error: null }, { id: 'b', nombre: 'B', error: 'La cuota no está solicitada.' }]);
+        const r = resumenBloque([
+            { id: 'a', nombre: 'A', error: null },
+            { id: 'b', nombre: 'B', error: 'La cuota no está solicitada.' },
+        ]);
         expect(r.hechas).toBe(1);
         expect(r.fallidas.map((x) => x.id)).toEqual(['b']);
     });

@@ -1,8 +1,20 @@
 'use client';
 
 import {
-    Building2, ClipboardCheck, ClipboardList, FileSpreadsheet, FileText, Inbox, ListChecks, Settings, Ship,
-    ShoppingCart, Table2, Users, Wallet, Waypoints,
+    Building2,
+    ClipboardCheck,
+    ClipboardList,
+    FileSpreadsheet,
+    FileText,
+    Inbox,
+    ListChecks,
+    Settings,
+    Ship,
+    ShoppingCart,
+    Table2,
+    Users,
+    Wallet,
+    Waypoints,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Sidebar, type SidebarGroup } from '@/shared/ui/sidebar.tsx';
@@ -45,5 +57,7 @@ export function MenuLateral({ grupos }: { grupos: { title: string; items: Entrad
         .flatMap((x) => x.items)
         .filter((it) => (it.href === '/' ? ruta === '/' : ruta === it.href || ruta.startsWith(it.href + '/')))
         .sort((a, b) => b.href.length - a.href.length)[0]?.key;
-    return <Sidebar marca={{ nombre: 'INROCOMPRAS', detalle: 'Compras e Importaciones' }} grupos={g} activo={activo ?? ''} clave="inrocompras.menu.contraido" />;
+    return (
+        <Sidebar marca={{ nombre: 'INROCOMPRAS', detalle: 'Compras e Importaciones' }} grupos={g} activo={activo ?? ''} clave="inrocompras.menu.contraido" />
+    );
 }

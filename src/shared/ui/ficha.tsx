@@ -8,7 +8,19 @@ import { useEffect, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { Button } from './button.tsx';
 
-export function Ficha({ titulo, subtitulo, estado, onCerrar, children }: { titulo: ReactNode; subtitulo?: ReactNode; estado?: ReactNode; onCerrar: () => void; children: ReactNode }) {
+export function Ficha({
+    titulo,
+    subtitulo,
+    estado,
+    onCerrar,
+    children,
+}: {
+    titulo: ReactNode;
+    subtitulo?: ReactNode;
+    estado?: ReactNode;
+    onCerrar: () => void;
+    children: ReactNode;
+}) {
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => e.key === 'Escape' && !document.querySelector('dialog[open]') && onCerrar();
         window.addEventListener('keydown', onKey);

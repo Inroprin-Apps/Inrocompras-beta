@@ -272,6 +272,12 @@ export const COMPONENTS: ComponentEntry[] = [
 export const NOT_PORTED: { name: string; why: string }[] = [
     { name: 'tangram, quiz-option-shapes, confetti, achievement-icons, presence-beat', why: 'Son del campus educativo: juegos, logros y partidas en vivo.' },
     { name: 'chatbot, content', why: 'El chat y el contenido de aprendizaje del campus: dependen de sus datos y de su servidor.' },
-    { name: 'calendar, tour', why: 'Traen los datos de GRAMA (cursos y sesiones; los recorridos del campus y del admin). INROCONTA ya tiene driver.js por su lado. Se pueden llevar genéricos si los quieres.' },
-    { name: 'spam-notice, enlace-precargado, feature-seen, icons.ts', why: 'Correos del campus, precarga y medición propias de GRAMA, y su registro de iconos (aquí se usa lucide directo).' },
+    {
+        name: 'calendar, tour',
+        why: 'Traen los datos de GRAMA (cursos y sesiones; los recorridos del campus y del admin). INROCONTA ya tiene driver.js por su lado. Se pueden llevar genéricos si los quieres.',
+    },
+    {
+        name: 'spam-notice, enlace-precargado, feature-seen, icons.ts',
+        why: 'Correos del campus, precarga y medición propias de GRAMA, y su registro de iconos (aquí se usa lucide directo).',
+    },
 ];

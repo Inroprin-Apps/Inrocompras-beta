@@ -107,7 +107,14 @@ export function PanelAcciones({
                     ))}
                 </div>
             )}
-            {abierta && <DialogoAccion accion={abierta} ocupado={haciendo === abierta.accion} onCerrar={() => setAbierta(null)} onConfirmar={(v) => hacer(abierta, v)} />}
+            {abierta && (
+                <DialogoAccion
+                    accion={abierta}
+                    ocupado={haciendo === abierta.accion}
+                    onCerrar={() => setAbierta(null)}
+                    onConfirmar={(v) => hacer(abierta, v)}
+                />
+            )}
         </div>
     );
 }

@@ -1,8 +1,27 @@
 import { describe, expect, it } from 'vitest';
-import { anioDe, nombreCarpetaDes, nombreCarpetaOC, nombreSeguro, rutaCarpetaOC, serieOC, subcarpetaDe, escaparConsultaDrive } from '@/modules/integraciones/domain/carpetas.ts';
+import {
+    anioDe,
+    nombreCarpetaDes,
+    nombreCarpetaOC,
+    nombreSeguro,
+    rutaCarpetaOC,
+    serieOC,
+    subcarpetaDe,
+    escaparConsultaDrive,
+} from '@/modules/integraciones/domain/carpetas.ts';
 import { correoValido, escaparHtml, modoCorreo, notificacion, ocProveedor } from '@/modules/integraciones/domain/correo.ts';
 import { leerEvento, solicitudInroPay } from '@/modules/integraciones/domain/inropay.ts';
-import { aNumero, bastaElTexto, combinar, extraerDeTexto, fechaDelTexto, monedaDelTexto, numeroDelTexto, revisarGemini, LECTURA_VACIA } from '@/modules/integraciones/domain/lectura.ts';
+import {
+    aNumero,
+    bastaElTexto,
+    combinar,
+    extraerDeTexto,
+    fechaDelTexto,
+    monedaDelTexto,
+    numeroDelTexto,
+    revisarGemini,
+    LECTURA_VACIA,
+} from '@/modules/integraciones/domain/lectura.ts';
 import { formaPagoTexto, idiomaPdf, lineasPdf, nombrePdf, type OrdenPdf } from '@/modules/integraciones/domain/pdf.ts';
 import { cierre, descartado, final, hecho, noConfigurado, reintentar } from '@/modules/integraciones/domain/trabajo.ts';
 import { firmaValida, firmar } from '@/modules/integraciones/infrastructure/hmac.ts';
@@ -10,7 +29,14 @@ import { mensajeMime } from '@/modules/integraciones/infrastructure/mime.ts';
 import { rucValido } from '@/modules/proveedores/domain/ruc.ts';
 
 describe('carpetas del legajo (docs/07 §2)', () => {
-    const oc = { numero: 'INROPRIN-NAC-2026-0025', empresaId: 'INROPRIN', clase: 'Compra', procedencia: 'Nacional', fecha: '2026-12-03', proveedor: 'Ferretería / Andina SAC' };
+    const oc = {
+        numero: 'INROPRIN-NAC-2026-0025',
+        empresaId: 'INROPRIN',
+        clase: 'Compra',
+        procedencia: 'Nacional',
+        fecha: '2026-12-03',
+        proveedor: 'Ferretería / Andina SAC',
+    };
     it('Raíz / AAAA / EMPRESA-PROC / N° OC – Proveedor', () => {
         expect(rutaCarpetaOC(oc)).toEqual(['2026', 'INROPRIN-NAC', 'INROPRIN-NAC-2026-0025 – Ferretería Andina SAC']);
         expect(serieOC({ ...oc, procedencia: 'Importación' })).toBe('INROPRIN-IMP');
@@ -80,7 +106,16 @@ describe('lector: lo que se saca del texto', () => {
         expect(numeroDelTexto('E001 - 45')).toBe('E001-45');
     });
     it('Gemini: avisa RUC malo; al combinar gana el RUC del texto', () => {
-        const g = revisarGemini({ ...LECTURA_VACIA, ruc: '20100100102', total: 10, items: [{ descripcion: 'x', cantidad: 1, unidad: null, precio_unitario: 5, total: 5, marca: null, modelo: null }], subtotal: 10 }, rucValido);
+        const g = revisarGemini(
+            {
+                ...LECTURA_VACIA,
+                ruc: '20100100102',
+                total: 10,
+                items: [{ descripcion: 'x', cantidad: 1, unidad: null, precio_unitario: 5, total: 5, marca: null, modelo: null }],
+                subtotal: 10,
+            },
+            rucValido,
+        );
         expect(g.avisos.join(' ')).toMatch(/no pasa la validación/);
         expect(g.avisos.join(' ')).toMatch(/no coincide con el subtotal/);
         const t = extraerDeTexto(texto, rucValido, ['20100100101']);
@@ -127,7 +162,16 @@ describe('InroPay', () => {
         });
     });
     it('arma la solicitud del contrato', () => {
-        const b = solicitudInroPay({ id, nCuota: 1, monto: 100, retencion: 3, neto: 97, fechaLimite: null, facturaId: null, orden: { numero: 'N1', moneda: 'PEN', proveedor: null } });
+        const b = solicitudInroPay({
+            id,
+            nCuota: 1,
+            monto: 100,
+            retencion: 3,
+            neto: 97,
+            fechaLimite: null,
+            facturaId: null,
+            orden: { numero: 'N1', moneda: 'PEN', proveedor: null },
+        });
         expect(Object.keys(b)).toEqual(['origen', 'pago_id', 'orden', 'cuota', 'monto', 'retencion', 'neto', 'fecha_limite', 'factura_id']);
     });
 });
@@ -141,7 +185,15 @@ describe('PDF y correo', () => {
         expect(nombrePdf({ numero: null, revision: 0 }, 'proveedor')).toBe('borrador.pdf');
         expect(formaPagoTexto(o, 'es')).toBe('30 % adelanto, saldo contra BL');
         expect(formaPagoTexto({ ...o, formaPago: 'Crédito', diasCredito: 30 }, 'en')).toBe('Credit 30 days');
-        expect(lineasPdf({ lineas: [{ nLinea: 2, esDemasia: false }, { nLinea: 1, esDemasia: true, demasiaEstado: 'Rechazada' }, { nLinea: 1, esDemasia: false }] } as OrdenPdf).map((l) => l.nLinea)).toEqual([1, 2]);
+        expect(
+            lineasPdf({
+                lineas: [
+                    { nLinea: 2, esDemasia: false },
+                    { nLinea: 1, esDemasia: true, demasiaEstado: 'Rechazada' },
+                    { nLinea: 1, esDemasia: false },
+                ],
+            } as OrdenPdf).map((l) => l.nLinea),
+        ).toEqual([1, 2]);
     });
     it('plantillas: la de importación en inglés, todo escapado', () => {
         expect(ocProveedor({ proveedor: 'A<b>', numero: 'N1', empresa: 'E', comprador: 'C', idioma: 'en' }).asunto).toBe('Purchase Order N1 – E');
@@ -155,7 +207,14 @@ describe('PDF y correo', () => {
     });
     it('el MIME lleva asunto UTF-8, copia, responder a y el adjunto', () => {
         const m = mensajeMime(
-            { para: ['p@x.pe'], cc: ['c@x.pe'], responderA: 'c@x.pe', asunto: 'Orden ñ', html: '<p>hola</p>', adjuntos: [{ nombre: 'oc.pdf', mime: 'application/pdf', datos: new Uint8Array([1, 2, 3]) }] },
+            {
+                para: ['p@x.pe'],
+                cc: ['c@x.pe'],
+                responderA: 'c@x.pe',
+                asunto: 'Orden ñ',
+                html: '<p>hola</p>',
+                adjuntos: [{ nombre: 'oc.pdf', mime: 'application/pdf', datos: new Uint8Array([1, 2, 3]) }],
+            },
             'INROCOMPRAS <n@x.pe>',
             'LIM',
         );

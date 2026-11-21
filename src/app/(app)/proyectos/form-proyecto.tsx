@@ -20,7 +20,15 @@ export function FormProyecto({ proyecto, onCerrar, onCreado }: { proyecto?: Proy
     const gente = (personasStore.use().data ?? []).filter((g) => g.activo);
     const empresas = catalogosStore.use().data?.empresas ?? [];
     const inicial: NuevoProyecto = proyecto
-        ? { codigo: proyecto.codigo, nombre: proyecto.nombre, cliente: proyecto.cliente, empresaId: proyecto.empresaId, gerenteId: proyecto.gerenteId, fechaMeta: proyecto.fechaMeta, lugarEntrega: proyecto.lugarEntrega }
+        ? {
+              codigo: proyecto.codigo,
+              nombre: proyecto.nombre,
+              cliente: proyecto.cliente,
+              empresaId: proyecto.empresaId,
+              gerenteId: proyecto.gerenteId,
+              fechaMeta: proyecto.fechaMeta,
+              lugarEntrega: proyecto.lugarEntrega,
+          }
         : VACIO;
     const [f, setF, olvidar] = useBorrador<NuevoProyecto>(proyecto ? `proyecto:${proyecto.id}` : 'proyecto:nuevo', inicial);
     const [error, setError] = useState<string | null>(null);
@@ -65,7 +73,14 @@ export function FormProyecto({ proyecto, onCerrar, onCreado }: { proyecto?: Proy
                     {(p) => <Input {...p} value={f.cliente} onChange={(e) => set({ cliente: e.target.value })} />}
                 </Field>
                 <Field label="Empresa">
-                    {(p) => <SelectMenu {...p} value={f.empresaId} onChange={(empresaId) => set({ empresaId })} options={empresas.map((e) => ({ value: e.id, label: e.razonSocial }))} />}
+                    {(p) => (
+                        <SelectMenu
+                            {...p}
+                            value={f.empresaId}
+                            onChange={(empresaId) => set({ empresaId })}
+                            options={empresas.map((e) => ({ value: e.id, label: e.razonSocial }))}
+                        />
+                    )}
                 </Field>
                 <Field label="Gerente del proyecto" optional>
                     {(p) => (

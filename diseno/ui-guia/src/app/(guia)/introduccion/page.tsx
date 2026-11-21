@@ -70,9 +70,9 @@ export default function Home() {
                 title="De dónde sale"
                 blurb={
                     <>
-                        Del trabajo hecho en INROCONTA (su página <code>/dev/colores</code>): los tokens por rol, los cinco estados de botón y los
-                        componentes de <code>shared/ui</code>. Aquí se ordena lo que allí quedó como lista de trabajo (la tipografía y los radios ahora tienen
-                        nombre) y se agregan los ejemplos y las reglas de uso.
+                        Del trabajo hecho en INROCONTA (su página <code>/dev/colores</code>): los tokens por rol, los cinco estados de botón y los componentes
+                        de <code>shared/ui</code>. Aquí se ordena lo que allí quedó como lista de trabajo (la tipografía y los radios ahora tienen nombre) y se
+                        agregan los ejemplos y las reglas de uso.
                     </>
                 }
             >
@@ -87,8 +87,8 @@ export default function Home() {
                         <Chip tone="info">sonner</Chip>
                     </div>
                     <p className="text-ui text-ink-2">
-                        El código de cada componente está en <code>src/ui/</code> y los tokens en <code>src/app/globals.css</code>. Eso es lo que se copia
-                        a una app; <code>src/guia/</code> y <code>src/app/</code> son solo la guía.{' '}
+                        El código de cada componente está en <code>src/ui/</code> y los tokens en <code>src/app/globals.css</code>. Eso es lo que se copia a una
+                        app; <code>src/guia/</code> y <code>src/app/</code> son solo la guía.{' '}
                         <Link href="/uso" className="font-medium">
                             Cómo usarla en una app →
                         </Link>

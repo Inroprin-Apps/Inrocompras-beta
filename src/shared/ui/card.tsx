@@ -76,7 +76,10 @@ export function Kpi({
     );
     const clase = `block min-w-0 ${CARD} px-[18px] pt-4 pb-4`;
     return href ? (
-        <a href={href} className={`${clase} text-ink no-underline transition-colors hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`}>
+        <a
+            href={href}
+            className={`${clase} text-ink no-underline transition-colors hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`}
+        >
             {cuerpo}
         </a>
     ) : (

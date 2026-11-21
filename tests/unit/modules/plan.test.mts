@@ -18,10 +18,33 @@ import {
 } from '@/modules/plan/domain/plan.ts';
 
 const l = (x: Partial<LineaPlan>): LineaPlan => ({
-    itemId: 'i1', requerimientoId: 'r1', requerimiento: 'RC-2026-0001', rqSidige: '', reqEstado: 'Emitido', proyectoId: 'p1', nItem: 1,
-    tipo: 'Bienes', codigoCliente: 'C-1', sku: '', descripcion: 'Torno', unidad: 'UND', cantidad: 10, saldo: 10, canal: 'Nacional',
-    plazoDias: 20, fechaMeta: '2026-12-31', incluidoEn: null, anulado: false, validacion: 'Validado', marca: '', modelo: '',
-    presupuestoUnit: 100, monedaPpto: 'PEN', ordenes: [], pagado: false, ...x,
+    itemId: 'i1',
+    requerimientoId: 'r1',
+    requerimiento: 'RC-2026-0001',
+    rqSidige: '',
+    reqEstado: 'Emitido',
+    proyectoId: 'p1',
+    nItem: 1,
+    tipo: 'Bienes',
+    codigoCliente: 'C-1',
+    sku: '',
+    descripcion: 'Torno',
+    unidad: 'UND',
+    cantidad: 10,
+    saldo: 10,
+    canal: 'Nacional',
+    plazoDias: 20,
+    fechaMeta: '2026-12-31',
+    incluidoEn: null,
+    anulado: false,
+    validacion: 'Validado',
+    marca: '',
+    modelo: '',
+    presupuestoUnit: 100,
+    monedaPpto: 'PEN',
+    ordenes: [],
+    pagado: false,
+    ...x,
 });
 const cfg: ConfigPlan = { hoy: '2026-11-20', diasAlerta: 7, exigirValidacion: true };
 const num = (t: string) => (t.trim() === '' || Number.isNaN(Number(t)) ? null : Number(t));
@@ -42,7 +65,14 @@ describe('plan de compras: fechas y semáforo', () => {
     });
     it('criticidad por plazo', () => {
         expect([121, 120, 100, 99, 60, 30, 29, null].map(criticidad)).toEqual([
-            'Fuera de plazo', 'Muy crítico', 'Muy crítico', 'Crítico', 'Crítico', 'Normal', 'Sencillo', 'Sin plazo',
+            'Fuera de plazo',
+            'Muy crítico',
+            'Muy crítico',
+            'Crítico',
+            'Crítico',
+            'Normal',
+            'Sencillo',
+            'Sin plazo',
         ]);
     });
     it('hoy en Lima (UTC−5)', () => {

@@ -26,8 +26,8 @@ export function Gastos({ d, registra, nombre }: { d: DesaduanajeDetalle; registr
         <div className="flex flex-col gap-3">
             {cerrado && (
                 <Notice tone="info" cerrable={false}>
-                    El costeo está cerrado (versión {d.versionCosteo}): ya no se agregan ni cambian gastos. Si llegó un gasto después (una multa, por ejemplo), pide a la
-                    jefatura de Importaciones que lo reabra con motivo.
+                    El costeo está cerrado (versión {d.versionCosteo}): ya no se agregan ni cambian gastos. Si llegó un gasto después (una multa, por ejemplo),
+                    pide a la jefatura de Importaciones que lo reabra con motivo.
                 </Notice>
             )}
             {d.gastos.length === 0 ? (

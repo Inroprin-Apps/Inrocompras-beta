@@ -64,7 +64,9 @@ export default function Filtros() {
                 title="Período"
                 blurb="Primero el tipo (día, mes, bimestre, trimestre, semestre, año o rango) y luego cuál. Solo ofrece los períodos que tienen datos. El valor es un código corto que cabe en la URL: m202611, t2026-4, a2026, r2026-10-01_2026-10-15."
             >
-                <Example code={`<PeriodPicker value={period} onChange={setPeriod} months={['202610', '202611']} />\n<PeriodPicker value="" onChange={() => {}} months={[]} disabled />`}>
+                <Example
+                    code={`<PeriodPicker value={period} onChange={setPeriod} months={['202610', '202611']} />\n<PeriodPicker value="" onChange={() => {}} months={[]} disabled />`}
+                >
                     <div className="flex flex-col gap-3">
                         <PeriodPicker value={period} onChange={setPeriod} months={MONTHS} />
                         <PeriodPicker value="" onChange={() => {}} months={MONTHS} disabled />
@@ -115,10 +117,16 @@ export default function Filtros() {
             <Section title="Reglas">
                 <Rules
                     items={[
-                        ['El buscador filtra mientras se escribe (150 ms después de la última tecla).', 'Sin botón «Buscar». Ignora tildes y mayúsculas: «cámara» encuentra «CAMARA».'],
+                        [
+                            'El buscador filtra mientras se escribe (150 ms después de la última tecla).',
+                            'Sin botón «Buscar». Ignora tildes y mayúsculas: «cámara» encuentra «CAMARA».',
+                        ],
                         ['Los filtros viven en la URL.', 'Así un enlace copiado abre la misma vista, y «atrás» deshace el último filtro.'],
                         ['Cambiar un filtro vuelve a la página 1.', 'Si no, el usuario queda en la página 4 de un resultado que tiene 2.'],
-                        ['El orden de la barra: buscar, luego los selects, luego el período, y a la derecha el orden y exportar.', 'Igual en todas las pantallas.'],
+                        [
+                            'El orden de la barra: buscar, luego los selects, luego el período, y a la derecha el orden y exportar.',
+                            'Igual en todas las pantallas.',
+                        ],
                     ]}
                 />
             </Section>

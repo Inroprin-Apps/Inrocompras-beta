@@ -9,7 +9,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FileDown, FileSpreadsheet, Smartphone } from 'lucide-react';
 import { exportarCuadro } from '@/modules/cuadro/composition.ts';
-import { COLUMNAS_CUADRO, FILTROS_CUADRO, filtrarCuadro, nombreArchivo, ordenarCuadro, textoCelda, type FilaCuadro } from '@/modules/cuadro/application/views.ts';
+import {
+    COLUMNAS_CUADRO,
+    FILTROS_CUADRO,
+    filtrarCuadro,
+    nombreArchivo,
+    ordenarCuadro,
+    textoCelda,
+    type FilaCuadro,
+} from '@/modules/cuadro/application/views.ts';
 import { ESTADOS_APROBACION, ESTATUS, PROCEDENCIAS } from '@/modules/ordenes/application/views.ts';
 import { hoyLima } from '@/modules/pagos/application/views.ts';
 import { CONTROL, FilterRow, SearchBox, SectionTitle } from '@/shared/ui/bits.tsx';
@@ -122,11 +130,23 @@ export function CuadroView() {
                 />
                 <label className="flex items-center gap-1.5 text-small text-ink-2">
                     Desde
-                    <input type="date" aria-label="Desde" value={v.desde} onChange={(e) => vista$.set({ desde: e.target.value })} className={`${CONTROL} w-40`} />
+                    <input
+                        type="date"
+                        aria-label="Desde"
+                        value={v.desde}
+                        onChange={(e) => vista$.set({ desde: e.target.value })}
+                        className={`${CONTROL} w-40`}
+                    />
                 </label>
                 <label className="flex items-center gap-1.5 text-small text-ink-2">
                     Hasta
-                    <input type="date" aria-label="Hasta" value={v.hasta} onChange={(e) => vista$.set({ hasta: e.target.value })} className={`${CONTROL} w-40`} />
+                    <input
+                        type="date"
+                        aria-label="Hasta"
+                        value={v.hasta}
+                        onChange={(e) => vista$.set({ hasta: e.target.value })}
+                        className={`${CONTROL} w-40`}
+                    />
                 </label>
                 {conFiltros && (
                     <Button variant="ghost" onClick={() => vista$.reset()}>
@@ -152,7 +172,9 @@ export function CuadroView() {
                             <table className="w-max border-separate border-spacing-0 text-small">
                                 <thead>
                                     <tr className="text-left">
-                                        <th className="sticky top-0 left-0 z-20 border-r border-b border-divider-strong bg-surface-2 px-3 py-2.5 font-medium text-ink-2">{OC.titulo}</th>
+                                        <th className="sticky top-0 left-0 z-20 border-r border-b border-divider-strong bg-surface-2 px-3 py-2.5 font-medium text-ink-2">
+                                            {OC.titulo}
+                                        </th>
                                         {RESTO.map((c) => (
                                             <th
                                                 key={c.titulo}
@@ -165,7 +187,13 @@ export function CuadroView() {
                                 </thead>
                                 <tbody>
                                     {pag.rows.map((f) => (
-                                        <tr key={f.id} tabIndex={0} className="group cursor-pointer" onClick={() => abrir(f)} onKeyDown={(e) => e.key === 'Enter' && abrir(f)}>
+                                        <tr
+                                            key={f.id}
+                                            tabIndex={0}
+                                            className="group cursor-pointer"
+                                            onClick={() => abrir(f)}
+                                            onKeyDown={(e) => e.key === 'Enter' && abrir(f)}
+                                        >
                                             <td className="sticky left-0 z-[5] border-r border-b border-divider bg-surface px-3 py-2.5 font-medium whitespace-nowrap group-hover:bg-surface-2">
                                                 {textoCelda(OC, f.valores.OC) || <span className="text-ink-3">Borrador</span>}
                                             </td>
@@ -179,7 +207,13 @@ export function CuadroView() {
                                                         style={{ maxWidth: `${Math.max(c.ancho, 8)}ch` }}
                                                     >
                                                         {c.tipo === 'url' && t ? (
-                                                            <a href={t} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-primary hover:underline">
+                                                            <a
+                                                                href={t}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                className="text-primary hover:underline"
+                                                            >
                                                                 Abrir carpeta
                                                             </a>
                                                         ) : t ? (

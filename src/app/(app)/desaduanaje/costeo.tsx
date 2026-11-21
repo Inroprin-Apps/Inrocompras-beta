@@ -5,7 +5,15 @@
 // es una versión, con el motivo de la reapertura que la originó.
 import { useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { costeoDesactualizado, factor, monto, numero, totalesCosteo, type DesaduanajeDetalle, type VersionCosteo } from '@/modules/desaduanaje/application/views.ts';
+import {
+    costeoDesactualizado,
+    factor,
+    monto,
+    numero,
+    totalesCosteo,
+    type DesaduanajeDetalle,
+    type VersionCosteo,
+} from '@/modules/desaduanaje/application/views.ts';
 import { Notice } from '@/shared/ui/bits.tsx';
 import { dayTime } from '@/shared/ui/format.ts';
 
@@ -24,7 +32,8 @@ export function Costeo({ d, nombre }: { d: DesaduanajeDetalle; nombre: (u: strin
                 <p className="text-small text-ink-3">Aún no se calcula. Registra los gastos y pulsa «Calcular costeo»: reparte los gastos y da el FI.</p>
             ) : costeoDesactualizado(d, t) ? (
                 <Notice tone="warning" cerrable={false}>
-                    Hay gastos que aún no están en el costeo ({monto(t.gastosCostoS)} registrados, {monto(d.gastosCostoS ?? 0)} calculados). Pulsa «Calcular costeo».
+                    Hay gastos que aún no están en el costeo ({monto(t.gastosCostoS)} registrados, {monto(d.gastosCostoS ?? 0)} calculados). Pulsa «Calcular
+                    costeo».
                 </Notice>
             ) : (
                 <p className="text-small text-ink-2">
@@ -51,7 +60,12 @@ function Version({ v, nombre }: { v: VersionCosteo; nombre: (u: string | null) =
     const Icono = abierta ? ChevronDown : ChevronRight;
     return (
         <li className="py-2">
-            <button type="button" onClick={() => setAbierta((x) => !x)} aria-expanded={abierta} className="flex w-full items-start gap-2 text-left focus-visible:outline-2 focus-visible:outline-primary">
+            <button
+                type="button"
+                onClick={() => setAbierta((x) => !x)}
+                aria-expanded={abierta}
+                className="flex w-full items-start gap-2 text-left focus-visible:outline-2 focus-visible:outline-primary"
+            >
                 <Icono size={16} className="mt-0.5 flex-none text-ink-3" aria-hidden />
                 <div className="min-w-0 flex-1">
                     <div className="text-ui font-medium">

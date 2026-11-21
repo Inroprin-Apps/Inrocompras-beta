@@ -7,7 +7,16 @@
 import { useState } from 'react';
 import { ExternalLink, FileText, ScanText } from 'lucide-react';
 import { documentos } from '@/modules/documentos/composition.ts';
-import { ACEPTA, etiquetaEstadoDoc, pideMonto, tonoDoc, type Documento, type Dueno, type Lectura, type TipoDoc } from '@/modules/documentos/application/views.ts';
+import {
+    ACEPTA,
+    etiquetaEstadoDoc,
+    pideMonto,
+    tonoDoc,
+    type Documento,
+    type Dueno,
+    type Lectura,
+    type TipoDoc,
+} from '@/modules/documentos/application/views.ts';
 import { Button, LINK_CLASS } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
 import { Dialog } from '@/shared/ui/dialog.tsx';
@@ -91,7 +100,13 @@ export function Documentos({
                 </ul>
             )}
             {puedeSubir && (
-                <DropZone compact accept={ACEPTA} onFiles={(fs) => fs[0] && setSubiendo(fs[0])} label="Arrastra un documento o haz clic para elegirlo" hint="PDF, imagen, XML o Excel, hasta 25 MB." />
+                <DropZone
+                    compact
+                    accept={ACEPTA}
+                    onFiles={(fs) => fs[0] && setSubiendo(fs[0])}
+                    label="Arrastra un documento o haz clic para elegirlo"
+                    hint="PDF, imagen, XML o Excel, hasta 25 MB."
+                />
             )}
             {subiendo && <FormSubida archivo={subiendo} dueno={dueno} tipos={tipos} moneda={moneda} tocadas={tocadas} onCerrar={() => setSubiendo(null)} />}
             {revisar && <RevisarLectura doc={revisar} tocadas={tocadas} onCerrar={() => setRevisar(null)} />}
@@ -99,7 +114,21 @@ export function Documentos({
     );
 }
 
-function FormSubida({ archivo, dueno, tipos, moneda, tocadas, onCerrar }: { archivo: File; dueno: Dueno; tipos: readonly TipoDoc[]; moneda?: string; tocadas: readonly string[]; onCerrar: () => void }) {
+function FormSubida({
+    archivo,
+    dueno,
+    tipos,
+    moneda,
+    tocadas,
+    onCerrar,
+}: {
+    archivo: File;
+    dueno: Dueno;
+    tipos: readonly TipoDoc[];
+    moneda?: string;
+    tocadas: readonly string[];
+    onCerrar: () => void;
+}) {
     const [tipo, setTipo] = useState<TipoDoc>(tipos[0]);
     const [numero, setNumero] = useState('');
     const [fecha, setFecha] = useState('');
@@ -112,7 +141,13 @@ function FormSubida({ archivo, dueno, tipos, moneda, tocadas, onCerrar }: { arch
         const m = monto.trim() ? Number(monto.replace(',', '.')) : null;
         if (m != null && !Number.isFinite(m)) return setError('El monto debe ser un número.');
         setSubiendo(true);
-        const r = await documentos().subir(dueno, archivo, { tipo, numero, fecha: fecha || null, monto: conMonto ? m : null, moneda: conMonto && m != null ? (moneda ?? 'PEN') : null });
+        const r = await documentos().subir(dueno, archivo, {
+            tipo,
+            numero,
+            fecha: fecha || null,
+            monto: conMonto ? m : null,
+            moneda: conMonto && m != null ? (moneda ?? 'PEN') : null,
+        });
         setSubiendo(false);
         if (r.isErr()) return setError(r.error.message);
         toast.success(`${tipo} subida. Pasa a Drive en segundo plano.`);
@@ -136,7 +171,9 @@ function FormSubida({ archivo, dueno, tipos, moneda, tocadas, onCerrar }: { arch
                 </>
             }
         >
-            <Field label="Tipo de documento">{(p) => <SelectMenu {...p} value={tipo} onChange={(t) => setTipo(t as TipoDoc)} options={tipos.map((t) => ({ value: t, label: t }))} />}</Field>
+            <Field label="Tipo de documento">
+                {(p) => <SelectMenu {...p} value={tipo} onChange={(t) => setTipo(t as TipoDoc)} options={tipos.map((t) => ({ value: t, label: t }))} />}
+            </Field>
             <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Serie y número" optional>
                     {(p) => <Input {...p} value={numero} onChange={(e) => setNumero(e.target.value)} placeholder="F001-123" />}
@@ -145,7 +182,11 @@ function FormSubida({ archivo, dueno, tipos, moneda, tocadas, onCerrar }: { arch
                     {(p) => <Input {...p} type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />}
                 </Field>
                 {conMonto && (
-                    <Field label={`Monto total (${moneda ?? 'PEN'})`} optional hint={tipo === 'Factura' ? 'Si calza con una cuota, el pago se solicita solo.' : undefined}>
+                    <Field
+                        label={`Monto total (${moneda ?? 'PEN'})`}
+                        optional
+                        hint={tipo === 'Factura' ? 'Si calza con una cuota, el pago se solicita solo.' : undefined}
+                    >
                         {(p) => <Input {...p} inputMode="decimal" value={monto} onChange={(e) => setMonto(e.target.value)} />}
                     </Field>
                 )}
@@ -197,7 +238,9 @@ function RevisarLectura({ doc, tocadas, onCerrar }: { doc: Documento; tocadas: r
                 <Field label="Serie y número">{(p) => <Input {...p} value={numero} onChange={(e) => setNumero(e.target.value)} />}</Field>
                 <Field label="Fecha">{(p) => <Input {...p} type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />}</Field>
                 <Field label="Moneda">
-                    {(p) => <SelectMenu {...p} value={moneda} onChange={setMoneda} options={['PEN', 'USD', 'EUR', 'GBP'].map((m) => ({ value: m, label: m }))} />}
+                    {(p) => (
+                        <SelectMenu {...p} value={moneda} onChange={setMoneda} options={['PEN', 'USD', 'EUR', 'GBP'].map((m) => ({ value: m, label: m }))} />
+                    )}
                 </Field>
                 <Field label="Total">{(p) => <Input {...p} inputMode="decimal" value={monto} onChange={(e) => setMonto(e.target.value)} />}</Field>
             </div>

@@ -25,7 +25,16 @@ const rombo = (cx: number, cy: number, r: number) => `${cx},${cy - r} ${cx + r},
 export function Rombos({ size = 18, className = '' }: { size?: number; className?: string }) {
     const colores: Color[] = ['azul', 'turquesa', 'rojo', 'amarillo'];
     return (
-        <svg width={(size * 88) / 24} height={size} viewBox="0 0 88 24" fill="none" strokeWidth="1.6" strokeLinejoin="miter" aria-hidden="true" className={`flex-none ${className}`}>
+        <svg
+            width={(size * 88) / 24}
+            height={size}
+            viewBox="0 0 88 24"
+            fill="none"
+            strokeWidth="1.6"
+            strokeLinejoin="miter"
+            aria-hidden="true"
+            className={`flex-none ${className}`}
+        >
             {colores.map((c, i) => (
                 <polygon key={c} points={rombo(11 + i * 22, 12, 10)} className={TRAZO[c]} />
             ))}
@@ -75,7 +84,16 @@ export function CuboRombos({
         return lleno ? RELLENO[color] : TRAZO[color];
     };
     return (
-        <svg width={size} height={size} viewBox="-62 -62 128 124" fill="none" strokeWidth="1.2" strokeLinejoin="miter" aria-hidden="true" className={`flex-none ${className}`}>
+        <svg
+            width={size}
+            height={size}
+            viewBox="-62 -62 128 124"
+            fill="none"
+            strokeWidth="1.2"
+            strokeLinejoin="miter"
+            aria-hidden="true"
+            className={`flex-none ${className}`}
+        >
             {CELDAS.map(([x, y, c]) => (
                 <polygon key={`${x},${y}`} points={rombo(x * h, y * h, r)} className={estilo(c)} />
             ))}

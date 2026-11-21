@@ -36,12 +36,20 @@ export function SeccionConceptos() {
     return (
         <>
             <div className="mb-3 flex flex-wrap items-center gap-3">
-                <Segmented<AmbitoConcepto> value={ambito} onChange={setAmbito} options={AMBITOS_CONCEPTO.map((a) => ({ value: a, label: etiquetaAmbito(a) }))} />
+                <Segmented<AmbitoConcepto>
+                    value={ambito}
+                    onChange={setAmbito}
+                    options={AMBITOS_CONCEPTO.map((a) => ({ value: a, label: etiquetaAmbito(a) }))}
+                />
                 <Button variant="dashed" onClick={() => setNuevo(true)}>
                     <Plus size={15} /> Concepto
                 </Button>
             </div>
-            <Lista estado={{ data: lista, error: estado.error }} onReintentar={() => void configuracionStore.retry()} vacia={<ListaVacia titulo="Sin conceptos de este tipo">Agrégalos con «Concepto».</ListaVacia>}>
+            <Lista
+                estado={{ data: lista, error: estado.error }}
+                onReintentar={() => void configuracionStore.retry()}
+                vacia={<ListaVacia titulo="Sin conceptos de este tipo">Agrégalos con «Concepto».</ListaVacia>}
+            >
                 {(cs) => (
                     <ul className="flex flex-col divide-y divide-divider rounded-card border border-line bg-surface">
                         {cs.map((c) => (
@@ -95,7 +103,11 @@ function FormConcepto({ ambito: inicial, existentes, onCerrar }: { ambito: Ambit
         >
             <div className="flex flex-col gap-1.5">
                 <span className="text-ui font-medium">Para</span>
-                <Segmented<AmbitoConcepto> value={ambito} onChange={setAmbito} options={AMBITOS_CONCEPTO.map((a) => ({ value: a, label: etiquetaAmbito(a) }))} />
+                <Segmented<AmbitoConcepto>
+                    value={ambito}
+                    onChange={setAmbito}
+                    options={AMBITOS_CONCEPTO.map((a) => ({ value: a, label: etiquetaAmbito(a) }))}
+                />
             </div>
             <Field label="Nombre" error={error}>
                 {(p) => <Input {...p} value={nombre} onChange={(e) => (setNombre(e.target.value), setError(null))} />}
@@ -113,12 +125,21 @@ export function SeccionGastos() {
             <div className="mb-3">
                 <Button
                     variant="dashed"
-                    onClick={() => setEditando({ g: { concepto: '', entraCosto: true, reparto: 'Valor', orden: (gastos?.at(-1)?.orden ?? 0) + 1, activo: true }, nuevo: true })}
+                    onClick={() =>
+                        setEditando({
+                            g: { concepto: '', entraCosto: true, reparto: 'Valor', orden: (gastos?.at(-1)?.orden ?? 0) + 1, activo: true },
+                            nuevo: true,
+                        })
+                    }
                 >
                     <Plus size={15} /> Concepto de gasto
                 </Button>
             </div>
-            <Lista estado={{ data: gastos, error: estado.error }} onReintentar={() => void configuracionStore.retry()} vacia={<ListaVacia titulo="Sin conceptos de gasto" />}>
+            <Lista
+                estado={{ data: gastos, error: estado.error }}
+                onReintentar={() => void configuracionStore.retry()}
+                vacia={<ListaVacia titulo="Sin conceptos de gasto" />}
+            >
                 {(gs) => (
                     <div className="overflow-x-auto">
                         <table className={T.table}>
@@ -148,7 +169,12 @@ export function SeccionGastos() {
                                         <td className={T.td}>{g.entraCosto ? 'Sí' : 'No'}</td>
                                         <td className={T.td}>{g.reparto === 'Producto' ? 'Por producto' : 'Por valor'}</td>
                                         <td className={`${T.td} w-12`}>
-                                            <Button variant="ghost" iconOnly aria-label={`Editar ${g.concepto}`} onClick={() => setEditando({ g, nuevo: false })}>
+                                            <Button
+                                                variant="ghost"
+                                                iconOnly
+                                                aria-label={`Editar ${g.concepto}`}
+                                                onClick={() => setEditando({ g, nuevo: false })}
+                                            >
                                                 <Pencil size={15} />
                                             </Button>
                                         </td>
@@ -198,7 +224,11 @@ function FormGasto({ g: inicial, nuevo, existentes, onCerrar }: { g: ConceptoGas
                 </>
             }
         >
-            {nuevo && <Field label="Concepto">{(p) => <Input {...p} value={g.concepto} onChange={(e) => (setG({ ...g, concepto: e.target.value }), setError(null))} />}</Field>}
+            {nuevo && (
+                <Field label="Concepto">
+                    {(p) => <Input {...p} value={g.concepto} onChange={(e) => (setG({ ...g, concepto: e.target.value }), setError(null))} />}
+                </Field>
+            )}
             <div className="flex flex-col gap-1.5">
                 <span className="text-ui font-medium">Reparto en el costeo</span>
                 <Segmented<ConceptoGasto['reparto']>
@@ -213,7 +243,12 @@ function FormGasto({ g: inicial, nuevo, existentes, onCerrar }: { g: ConceptoGas
             <Field label="Orden" hint="Posición en la lista de gastos.">
                 {(p) => <Input {...p} inputMode="numeric" value={orden} onChange={(e) => setOrden(e.target.value)} />}
             </Field>
-            <Checkbox label="Entra al costo" hint="La percepción y el IGV de importación no entran." checked={g.entraCosto} onChange={(e) => setG({ ...g, entraCosto: e.target.checked })} />
+            <Checkbox
+                label="Entra al costo"
+                hint="La percepción y el IGV de importación no entran."
+                checked={g.entraCosto}
+                onChange={(e) => setG({ ...g, entraCosto: e.target.checked })}
+            />
             <Checkbox label="Activo" checked={g.activo} onChange={(e) => setG({ ...g, activo: e.target.checked })} />
             {error && (
                 <p role="alert" className="text-small font-medium text-danger-strong">

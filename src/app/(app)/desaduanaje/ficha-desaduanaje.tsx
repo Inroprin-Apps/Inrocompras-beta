@@ -31,7 +31,9 @@ export function FichaDesaduanaje({ id, onCerrar }: { id: string; onCerrar: () =>
     if (!d)
         return (
             <Ficha titulo={error ? 'No se pudo abrir el desaduanaje' : 'Cargando el desaduanaje…'} onCerrar={onCerrar}>
-                <div className="flex flex-col gap-3 px-5 py-4">{error ? <p className="text-ui text-danger-strong">{error}</p> : [1, 2, 3].map((i) => <Hueco key={i} className="h-16 w-full" />)}</div>
+                <div className="flex flex-col gap-3 px-5 py-4">
+                    {error ? <p className="text-ui text-danger-strong">{error}</p> : [1, 2, 3].map((i) => <Hueco key={i} className="h-16 w-full" />)}
+                </div>
             </Ficha>
         );
     return <FichaCargada d={d} onCerrar={onCerrar} />;
@@ -155,7 +157,13 @@ function FichaCargada({ d, onCerrar }: { d: DesaduanajeDetalle; onCerrar: () => 
             </FichaSeccion>
 
             <FichaSeccion titulo="Documentos">
-                <Documentos dueno={{ desaduanajeId: d.id }} tipos={TIPOS_DESADUANAJE} puedeSubir={subeDocs} tocadas={['desaduanajes', 'acciones']} moneda={d.monedaDam} />
+                <Documentos
+                    dueno={{ desaduanajeId: d.id }}
+                    tipos={TIPOS_DESADUANAJE}
+                    puedeSubir={subeDocs}
+                    tocadas={['desaduanajes', 'acciones']}
+                    moneda={d.monedaDam}
+                />
             </FichaSeccion>
 
             <FichaSeccion titulo="Historial">

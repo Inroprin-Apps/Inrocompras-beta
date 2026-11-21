@@ -18,7 +18,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <main className="flex min-h-dvh items-center justify-center bg-surface-2 px-4">
                 <div className="max-w-md rounded-card border border-line bg-surface p-8">
                     <h1 className="mb-2 text-subtitle font-semibold">{perfil ? 'Tu usuario está desactivado' : 'Tu usuario aún no está registrado'}</h1>
-                    <p className="mb-5 text-body text-ink-2">Pide al administrador de INROCOMPRAS que {perfil ? 'lo reactive' : 'revise tu alta'}. Luego vuelve a entrar.</p>
+                    <p className="mb-5 text-body text-ink-2">
+                        Pide al administrador de INROCOMPRAS que {perfil ? 'lo reactive' : 'revise tu alta'}. Luego vuelve a entrar.
+                    </p>
                     <SalirBoton />
                 </div>
             </main>
@@ -51,7 +53,12 @@ function SalirBoton({ icono = false }: { icono?: boolean }) {
     return (
         <form action="/auth/salir" method="post">
             {icono ? (
-                <button type="submit" aria-label="Cerrar sesión" title="Cerrar sesión" className="rounded-control p-2 text-ink-2 hover:bg-surface-3 hover:text-ink focus-visible:outline-2 focus-visible:outline-primary">
+                <button
+                    type="submit"
+                    aria-label="Cerrar sesión"
+                    title="Cerrar sesión"
+                    className="rounded-control p-2 text-ink-2 hover:bg-surface-3 hover:text-ink focus-visible:outline-2 focus-visible:outline-primary"
+                >
                     <LogOut size={18} />
                 </button>
             ) : (

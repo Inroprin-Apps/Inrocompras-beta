@@ -88,7 +88,8 @@ export function FichaProyecto({ proyecto: p, onCerrar }: { proyecto: Proyecto; o
             >
                 {sinAprobador.length > 0 && (
                     <Notice tone="warning" cerrable={false}>
-                        {sinAprobador.map((e) => e.nombre).join(', ')}: sin aprobadores. Las solicitudes de esa etapa no se pueden emitir hasta que alguien la libere.
+                        {sinAprobador.map((e) => e.nombre).join(', ')}: sin aprobadores. Las solicitudes de esa etapa no se pueden emitir hasta que alguien la
+                        libere.
                     </Notice>
                 )}
                 {p.etapas.length === 0 ? (

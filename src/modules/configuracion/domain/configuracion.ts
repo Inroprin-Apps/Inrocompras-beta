@@ -17,14 +17,57 @@ export interface DefParametro {
 /** Los parámetros que usa la base (app.cfg) y la app, con su descripción. Lo que no está aquí se edita como JSON. */
 export const PARAMETROS: DefParametro[] = [
     { clave: 'dominio_permitido', etiqueta: 'Dominio de la empresa', descripcion: 'Solo entran cuentas de Google de este dominio.', tipo: 'texto' },
-    { clave: 'admins_iniciales', etiqueta: 'Administradores iniciales', descripcion: 'Reciben el rol de administrador la primera vez que entran. Un correo por línea.', tipo: 'correos' },
-    { clave: 'area_emisora_rq', etiqueta: 'Área que emite los requerimientos', descripcion: 'Recibe los requerimientos que nacen de una solicitud liberada.', tipo: 'area' },
-    { clave: 'exigir_validacion_tecnica', etiqueta: 'Exigir validación técnica', descripcion: 'No se emite una orden si algún ítem no tiene la validación técnica (C-16).', tipo: 'booleano' },
-    { clave: 'exigir_evaluacion_fin', etiqueta: 'Exigir evaluación de Finanzas', descripcion: 'No se envía una orden al proveedor si Finanzas no lo aprobó.', tipo: 'booleano' },
-    { clave: 'retencion_tasa', etiqueta: 'Tasa de retención del IGV', descripcion: 'Se retiene a proveedores nacionales que no son agentes ni buenos contribuyentes.', tipo: 'porcentaje' },
-    { clave: 'retencion_umbral_soles', etiqueta: 'Retención desde', descripcion: 'Monto del comprobante desde el que aplica la retención.', tipo: 'numero', unidad: 'soles' },
-    { clave: 'dias_alerta_plan', etiqueta: 'Alerta del plan de compras', descripcion: 'Días antes de la fecha límite en que el semáforo pasa a ámbar.', tipo: 'entero', unidad: 'días' },
-    { clave: 'dias_requerimiento_quieto', etiqueta: 'Requerimiento sin movimiento', descripcion: 'Días con saldo y sin movimiento para avisarlo en la bandeja.', tipo: 'entero', unidad: 'días' },
+    {
+        clave: 'admins_iniciales',
+        etiqueta: 'Administradores iniciales',
+        descripcion: 'Reciben el rol de administrador la primera vez que entran. Un correo por línea.',
+        tipo: 'correos',
+    },
+    {
+        clave: 'area_emisora_rq',
+        etiqueta: 'Área que emite los requerimientos',
+        descripcion: 'Recibe los requerimientos que nacen de una solicitud liberada.',
+        tipo: 'area',
+    },
+    {
+        clave: 'exigir_validacion_tecnica',
+        etiqueta: 'Exigir validación técnica',
+        descripcion: 'No se emite una orden si algún ítem no tiene la validación técnica (C-16).',
+        tipo: 'booleano',
+    },
+    {
+        clave: 'exigir_evaluacion_fin',
+        etiqueta: 'Exigir evaluación de Finanzas',
+        descripcion: 'No se envía una orden al proveedor si Finanzas no lo aprobó.',
+        tipo: 'booleano',
+    },
+    {
+        clave: 'retencion_tasa',
+        etiqueta: 'Tasa de retención del IGV',
+        descripcion: 'Se retiene a proveedores nacionales que no son agentes ni buenos contribuyentes.',
+        tipo: 'porcentaje',
+    },
+    {
+        clave: 'retencion_umbral_soles',
+        etiqueta: 'Retención desde',
+        descripcion: 'Monto del comprobante desde el que aplica la retención.',
+        tipo: 'numero',
+        unidad: 'soles',
+    },
+    {
+        clave: 'dias_alerta_plan',
+        etiqueta: 'Alerta del plan de compras',
+        descripcion: 'Días antes de la fecha límite en que el semáforo pasa a ámbar.',
+        tipo: 'entero',
+        unidad: 'días',
+    },
+    {
+        clave: 'dias_requerimiento_quieto',
+        etiqueta: 'Requerimiento sin movimiento',
+        descripcion: 'Días con saldo y sin movimiento para avisarlo en la bandeja.',
+        tipo: 'entero',
+        unidad: 'días',
+    },
     { clave: 'lector_documentos', etiqueta: 'Lector de cotizaciones y facturas', descripcion: 'Proveedor del lector y si está activo (JSON).', tipo: 'json' },
 ];
 
@@ -42,7 +85,15 @@ export function parametros(filas: { clave: string; valor: unknown; nota: string 
     });
     const otros = filas
         .filter((f) => !PARAMETROS.some((d) => d.clave === f.clave))
-        .map((f) => ({ clave: f.clave, etiqueta: f.clave.replace(/_/g, ' '), descripcion: f.nota || 'Parámetro sin descripción.', tipo: 'json' as const, valor: f.valor, nota: f.nota, conocido: false }));
+        .map((f) => ({
+            clave: f.clave,
+            etiqueta: f.clave.replace(/_/g, ' '),
+            descripcion: f.nota || 'Parámetro sin descripción.',
+            tipo: 'json' as const,
+            valor: f.valor,
+            nota: f.nota,
+            conocido: false,
+        }));
     return [...conocidos, ...otros];
 }
 
@@ -83,10 +134,19 @@ export function aValor(p: Pick<DefParametro, 'tipo' | 'etiqueta'>, texto: string
         }
         case 'porcentaje': {
             const n = num(t.replace('%', ''));
-            return t && Number.isFinite(n) && n >= 0 && n <= 100 ? { valor: Math.round(n * 1000) / 100_000 } : { error: `${p.etiqueta}: escribe un porcentaje entre 0 y 100.` };
+            return t && Number.isFinite(n) && n >= 0 && n <= 100
+                ? { valor: Math.round(n * 1000) / 100_000 }
+                : { error: `${p.etiqueta}: escribe un porcentaje entre 0 y 100.` };
         }
         case 'correos': {
-            const lista = [...new Set(t.split(/[\s,;]+/).map((x) => x.toLowerCase()).filter(Boolean))];
+            const lista = [
+                ...new Set(
+                    t
+                        .split(/[\s,;]+/)
+                        .map((x) => x.toLowerCase())
+                        .filter(Boolean),
+                ),
+            ];
             const malo = lista.find((c) => !CORREO.test(c));
             return malo ? { error: `«${malo}» no parece un correo.` } : { valor: lista };
         }
@@ -163,7 +223,11 @@ export interface ConceptoGasto {
 }
 
 export const faltaEnConcepto = (nombre: string, existentes: string[]) =>
-    !nombre.trim() ? 'Escribe el nombre del concepto.' : existentes.some((e) => e.toLowerCase() === nombre.trim().toLowerCase()) ? 'Ese concepto ya existe.' : null;
+    !nombre.trim()
+        ? 'Escribe el nombre del concepto.'
+        : existentes.some((e) => e.toLowerCase() === nombre.trim().toLowerCase())
+          ? 'Ese concepto ya existe.'
+          : null;
 
 // ── Cola de trabajos ──
 export const ESTADOS_COLA = ['Pendiente', 'En curso', 'Error', 'Hecho', 'Descartado'] as const;
@@ -202,7 +266,8 @@ const TIPOS: Record<string, string> = {
 export const etiquetaTipo = (t: string) => TIPOS[t] ?? t.replace(/_/g, ' ');
 
 export type TonoChip = 'ok' | 'warn' | 'danger' | 'info' | 'muted';
-export const tonoCola = (e: EstadoCola): TonoChip => (e === 'Hecho' ? 'ok' : e === 'Error' ? 'danger' : e === 'Descartado' ? 'muted' : e === 'En curso' ? 'info' : 'warn');
+export const tonoCola = (e: EstadoCola): TonoChip =>
+    e === 'Hecho' ? 'ok' : e === 'Error' ? 'danger' : e === 'Descartado' ? 'muted' : e === 'En curso' ? 'info' : 'warn';
 
 /** Totales por estado (para los contadores de arriba). */
 export function totalesCola(r: ResumenCola[]): Record<EstadoCola, number> {

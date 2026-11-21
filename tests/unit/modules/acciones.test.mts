@@ -15,7 +15,12 @@ describe('acciones', () => {
     });
     it('las peligrosas siempre confirman', () => expect(necesitaDialogo(a({ tipo: 'd' }))).toBe(true));
     it('dice qué falta y convierte números', () => {
-        const x = a({ pide: [{ campo: 'p_monto', tipo: 'numero' }, { campo: 'p_sustento', tipo: 'texto', opcional: true }] });
+        const x = a({
+            pide: [
+                { campo: 'p_monto', tipo: 'numero' },
+                { campo: 'p_sustento', tipo: 'texto', opcional: true },
+            ],
+        });
         expect(faltante(x, { p_monto: '' })).toMatch(/Completa: monto/);
         expect(faltante(x, { p_monto: 'abc' })).toMatch(/número/);
         expect(parametros(x, 'p_id', 'i', { p_monto: '12,5', p_sustento: ' ' })).toEqual({ p_id: 'i', p_monto: 12.5, p_sustento: null });

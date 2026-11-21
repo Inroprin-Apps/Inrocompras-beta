@@ -6,6 +6,8 @@
 //   orden de atención: criticidad y después días a la fecha límite
 // La base vuelve a validar todo al crear la orden (ac_oc_crear): esto solo explica antes por qué no se puede.
 
+import { palabrasDe, plano } from '@/shared/texto.ts';
+
 export type Canal = 'Nacional' | 'Importación';
 
 export interface OcDeLinea {
@@ -63,7 +65,9 @@ export const diasEntre = (desde: string, hasta: string) => Math.round(aDia(hasta
 /** Hoy en America/Lima como «AAAA-MM-DD». */
 export function hoyLima(ahora = new Date()): string {
     const p = Object.fromEntries(
-        new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(ahora).map((x) => [x.type, x.value]),
+        new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit' })
+            .formatToParts(ahora)
+            .map((x) => [x.type, x.value]),
     );
     return `${p.year}-${p.month}-${p.day}`;
 }
@@ -163,10 +167,8 @@ export interface FiltrosPlan {
 }
 export const FILTROS_PLAN: FiltrosPlan = { estado: '', canal: '', semaforo: '', validacion: '', texto: '' };
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-
 export function filtrarPlan(lista: FilaPlan[], f: FiltrosPlan): FilaPlan[] {
-    const palabras = plano(f.texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(f.texto);
     return lista.filter((l) => {
         if (f.estado === 'por_comprar' && !(l.saldo > 0 && !l.anulado && !l.incluidoEn)) return false;
         if (f.estado === 'con_oc' && l.ordenes.length === 0) return false;
@@ -175,7 +177,9 @@ export function filtrarPlan(lista: FilaPlan[], f: FiltrosPlan): FilaPlan[] {
         if (f.semaforo && l.semaforo !== f.semaforo) return false;
         if (f.validacion === 'pendiente' && (l.validacion === 'Validado' || l.validacion === 'No aplica' || l.anulado)) return false;
         if (!palabras.length) return true;
-        const t = plano(`${l.codigoCliente} ${l.sku} ${l.descripcion} ${l.requerimiento ?? ''} ${l.rqSidige} ${l.marca} ${l.modelo} ${l.ordenes.map((o) => o.numero ?? '').join(' ')}`);
+        const t = plano(
+            `${l.codigoCliente} ${l.sku} ${l.descripcion} ${l.requerimiento ?? ''} ${l.rqSidige} ${l.marca} ${l.modelo} ${l.ordenes.map((o) => o.numero ?? '').join(' ')}`,
+        );
         return palabras.every((w) => t.includes(w));
     });
 }

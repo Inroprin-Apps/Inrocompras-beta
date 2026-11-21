@@ -1,7 +1,9 @@
 # 06 · Diseño y UX
 
 ## Base: la guía UI de INROPRIN (`diseno/ui-guia/`)
+
 Es el sitio Next.js que documenta las apps internas (marca Roland Print). Se copian:
+
 - `src/app/globals.css`: los tokens (color por rol con `color-mix(in oklab)`, escala tipográfica, radios, sombras).
 - `src/ui/*`: Button, Card, Field, FilterPill, Pager, SelectMenu, Tabs, Toaster, DropZone, DateField, FloatingPanel, Sidebar, Tooltip, Marca (rombos), etc.
 - Las reglas de `diseno/ui-guia/CLAUDE.md`: pintar con roles (`bg-primary`, `text-ink-2`, `border-line`), nunca hex; tipografía solo con la escala (`text-display` 24 · `title` 21 · `subtitle` 17 · `heading` 15 · `body` 14 · `ui` 13 · `small` 12 · `caption` 11); radios con nombre (`rounded-inner` 7 · `control` 9 · `card` 12).
@@ -10,6 +12,7 @@ Es el sitio Next.js que documenta las apps internas (marca Roland Print). Se cop
 **Pendientes de la guía** que esta app tendrá que resolver (y devolver a la guía): modo oscuro, modal o diálogo, menú desplegable.
 
 ## Patrones del prototipo v3 (`referencia/prototipo_v3/`)
+
 Ábrelo en el navegador: es un solo HTML y funciona sin servidor.
 
 1. **«Te toca»** es la pantalla de inicio. Agrupa por paso lo que le toca a la persona (`te_toca()`) y marca en rojo lo que lleva más de 3 días esperando. Algunos pasos se pueden hacer en bloque (validar varias, aprobar varias).
@@ -23,6 +26,7 @@ Es el sitio Next.js que documenta las apps internas (marca Roland Print). Se cop
 9. **Sesión:** si se cae internet, el borrador de un formulario no se pierde. Se guarda en `localStorage` y se recupera al volver.
 
 ## Pantallas mínimas del tramo
+
 Te toca · Proyectos (lista y página con pestañas: Plan · Órdenes · Solicitudes · Embarques · Historial) · Solicitudes (con carga Excel) · Requerimientos · Validaciones técnicas · Generar OC (carrito) · Orden (ficha: líneas, documentos, cuotas, aprobaciones, historial) · Cuadro de aprobaciones (exportable) · Pagos (Finanzas) · Proveedores · Desaduanaje · Equipo (administrador: áreas y roles) · Configuración.
 
 Las capturas del prototipo v3 están en `diseno/capturas/`.

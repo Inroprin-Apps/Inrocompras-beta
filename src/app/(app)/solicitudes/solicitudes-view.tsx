@@ -47,13 +47,17 @@ const vista$ = urlState(
 export function SolicitudesView() {
     const perfil = usePerfil();
     const estado = solicitudesStore.use();
-    const proyectos = proyectosStore.use().data ?? [];
+    const proyectosLeidos = proyectosStore.use().data;
+    const proyectos = useMemo(() => proyectosLeidos ?? [], [proyectosLeidos]);
     const gente = personasStore.use().data;
     const teToca = teTocaStore.use().data;
     const v = vista$.use();
     const [creando, setCreando] = useState(false);
 
-    const porLiberar = useMemo(() => new Set((teToca ?? []).filter((t) => t.tabla === 'solicitudes' && t.paso === 'Liberar solicitud').map((t) => t.id)), [teToca]);
+    const porLiberar = useMemo(
+        () => new Set((teToca ?? []).filter((t) => t.tabla === 'solicitudes' && t.paso === 'Liberar solicitud').map((t) => t.id)),
+        [teToca],
+    );
     const nombreProyecto = useMemo(() => {
         const m = new Map(proyectos.map((p) => [p.id, p.nombre]));
         return (id: string | null) => (id ? (m.get(id) ?? '') : '');
@@ -73,7 +77,9 @@ export function SolicitudesView() {
         v.pestana === 'liberar' ? (
             <ListaVacia titulo="Nada por liberar">Aquí aparecen las solicitudes de las etapas que apruebas o de las personas a tu cargo.</ListaVacia>
         ) : v.pestana === 'mias' && !(estado.data ?? []).some((s) => s.solicitanteId === perfil.id) ? (
-            <ListaVacia titulo="Aún no tienes solicitudes">Crea una con «Nueva solicitud»: eliges el proyecto o a tu jefe, escribes el sustento y agregas los ítems.</ListaVacia>
+            <ListaVacia titulo="Aún no tienes solicitudes">
+                Crea una con «Nueva solicitud»: eliges el proyecto o a tu jefe, escribes el sustento y agregas los ítems.
+            </ListaVacia>
         ) : (
             <ListaVacia titulo="Ninguna solicitud coincide">Prueba con otra búsqueda o quita los filtros.</ListaVacia>
         );
@@ -159,9 +165,13 @@ export function SolicitudesView() {
                                             </td>
                                             <td className={`${T.td} hidden sm:table-cell`}>
                                                 <Chip tone={tonoEstado(s.estado)}>{s.estado}</Chip>
-                                                {porLiberar.has(s.id) && <div className="mt-1 text-caption font-medium text-primary-strong">Te toca liberar</div>}
+                                                {porLiberar.has(s.id) && (
+                                                    <div className="mt-1 text-caption font-medium text-primary-strong">Te toca liberar</div>
+                                                )}
                                             </td>
-                                            <td className={`${T.td} hidden md:table-cell`}>{quien(s.solicitanteId) || <span className="text-ink-3">—</span>}</td>
+                                            <td className={`${T.td} hidden md:table-cell`}>
+                                                {quien(s.solicitanteId) || <span className="text-ink-3">—</span>}
+                                            </td>
                                             <td className={`${T.tdNum} hidden sm:table-cell`}>{s.nItems}</td>
                                             <td className={`${T.tdNum} hidden sm:table-cell`}>{dmy(s.creado)}</td>
                                         </tr>

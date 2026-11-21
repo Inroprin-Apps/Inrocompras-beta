@@ -96,28 +96,69 @@ describe('carga Excel: leerFilas', () => {
         expect(l.ignoradas).toEqual(['N°', 'Columna rara']);
     });
     it('sin títulos reconocibles o sin cantidad, dice qué falta', () => {
-        const a = leerFilas([['a', 'b'], [1, 2]]);
+        const a = leerFilas([
+            ['a', 'b'],
+            [1, 2],
+        ]);
         expect(esErrorLectura(a) && a.mensaje).toMatch(/fila de títulos/);
-        const b = leerFilas([['Descripción', 'Unidad'], ['x', 'UND']]);
+        const b = leerFilas([
+            ['Descripción', 'Unidad'],
+            ['x', 'UND'],
+        ]);
         expect(esErrorLectura(b) && b.mensaje).toMatch(/Cantidad/);
         const c = leerFilas([['Descripción', 'Cantidad']]);
         expect(esErrorLectura(c) && c.mensaje).toMatch(/no tiene filas/);
     });
     it('no manda las celdas vacías (la base pone sus valores por defecto)', () => {
-        const l = leerFilas([['Tipo', 'Descripción', 'Cantidad', 'Unidad'], [null, 'Mesa', 1, '']]);
+        const l = leerFilas([
+            ['Tipo', 'Descripción', 'Cantidad', 'Unidad'],
+            [null, 'Mesa', 1, ''],
+        ]);
         if (esErrorLectura(l)) throw new Error(l.mensaje);
         expect(l.filas[0].datos).toEqual({ fila_excel: '2', descripcion: 'Mesa', cantidad: '1' });
     });
 });
 
 const sol = (x: Partial<Solicitud>): Solicitud => ({
-    id: '1', numero: '', tipo: 'Proyecto', proyectoId: 'p', etapaId: 'e', jefeId: null, solicitanteId: 'yo', sustento: '', estado: 'Borrador',
-    liberadoPor: null, fechaLiberacion: null, motivoRechazo: '', motivoObservacion: '', motivoCancelacion: '', nuevaSolicitudId: null,
-    requerimientoId: null, estadoCarga: null, loteActual: null, creado: '2026-11-01', nItems: 0, ...x,
+    id: '1',
+    numero: '',
+    tipo: 'Proyecto',
+    proyectoId: 'p',
+    etapaId: 'e',
+    jefeId: null,
+    solicitanteId: 'yo',
+    sustento: '',
+    estado: 'Borrador',
+    liberadoPor: null,
+    fechaLiberacion: null,
+    motivoRechazo: '',
+    motivoObservacion: '',
+    motivoCancelacion: '',
+    nuevaSolicitudId: null,
+    requerimientoId: null,
+    estadoCarga: null,
+    loteActual: null,
+    creado: '2026-11-01',
+    nItems: 0,
+    ...x,
 });
 const it_ = (x: Partial<ItemSolicitud>): ItemSolicitud => ({
-    id: 'i', solicitudId: '1', nItem: 1, tipo: 'Bienes', codigoCliente: '', descripcion: 'x', detalle: '', unidad: 'UND', cantidad: 1,
-    plazoAdquisicion: null, canal: null, presupuestoUnit: null, monedaPpto: null, incluidoEn: null, referenciaLink: '', ...x,
+    id: 'i',
+    solicitudId: '1',
+    nItem: 1,
+    tipo: 'Bienes',
+    codigoCliente: '',
+    descripcion: 'x',
+    detalle: '',
+    unidad: 'UND',
+    cantidad: 1,
+    plazoAdquisicion: null,
+    canal: null,
+    presupuestoUnit: null,
+    monedaPpto: null,
+    incluidoEn: null,
+    referenciaLink: '',
+    ...x,
 });
 
 describe('solicitudes', () => {

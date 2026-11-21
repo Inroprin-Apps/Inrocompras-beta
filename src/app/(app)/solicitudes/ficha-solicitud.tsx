@@ -100,7 +100,11 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
     return (
         <Ficha
             titulo={s.numero || 'Borrador de solicitud'}
-            subtitulo={s.tipo === 'Proyecto' ? [proyecto?.nombre, etapa?.nombre].filter(Boolean).join(' · ') || 'Proyecto' : `Administrativa · libera ${nombre(s.jefeId) || 'su jefe'}`}
+            subtitulo={
+                s.tipo === 'Proyecto'
+                    ? [proyecto?.nombre, etapa?.nombre].filter(Boolean).join(' · ') || 'Proyecto'
+                    : `Administrativa · libera ${nombre(s.jefeId) || 'su jefe'}`
+            }
             estado={<Chip tone={tonoEstado(s.estado)}>{s.estado}</Chip>}
             onCerrar={onCerrar}
         >
@@ -155,7 +159,12 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
                         ...(s.tipo === 'Proyecto'
                             ? ([
                                   ['Proyecto', proyecto ? [proyecto.codigo, proyecto.nombre].filter(Boolean).join(' · ') : ''],
-                                  ['Etapa', etapa ? `${etapa.nombre}${etapa.aprobadores.length ? ` (libera ${etapa.aprobadores.map(nombre).filter(Boolean).join(', ')})` : ' (sin aprobadores)'}` : ''],
+                                  [
+                                      'Etapa',
+                                      etapa
+                                          ? `${etapa.nombre}${etapa.aprobadores.length ? ` (libera ${etapa.aprobadores.map(nombre).filter(Boolean).join(', ')})` : ' (sin aprobadores)'}`
+                                          : '',
+                                  ],
                               ] as [string, string][])
                             : ([['Jefe que la libera', nombre(s.jefeId)]] as [string, string][])),
                         ['Solicitante', nombre(s.solicitanteId)],
@@ -187,7 +196,13 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
                     )
                 }
             >
-                <ListaItems items={items} editable={editable} verMontos={perfil.ve_precios} onEditar={(i) => setItem(aNuevoItem(i))} onQuitar={(i) => void quitarItem(i)} />
+                <ListaItems
+                    items={items}
+                    editable={editable}
+                    verMontos={perfil.ve_precios}
+                    onEditar={(i) => setItem(aNuevoItem(i))}
+                    onQuitar={(i) => void quitarItem(i)}
+                />
             </FichaSeccion>
             {carga.length > 0 && <SeccionCarga filas={carga} editable={editable} />}
             {s.requerimientoId && (

@@ -11,9 +11,21 @@ import { Input } from '../../../ui/field.tsx';
 import { EscenaConPaneles } from '../paneles.tsx';
 
 const GRUPOS = [
-    { titulo: 'Cómo se escribe', texto: 'En español de Perú, de tú y sin exclamaciones. Un error dice qué está mal y cómo se arregla; un botón dice lo que hace.', pista: 'Compara cada frase con su «no»' },
-    { titulo: 'Montos, fechas y números', texto: 'Siempre el mismo formato, con los mismos separadores y la moneda delante, para que se comparen de un vistazo.', pista: 'Lee cómo queda cada dato' },
-    { titulo: 'Accesibilidad y teclado', texto: 'Todo se alcanza con Tab, el foco se ve, y el color nunca va solo: siempre lo acompaña un texto o un icono.', pista: 'Pulsa la tecla Tab y recorre las piezas' },
+    {
+        titulo: 'Cómo se escribe',
+        texto: 'En español de Perú, de tú y sin exclamaciones. Un error dice qué está mal y cómo se arregla; un botón dice lo que hace.',
+        pista: 'Compara cada frase con su «no»',
+    },
+    {
+        titulo: 'Montos, fechas y números',
+        texto: 'Siempre el mismo formato, con los mismos separadores y la moneda delante, para que se comparen de un vistazo.',
+        pista: 'Lee cómo queda cada dato',
+    },
+    {
+        titulo: 'Accesibilidad y teclado',
+        texto: 'Todo se alcanza con Tab, el foco se ve, y el color nunca va solo: siempre lo acompaña un texto o un icono.',
+        pista: 'Pulsa la tecla Tab y recorre las piezas',
+    },
 ] as const;
 
 const FRASES = [
@@ -71,7 +83,14 @@ function Teclado() {
             <div className="flex flex-wrap items-center gap-2.5">
                 <Button>Guardar</Button>
                 <Button variant="secondary">Exportar</Button>
-                <FilterPill value="todos" onChange={() => {}} options={[{ value: 'todos', label: 'Todos los estados' }, { value: 'sin-oc', label: 'Sin OC' }]} />
+                <FilterPill
+                    value="todos"
+                    onChange={() => {}}
+                    options={[
+                        { value: 'todos', label: 'Todos los estados' },
+                        { value: 'sin-oc', label: 'Sin OC' },
+                    ]}
+                />
                 <div className="w-52">
                     <Input aria-label="Buscar proveedor" placeholder="Buscar proveedor" />
                 </div>

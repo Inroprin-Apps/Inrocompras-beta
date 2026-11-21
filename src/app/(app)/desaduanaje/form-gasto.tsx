@@ -36,7 +36,8 @@ const op = (xs: readonly string[]) => xs.map((x) => ({ value: x, label: x }));
 export function FormGasto({ d, gasto, onCerrar }: { d: DesaduanajeDetalle; gasto?: GastoDes; onCerrar: () => void }) {
     const conceptos = conceptosGastoStore.use().data ?? [];
     const tcs = tcCosteoStore.use().data ?? [];
-    const ordenes = ordenesStore.use().data ?? [];
+    const ordenesLeidos = ordenesStore.use().data;
+    const ordenes = useMemo(() => ordenesLeidos ?? [], [ordenesLeidos]);
     const [g, setG] = useState<NuevoGasto>(gasto ? aNuevoGasto(gasto) : gastoVacio(d.monedaDam === 'EUR' ? 'EUR' : 'USD'));
     const [montoTxt, setMontoTxt] = useState(gasto ? String(gasto.montoSinIgv) : '');
     // null = usar el sugerido; texto = lo que escribió la persona.
@@ -84,7 +85,11 @@ export function FormGasto({ d, gasto, onCerrar }: { d: DesaduanajeDetalle; gasto
         >
             <Field
                 label="Concepto"
-                hint={concepto ? `${concepto.entraCosto ? 'Entra al costo' : 'No entra al costo'}${concepto.entraCosto ? ` · se reparte por ${concepto.reparto === 'Valor' ? 'valor EXW' : 'cantidad'}` : ''}.` : undefined}
+                hint={
+                    concepto
+                        ? `${concepto.entraCosto ? 'Entra al costo' : 'No entra al costo'}${concepto.entraCosto ? ` · se reparte por ${concepto.reparto === 'Valor' ? 'valor EXW' : 'cantidad'}` : ''}.`
+                        : undefined
+                }
             >
                 {(p) => (
                     <SelectMenu
@@ -97,7 +102,14 @@ export function FormGasto({ d, gasto, onCerrar }: { d: DesaduanajeDetalle; gasto
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Tipo de comprobante">
-                    {(p) => <SelectMenu {...p} value={g.tipoComprobante} onChange={(t) => set({ tipoComprobante: t as TipoComprobante })} options={op(TIPOS_COMPROBANTE)} />}
+                    {(p) => (
+                        <SelectMenu
+                            {...p}
+                            value={g.tipoComprobante}
+                            onChange={(t) => set({ tipoComprobante: t as TipoComprobante })}
+                            options={op(TIPOS_COMPROBANTE)}
+                        />
+                    )}
                 </Field>
                 <Field label="N° de comprobante" optional>
                     {(p) => <Input {...p} value={g.nComprobante} onChange={(e) => set({ nComprobante: e.target.value })} placeholder="F001-123" />}
@@ -106,7 +118,15 @@ export function FormGasto({ d, gasto, onCerrar }: { d: DesaduanajeDetalle; gasto
                     {(p) => <Input {...p} value={g.emisor} onChange={(e) => set({ emisor: e.target.value })} />}
                 </Field>
                 <Field label="RUC del emisor" optional>
-                    {(p) => <Input {...p} inputMode="numeric" maxLength={11} value={g.rucEmisor} onChange={(e) => set({ rucEmisor: e.target.value.replace(/\D/g, '') })} />}
+                    {(p) => (
+                        <Input
+                            {...p}
+                            inputMode="numeric"
+                            maxLength={11}
+                            value={g.rucEmisor}
+                            onChange={(e) => set({ rucEmisor: e.target.value.replace(/\D/g, '') })}
+                        />
+                    )}
                 </Field>
                 <div className="flex flex-col gap-1.5">
                     <span className="text-ui font-medium">
@@ -115,7 +135,9 @@ export function FormGasto({ d, gasto, onCerrar }: { d: DesaduanajeDetalle; gasto
                     <DateField label="Fecha del comprobante" value={g.fechaComprobante ?? ''} onChange={(f) => set({ fechaComprobante: f || null })} />
                 </div>
                 <Field label="Moneda">
-                    {(p) => <SelectMenu {...p} value={g.moneda} onChange={(m) => (set({ moneda: m as MonedaGasto }), setTcTxt(null))} options={op(MONEDAS_GASTO)} />}
+                    {(p) => (
+                        <SelectMenu {...p} value={g.moneda} onChange={(m) => (set({ moneda: m as MonedaGasto }), setTcTxt(null))} options={op(MONEDAS_GASTO)} />
+                    )}
                 </Field>
                 <Field label="Monto sin IGV" hint={g.tipoComprobante === 'Nota de crédito' ? 'En positivo: el costeo lo resta.' : undefined}>
                     {(p) => <Input {...p} inputMode="decimal" value={montoTxt} onChange={(e) => setMontoTxt(e.target.value)} />}
@@ -144,7 +166,10 @@ export function FormGasto({ d, gasto, onCerrar }: { d: DesaduanajeDetalle; gasto
                         {...p}
                         value={g.ocHijaId ?? ''}
                         onChange={(v) => set({ ocHijaId: v || null })}
-                        options={[{ value: '', label: 'Sin OC hija' }, ...hijas.map((o) => ({ value: o.id, label: `${o.numero}${o.proveedor ? ` · ${o.proveedor}` : ''}` }))]}
+                        options={[
+                            { value: '', label: 'Sin OC hija' },
+                            ...hijas.map((o) => ({ value: o.id, label: `${o.numero}${o.proveedor ? ` · ${o.proveedor}` : ''}` })),
+                        ]}
                     />
                 )}
             </Field>

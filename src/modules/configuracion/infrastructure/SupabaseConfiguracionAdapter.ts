@@ -3,14 +3,13 @@ import { err, ok, type Result } from 'neverthrow';
 import { resultado, type ErrorFuente } from '@/shared/errores.ts';
 import type { ColaPort, ConfiguracionPort, DatosConfiguracion } from '../application/ports/ConfiguracionPort.ts';
 import type { AmbitoConcepto, ConceptoGasto, EstadoCola, ResumenCola, TrabajoCola } from '../domain/configuracion.ts';
-
-type Fila = Record<string, unknown>;
-const s = (v: unknown) => (v == null ? '' : String(v));
-const sn = (v: unknown) => (v == null ? null : String(v));
+import { s, sn, type Fila } from '@/shared/supabase/filas.ts';
 
 /** RLS deja un UPDATE en 0 filas (sin error) cuando no le toca: se dice como permiso negado. */
 const alMenosUna = (r: Result<Fila[], ErrorFuente>, quien: string): Result<null, ErrorFuente> =>
-    r.andThen((fs) => (fs.length ? ok(null) : err<null, ErrorFuente>({ kind: 'permiso', message: `No tienes permiso para cambiar esto. Lo cambia ${quien}.` })));
+    r.andThen((fs) =>
+        fs.length ? ok(null) : err<null, ErrorFuente>({ kind: 'permiso', message: `No tienes permiso para cambiar esto. Lo cambia ${quien}.` }),
+    );
 
 export class SupabaseConfiguracionAdapter implements ConfiguracionPort, ColaPort {
     constructor(private readonly db: SupabaseClient) {}
@@ -54,7 +53,10 @@ export class SupabaseConfiguracionAdapter implements ConfiguracionPort, ColaPort
     }
 
     async guardarParametro(clave: string, valor: unknown, nota: string): Promise<Result<null, ErrorFuente>> {
-        const r = await this.db.from('config').upsert({ clave, valor, nota: nota.trim() || null }, { onConflict: 'clave' }).select('clave');
+        const r = await this.db
+            .from('config')
+            .upsert({ clave, valor, nota: nota.trim() || null }, { onConflict: 'clave' })
+            .select('clave');
         return alMenosUna(resultado<Fila[]>(r), 'el administrador');
     }
 
@@ -64,7 +66,9 @@ export class SupabaseConfiguracionAdapter implements ConfiguracionPort, ColaPort
     }
 
     async agregarTc(t: { moneda: string; tc: number; vigenteDesde: string; comentario: string }): Promise<Result<null, ErrorFuente>> {
-        const r = await this.db.from('tc_costeo').insert({ moneda: t.moneda, tc: t.tc, vigente_desde: t.vigenteDesde, comentario: t.comentario.trim() || null });
+        const r = await this.db
+            .from('tc_costeo')
+            .insert({ moneda: t.moneda, tc: t.tc, vigente_desde: t.vigenteDesde, comentario: t.comentario.trim() || null });
         return resultado(r).map(() => null);
     }
 
@@ -87,7 +91,9 @@ export class SupabaseConfiguracionAdapter implements ConfiguracionPort, ColaPort
     // ── Cola (funciones solo-admin de 0021) ──
     async resumen(): Promise<Result<ResumenCola[], ErrorFuente>> {
         const r = resultado<Fila[]>(await this.db.rpc('cola_resumen'));
-        return r.map((fs) => (fs ?? []).map((f) => ({ estado: s(f.estado) as EstadoCola, tipo: s(f.tipo), cantidad: Number(f.cantidad), masAntiguo: s(f.mas_antiguo) })));
+        return r.map((fs) =>
+            (fs ?? []).map((f) => ({ estado: s(f.estado) as EstadoCola, tipo: s(f.tipo), cantidad: Number(f.cantidad), masAntiguo: s(f.mas_antiguo) })),
+        );
     }
 
     async listar(estado: string | null): Promise<Result<TrabajoCola[], ErrorFuente>> {

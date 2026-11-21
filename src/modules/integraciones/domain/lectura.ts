@@ -139,7 +139,8 @@ export function extraerDeTexto(texto: string, esValido: (r: string) => boolean, 
 }
 
 /** ¿Basta la lectura del texto, o conviene Gemini? (escaneado, varios RUC o sin total). */
-export const bastaElTexto = (l: LecturaDocumento, texto: string) => Boolean(l.ruc && l.rucs_encontrados.length === 1 && l.total !== null && texto.trim().length >= 50);
+export const bastaElTexto = (l: LecturaDocumento, texto: string) =>
+    Boolean(l.ruc && l.rucs_encontrados.length === 1 && l.total !== null && texto.trim().length >= 50);
 
 /** Avisos sobre lo que leyó Gemini (RUC que no pasa el módulo 11, ítems que no suman el subtotal). */
 export function revisarGemini(g: LecturaDocumento, esValido: (r: string) => boolean): LecturaDocumento {
@@ -158,7 +159,8 @@ export function combinar(texto: LecturaDocumento, gemini: LecturaDocumento): Lec
         g.ruc = texto.ruc;
         g.rucs_encontrados = [texto.ruc];
     }
-    for (const k of ['moneda', 'total', 'subtotal', 'igv', 'numero', 'fecha'] as const) if (g[k] == null && texto[k] != null) (g as Record<string, unknown>)[k] = texto[k];
+    for (const k of ['moneda', 'total', 'subtotal', 'igv', 'numero', 'fecha'] as const)
+        if (g[k] == null && texto[k] != null) (g as Record<string, unknown>)[k] = texto[k];
     return g;
 }
 

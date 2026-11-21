@@ -3,9 +3,7 @@ import { ok, type Result } from 'neverthrow';
 import { resultado, type ErrorFuente } from '@/shared/errores.ts';
 import type { BandejaPort, CatalogosPort, HistorialPort, PersonasPort } from '../application/ports/ComunPort.ts';
 import type { Cambio, Catalogos, Notificacion, Pendiente, Persona } from '../domain/tipos.ts';
-
-type Fila = Record<string, unknown>;
-const s = (v: unknown) => (v == null ? '' : String(v));
+import { s, type Fila } from '@/shared/supabase/filas.ts';
 
 export class SupabaseComunAdapter implements PersonasPort, CatalogosPort, BandejaPort, HistorialPort {
     constructor(private readonly db: SupabaseClient) {}
@@ -40,11 +38,15 @@ export class SupabaseComunAdapter implements PersonasPort, CatalogosPort, Bandej
 
     async teToca(): Promise<Result<Pendiente[], ErrorFuente>> {
         const r = resultado<Fila[]>(await this.db.rpc('te_toca'));
-        return r.map((fs) => (fs ?? []).map((f) => ({ tabla: s(f.tabla), id: s(f.id), titulo: s(f.titulo), paso: s(f.paso), desde: f.desde ? s(f.desde) : null })));
+        return r.map((fs) =>
+            (fs ?? []).map((f) => ({ tabla: s(f.tabla), id: s(f.id), titulo: s(f.titulo), paso: s(f.paso), desde: f.desde ? s(f.desde) : null })),
+        );
     }
 
     async notificaciones(): Promise<Result<Notificacion[], ErrorFuente>> {
-        const r = resultado<Fila[]>(await this.db.from('notificaciones').select('id,titulo,cuerpo,ref_tabla,ref_id,leida,creado').order('creado', { ascending: false }).limit(30));
+        const r = resultado<Fila[]>(
+            await this.db.from('notificaciones').select('id,titulo,cuerpo,ref_tabla,ref_id,leida,creado').order('creado', { ascending: false }).limit(30),
+        );
         return r.map((fs) =>
             fs.map((f) => ({
                 id: Number(f.id),
@@ -65,7 +67,13 @@ export class SupabaseComunAdapter implements PersonasPort, CatalogosPort, Bandej
 
     async de(tabla: string, id: string): Promise<Result<Cambio[], ErrorFuente>> {
         const r = resultado<Fila[]>(
-            await this.db.from('historial').select('id,accion,de,a,motivo,usuario_id,ts').eq('tabla', tabla).eq('registro_id', id).order('ts', { ascending: false }).limit(50),
+            await this.db
+                .from('historial')
+                .select('id,accion,de,a,motivo,usuario_id,ts')
+                .eq('tabla', tabla)
+                .eq('registro_id', id)
+                .order('ts', { ascending: false })
+                .limit(50),
         );
         return r.map((fs) =>
             fs.map((f) => ({

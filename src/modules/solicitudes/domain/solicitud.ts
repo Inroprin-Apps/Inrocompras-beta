@@ -2,6 +2,8 @@
 // reglas de presentación. Las reglas de negocio (quién emite, libera, rechaza…) viven en la base (0002/0003):
 // los botones salen de acciones_disponibles().
 
+import { palabrasDe, plano } from '@/shared/texto.ts';
+
 export const ESTADOS_SOLICITUD = ['Borrador', 'Pendiente Liberación', 'Observada', 'Liberada', 'En Req', 'Rechazada', 'Cancelada'] as const;
 export type EstadoSolicitud = (typeof ESTADOS_SOLICITUD)[number];
 
@@ -172,8 +174,6 @@ export interface FiltrosSolicitud {
 }
 export const FILTROS_SOLICITUD: FiltrosSolicitud = { pestana: 'mias', estado: '', tipo: '', proyecto: '', texto: '' };
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-
 /**
  * `porLiberar`: los id que la base dice que me toca liberar (te_toca), para no repetir aquí quién aprueba.
  * `nombreProyecto`: para buscar también por el nombre del proyecto.
@@ -183,7 +183,7 @@ export function filtrarSolicitudes(
     f: FiltrosSolicitud,
     ctx: { yo: string; porLiberar: ReadonlySet<string>; nombreProyecto?: (id: string | null) => string },
 ): Solicitud[] {
-    const palabras = plano(f.texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(f.texto);
     return lista.filter((s) => {
         if (f.pestana === 'mias' && s.solicitanteId !== ctx.yo) return false;
         if (f.pestana === 'liberar' && !ctx.porLiberar.has(s.id)) return false;

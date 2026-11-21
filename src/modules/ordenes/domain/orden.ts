@@ -1,6 +1,8 @@
 // Órdenes de compra (AppSheet: OC, Base de datos OC NAC, Pagos). PURO: tipos, filtros, orden y presentación.
 // Las reglas (quién emite, aprueba, edita) viven en la base (0002/0003/0030): la UI pregunta y muestra.
 
+import { palabrasDe, plano } from '@/shared/texto.ts';
+
 export const PROCEDENCIAS = ['Nacional', 'Importación'] as const;
 export type Procedencia = (typeof PROCEDENCIAS)[number];
 export const FORMAS_PAGO = ['Contado', 'Crédito', 'Adelanto', 'Tarjeta de crédito', 'Caja chica', 'Contra entrega', 'Letra'] as const;
@@ -184,7 +186,16 @@ export function tonoAprobacion(e: string | null): TonoChip {
 
 /** Hilo de fases de la ficha (docs/03 §Orden). */
 export const FASES_ORDEN = ['Borrador', 'Por aprobar', 'Aprobada', 'Legajo', 'Pago', 'Pagada', 'Cerrada'];
-const EN_PAGO = ['Pago pendiente', 'Adelanto pendiente', 'Crédito', 'Crédito letra', 'Tarjeta de crédito', 'Caja chica', 'Saldo pendiente', 'Observado por Finanzas'];
+const EN_PAGO = [
+    'Pago pendiente',
+    'Adelanto pendiente',
+    'Crédito',
+    'Crédito letra',
+    'Tarjeta de crédito',
+    'Caja chica',
+    'Saldo pendiente',
+    'Observado por Finanzas',
+];
 
 /** El paso en curso; -1 si la orden quedó anulada o rechazada. En modificación o con anulación pedida, el paso del que viene. */
 export function faseOrden(o: { estatus: string; envioSolicitado?: string | null; estadoPrevio?: string | null }): number {
@@ -220,7 +231,8 @@ export function monto(n: number, moneda = 'PEN'): string {
 export const cantidad = (n: number) => new Intl.NumberFormat('es-PE', { maximumFractionDigits: 3 }).format(n);
 
 /** Título de una orden aún sin número. */
-export const nombreOrden = (o: { numero: string | null; procedencia: string }) => o.numero ?? `Borrador ${o.procedencia === 'Importación' ? 'de importación' : 'nacional'}`;
+export const nombreOrden = (o: { numero: string | null; procedencia: string }) =>
+    o.numero ?? `Borrador ${o.procedencia === 'Importación' ? 'de importación' : 'nacional'}`;
 
 // ── Lista ──
 export type PestanaOrden = 'mias' | 'aprobar' | 'todas';
@@ -236,10 +248,8 @@ export interface FiltrosOrden {
 }
 export const FILTROS_ORDEN: FiltrosOrden = { estatus: '', aprobacion: '', procedencia: '', proyecto: '', proveedor: '', comprador: '', texto: '' };
 
-const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-
 export function filtrarOrdenes(lista: Orden[], f: FiltrosOrden): Orden[] {
-    const palabras = plano(f.texto).split(/\s+/).filter(Boolean);
+    const palabras = palabrasDe(f.texto);
     return lista.filter((o) => {
         if (f.estatus && o.estatus !== f.estatus) return false;
         if (f.aprobacion && !(o.estadoAprobacion ?? '').startsWith(f.aprobacion)) return false;
@@ -282,7 +292,9 @@ export function faltaEnCabecera(c: Cabecera): string | null {
 
 /** Totales de las líneas (lo que la base calculará; para mostrar mientras se edita). Excluye demasías rechazadas. */
 export function totales(lineas: Pick<Linea, 'cantidad' | 'precioUnit' | 'esDemasia' | 'demasiaEstado'>[], tipoImpuesto: string) {
-    const subtotal = lineas.filter((l) => !(l.esDemasia && l.demasiaEstado === 'Rechazada')).reduce((s, l) => s + Math.round(l.cantidad * l.precioUnit * 100) / 100, 0);
+    const subtotal = lineas
+        .filter((l) => !(l.esDemasia && l.demasiaEstado === 'Rechazada'))
+        .reduce((s, l) => s + Math.round(l.cantidad * l.precioUnit * 100) / 100, 0);
     const igv = tipoImpuesto === 'IGV 18%' ? Math.round(subtotal * 18) / 100 : 0;
     return { subtotal, igv, total: subtotal + igv };
 }

@@ -29,7 +29,8 @@ function verificar(t) {
 const CORS = {
     'access-control-allow-origin': '*',
     'access-control-allow-methods': 'GET,POST,PATCH,PUT,DELETE,OPTIONS,HEAD',
-    'access-control-allow-headers': 'authorization,apikey,content-type,x-client-info,prefer,accept-profile,content-profile,range,x-supabase-api-version,x-upsert,cache-control',
+    'access-control-allow-headers':
+        'authorization,apikey,content-type,x-client-info,prefer,accept-profile,content-profile,range,x-supabase-api-version,x-upsert,cache-control',
     'access-control-expose-headers': 'content-range,content-location',
 };
 
@@ -40,14 +41,24 @@ if (process.argv[1] && process.argv[1].endsWith('proxy.mjs')) {
         if (url.pathname === '/auth/v1/user') {
             const c = verificar((req.headers.authorization ?? '').replace(/^Bearer /, ''));
             if (!c || c.role !== 'authenticated') return res.writeHead(401, { ...CORS, 'content-type': 'application/json' }).end('{"message":"invalid JWT"}');
-            return res
-                .writeHead(200, { ...CORS, 'content-type': 'application/json' })
-                .end(JSON.stringify({ id: c.sub, aud: 'authenticated', role: 'authenticated', email: c.email, app_metadata: {}, user_metadata: { full_name: c.name }, created_at: new Date().toISOString() }));
+            return res.writeHead(200, { ...CORS, 'content-type': 'application/json' }).end(
+                JSON.stringify({
+                    id: c.sub,
+                    aud: 'authenticated',
+                    role: 'authenticated',
+                    email: c.email,
+                    app_metadata: {},
+                    user_metadata: { full_name: c.name },
+                    created_at: new Date().toISOString(),
+                }),
+            );
         }
         if (url.pathname.startsWith('/auth/v1/')) return res.writeHead(200, { ...CORS, 'content-type': 'application/json' }).end('{}');
         const esStorage = url.pathname.startsWith('/storage/v1');
         if (!url.pathname.startsWith('/rest/v1') && !esStorage) return res.writeHead(404, CORS).end();
-        const destino = esStorage ? STORAGE + url.pathname.replace(/^\/storage\/v1/, '') + url.search : REST + url.pathname.replace(/^\/rest\/v1/, '') + url.search;
+        const destino = esStorage
+            ? STORAGE + url.pathname.replace(/^\/storage\/v1/, '') + url.search
+            : REST + url.pathname.replace(/^\/rest\/v1/, '') + url.search;
         const headers = { ...req.headers };
         delete headers.host;
         const p = http.request(destino, { method: req.method, headers }, (r) => {

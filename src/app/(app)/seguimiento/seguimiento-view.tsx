@@ -60,7 +60,10 @@ export function SeguimientoView() {
                     className="w-64"
                     value={v.proyecto}
                     onChange={(proyecto) => vista$.set({ proyecto })}
-                    options={[{ value: '', label: 'Todos los proyectos' }, ...proyectos.map((p) => ({ value: p.id, label: p.codigo ? `${p.codigo} · ${p.nombre}` : p.nombre }))]}
+                    options={[
+                        { value: '', label: 'Todos los proyectos' },
+                        ...proyectos.map((p) => ({ value: p.id, label: p.codigo ? `${p.codigo} · ${p.nombre}` : p.nombre })),
+                    ]}
                 />
             </FilterRow>
             <Lista
@@ -68,7 +71,9 @@ export function SeguimientoView() {
                 onReintentar={() => void seguimientoStore.reload(v.proyecto || 'todos')}
                 vacia={
                     <ListaVacia titulo={estado.data?.length ? 'Ningún ítem coincide' : 'Aún no hay ítems que seguir'}>
-                        {estado.data?.length ? 'Prueba con otra búsqueda o cambia de pestaña.' : 'Aquí aparecen los ítems de los requerimientos en cuanto nacen.'}
+                        {estado.data?.length
+                            ? 'Prueba con otra búsqueda o cambia de pestaña.'
+                            : 'Aquí aparecen los ítems de los requerimientos en cuanto nacen.'}
                     </ListaVacia>
                 }
             >
@@ -85,10 +90,16 @@ export function SeguimientoView() {
                                             <Chip tone={TONO[e]}>{ETIQUETA_COMPRA[e]}</Chip>
                                         </div>
                                         <div className="mt-0.5 text-small text-ink-2">
-                                            {[f.proyecto || 'Administrativa', f.requerimiento || 'En proceso', `${fmtNum.format(f.saldo)} de ${fmtNum.format(f.cantidad)} por comprar`].join(' · ')}
+                                            {[
+                                                f.proyecto || 'Administrativa',
+                                                f.requerimiento || 'En proceso',
+                                                `${fmtNum.format(f.saldo)} de ${fmtNum.format(f.cantidad)} por comprar`,
+                                            ].join(' · ')}
                                         </div>
                                         <div className="text-small text-ink-3">
-                                            {[`Técnica: ${f.validacionTecnica}`, f.ordenes, f.estadoOrden, f.fechaMeta && `meta ${dmy(f.fechaMeta)}`].filter(Boolean).join(' · ')}
+                                            {[`Técnica: ${f.validacionTecnica}`, f.ordenes, f.estadoOrden, f.fechaMeta && `meta ${dmy(f.fechaMeta)}`]
+                                                .filter(Boolean)
+                                                .join(' · ')}
                                         </div>
                                     </li>
                                 );
@@ -115,7 +126,9 @@ export function SeguimientoView() {
                                             <tr key={f.itemId} className={T.row}>
                                                 <td className={T.td}>
                                                     <div className="max-w-80 font-medium break-words">{f.descripcion}</div>
-                                                    <div className={T.sub}>{[f.codigoCliente, f.codigoSidige && `SKU ${f.codigoSidige}`].filter(Boolean).join(' · ') || '—'}</div>
+                                                    <div className={T.sub}>
+                                                        {[f.codigoCliente, f.codigoSidige && `SKU ${f.codigoSidige}`].filter(Boolean).join(' · ') || '—'}
+                                                    </div>
                                                 </td>
                                                 {!unProyecto && <td className={T.td}>{f.proyecto || <span className="text-ink-3">Administrativa</span>}</td>}
                                                 <td className={T.td}>

@@ -117,7 +117,9 @@ function OrdenDoc({ o, version }: { o: OrdenPdf; version: VersionPdf }) {
                     <View style={s.caja}>
                         <Text style={[s.negrita, { marginBottom: 3 }]}>{t.terminos}</Text>
                         {o.terminos ? <Text>{o.terminos}</Text> : null}
-                        {o.penalidadPctDia ? <Text>{t.penal(Number((o.penalidadPctDia * 100).toFixed(2)), Number(((o.penalidadTopePct ?? 0) * 100).toFixed(2)))}</Text> : null}
+                        {o.penalidadPctDia ? (
+                            <Text>{t.penal(Number((o.penalidadPctDia * 100).toFixed(2)), Number(((o.penalidadTopePct ?? 0) * 100).toFixed(2)))}</Text>
+                        ) : null}
                     </View>
                 ) : null}
                 {version === 'interna' ? (

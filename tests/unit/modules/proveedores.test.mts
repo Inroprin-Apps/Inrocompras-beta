@@ -15,9 +15,27 @@ import {
 import { digitoVerificador, motivoRuc, rucValido } from '@/modules/proveedores/domain/ruc.ts';
 
 const p = (x: Partial<Proveedor>): Proveedor => ({
-    id: 'x', ruc: '20100100101', razonSocial: 'Proveedor SAC', origen: 'Nacional', pais: '', correo: '', telefono: '', contacto: '', cuentas: [],
-    esAgenteRetencion: false, esBuenContribuyente: false, verificadoContab: false, verificadoPor: null, fechaVerificacion: null,
-    evaluacion: 'Pendiente', evaluacionPor: null, evaluacionFecha: null, evaluacionNota: '', creadoPor: null, creado: '2026-11-01T00:00:00Z', ...x,
+    id: 'x',
+    ruc: '20100100101',
+    razonSocial: 'Proveedor SAC',
+    origen: 'Nacional',
+    pais: '',
+    correo: '',
+    telefono: '',
+    contacto: '',
+    cuentas: [],
+    esAgenteRetencion: false,
+    esBuenContribuyente: false,
+    verificadoContab: false,
+    verificadoPor: null,
+    fechaVerificacion: null,
+    evaluacion: 'Pendiente',
+    evaluacionPor: null,
+    evaluacionFecha: null,
+    evaluacionNota: '',
+    creadoPor: null,
+    creado: '2026-11-01T00:00:00Z',
+    ...x,
 });
 
 describe('RUC (módulo 11, igual que public.ruc_valido)', () => {
@@ -60,15 +78,29 @@ describe('alta y edición', () => {
     it('revisa el correo y las cuentas', () => {
         const base = { ...NUEVO_PROVEEDOR, razonSocial: 'X' };
         expect(faltaEnDatos({ ...base, correo: 'ventas' }, 'Nacional')).toMatch(/correo/);
-        expect(faltaEnDatos({ ...base, cuentas: [{ banco: '', moneda: 'PEN', numero: '123', cci: '', swift: '', iban: '' }] }, 'Nacional')).toMatch(/Cuenta 1: escribe el banco/);
-        expect(faltaEnDatos({ ...base, cuentas: [{ banco: 'BCP', moneda: 'PEN', numero: '1', cci: '123', swift: '', iban: '' }] }, 'Nacional')).toMatch(/CCI tiene 20/);
-        expect(faltaEnDatos({ ...base, pais: 'China', cuentas: [{ banco: 'HSBC', moneda: 'USD', numero: '', cci: '', swift: 'HSBCHKHH', iban: 'GB00X' }] }, 'Extranjero')).toBeNull();
-        expect(faltaEnDatos({ ...base, pais: 'China', cuentas: [{ banco: 'HSBC', moneda: 'USD', numero: '1', cci: '', swift: 'HSB', iban: '' }] }, 'Extranjero')).toMatch(/SWIFT/);
+        expect(faltaEnDatos({ ...base, cuentas: [{ banco: '', moneda: 'PEN', numero: '123', cci: '', swift: '', iban: '' }] }, 'Nacional')).toMatch(
+            /Cuenta 1: escribe el banco/,
+        );
+        expect(faltaEnDatos({ ...base, cuentas: [{ banco: 'BCP', moneda: 'PEN', numero: '1', cci: '123', swift: '', iban: '' }] }, 'Nacional')).toMatch(
+            /CCI tiene 20/,
+        );
+        expect(
+            faltaEnDatos(
+                { ...base, pais: 'China', cuentas: [{ banco: 'HSBC', moneda: 'USD', numero: '', cci: '', swift: 'HSBCHKHH', iban: 'GB00X' }] },
+                'Extranjero',
+            ),
+        ).toBeNull();
+        expect(
+            faltaEnDatos({ ...base, pais: 'China', cuentas: [{ banco: 'HSBC', moneda: 'USD', numero: '1', cci: '', swift: 'HSB', iban: '' }] }, 'Extranjero'),
+        ).toMatch(/SWIFT/);
     });
     it('las cuentas vacías no se guardan y se limpian', () => {
-        expect(cuentasLimpias([{ banco: ' BCP ', moneda: 'PEN', numero: '1', cci: '002-191 0000', swift: '', iban: '' }, { banco: '', moneda: 'PEN', numero: '', cci: '', swift: '', iban: '' }])).toEqual([
-            { banco: 'BCP', moneda: 'PEN', numero: '1', cci: '0021910000', swift: '', iban: '' },
-        ]);
+        expect(
+            cuentasLimpias([
+                { banco: ' BCP ', moneda: 'PEN', numero: '1', cci: '002-191 0000', swift: '', iban: '' },
+                { banco: '', moneda: 'PEN', numero: '', cci: '', swift: '', iban: '' },
+            ]),
+        ).toEqual([{ banco: 'BCP', moneda: 'PEN', numero: '1', cci: '0021910000', swift: '', iban: '' }]);
     });
 });
 

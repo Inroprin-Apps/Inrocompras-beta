@@ -8,10 +8,13 @@ import { Hueco } from '@/shared/ui/hueco.tsx';
 import { keyed } from '../_lib/resource.ts';
 import { personasStore } from '../_lib/stores.ts';
 
-const historialStore = keyed((k) => {
-    const [tabla, id] = k.split(':');
-    return historial().de(tabla, id);
-}, ['acciones']);
+const historialStore = keyed(
+    (k) => {
+        const [tabla, id] = k.split(':');
+        return historial().de(tabla, id);
+    },
+    ['acciones'],
+);
 
 export function Historial({ tabla, id }: { tabla: string; id: string }) {
     const { data, error } = historialStore.use(`${tabla}:${id}`);

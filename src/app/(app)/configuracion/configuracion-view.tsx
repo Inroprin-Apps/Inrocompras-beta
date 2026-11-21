@@ -16,7 +16,8 @@ export function ConfiguracionView() {
     const perfil = usePerfil();
     const tabs: (TabDef & { panel: React.ReactNode })[] = [];
     if (editaParametros(perfil)) tabs.push({ key: 'parametros', label: 'Parámetros', panel: <SeccionParametros /> });
-    if (editaTasas(perfil) || agregaTc(perfil)) tabs.push({ key: 'monedas', label: 'Monedas y TC', panel: <SeccionMonedas tasas={editaTasas(perfil)} tc={agregaTc(perfil)} /> });
+    if (editaTasas(perfil) || agregaTc(perfil))
+        tabs.push({ key: 'monedas', label: 'Monedas y TC', panel: <SeccionMonedas tasas={editaTasas(perfil)} tc={agregaTc(perfil)} /> });
     if (editaParametros(perfil)) tabs.push({ key: 'conceptos', label: 'Conceptos', panel: <SeccionConceptos /> });
     if (editaGastos(perfil)) tabs.push({ key: 'gastos', label: 'Gastos de importación', panel: <SeccionGastos /> });
     if (veCola(perfil)) tabs.push({ key: 'cola', label: 'Cola de trabajos', panel: <SeccionCola /> });
@@ -29,7 +30,17 @@ export function ConfiguracionView() {
                     La configuración la cambia el administrador (las tasas de cambio, también Finanzas). Si necesitas un cambio, pídeselo.
                 </Notice>
             ) : (
-                <Tabs tabs={tabs.map(({ key, label }) => ({ key, label }))} panels={Object.fromEntries(tabs.map((t) => [t.key, <div key={t.key} className="pt-4">{t.panel}</div>]))} />
+                <Tabs
+                    tabs={tabs.map(({ key, label }) => ({ key, label }))}
+                    panels={Object.fromEntries(
+                        tabs.map((t) => [
+                            t.key,
+                            <div key={t.key} className="pt-4">
+                                {t.panel}
+                            </div>,
+                        ]),
+                    )}
+                />
             )}
         </>
     );

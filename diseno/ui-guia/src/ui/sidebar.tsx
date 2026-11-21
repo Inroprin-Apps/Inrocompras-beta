@@ -36,7 +36,10 @@ function Badge({ b, activo, contraido }: { b: SidebarBadge; activo: boolean; con
     const color = activo ? 'bg-on-fill text-primary-strong' : 'bg-surface-3 text-ink';
     // Contraído no hay sitio para el número: se desvanece (no se quita del todo, para que nada se mueva a mitad de la animación).
     return (
-        <span title={b.title} className={`flex ml-auto min-w-5 items-center justify-center rounded-full px-1.5 py-px text-center text-caption font-medium tabular-nums transition-opacity duration-150 ${color} ${contraido ? 'md:opacity-0' : ''}`}>
+        <span
+            title={b.title}
+            className={`flex ml-auto min-w-5 items-center justify-center rounded-full px-1.5 py-px text-center text-caption font-medium tabular-nums transition-opacity duration-150 ${color} ${contraido ? 'md:opacity-0' : ''}`}
+        >
             {b.count.toLocaleString('en-US')}
         </span>
     );
@@ -130,16 +133,27 @@ export function Sidebar({
                 </button>
             </div>
 
-            <div className={`no-scrollbar relative flex-1 flex-col gap-5 overflow-x-hidden overflow-y-auto px-3 pb-3 md:flex ${abierto ? 'flex max-h-[70dvh]' : 'hidden'}`}>
+            <div
+                className={`no-scrollbar relative flex-1 flex-col gap-5 overflow-x-hidden overflow-y-auto px-3 pb-3 md:flex ${abierto ? 'flex max-h-[70dvh]' : 'hidden'}`}
+            >
                 {grupos.map((g) => (
                     <nav key={g.title} aria-label={g.title} className="flex flex-col gap-0.5">
                         {/* Misma altura abierto y contraído: al contraer, el título se cambia por una línea y los iconos no se mueven. */}
                         <p className="relative mb-1 flex h-5 items-center px-2.5 text-small font-medium whitespace-nowrap text-ink-2">
                             <span className={`transition-opacity duration-150 ${contraido ? 'md:opacity-0' : ''}`}>{g.title}</span>
-                            <span aria-hidden className={`absolute inset-x-2.5 top-1/2 hidden h-px bg-divider opacity-0 transition-opacity duration-150 md:block ${contraido ? 'md:opacity-100' : ''}`} />
+                            <span
+                                aria-hidden
+                                className={`absolute inset-x-2.5 top-1/2 hidden h-px bg-divider opacity-0 transition-opacity duration-150 md:block ${contraido ? 'md:opacity-100' : ''}`}
+                            />
                         </p>
                         {g.items.map((it) => (
-                            <Item key={it.key} it={it} activo={activo ? activo === it.key : ruta === it.href} contraido={contraido} onPick={() => setAbierto(false)} />
+                            <Item
+                                key={it.key}
+                                it={it}
+                                activo={activo ? activo === it.key : ruta === it.href}
+                                contraido={contraido}
+                                onPick={() => setAbierto(false)}
+                            />
                         ))}
                     </nav>
                 ))}

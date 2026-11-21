@@ -6,7 +6,16 @@
 import { useMemo, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { cola } from '@/modules/configuracion/composition.ts';
-import { ESTADOS_COLA, etiquetaTipo, puedeDescartar, puedeReintentar, tonoCola, totalesCola, type EstadoCola, type TrabajoCola } from '@/modules/configuracion/application/views.ts';
+import {
+    ESTADOS_COLA,
+    etiquetaTipo,
+    puedeDescartar,
+    puedeReintentar,
+    tonoCola,
+    totalesCola,
+    type EstadoCola,
+    type TrabajoCola,
+} from '@/modules/configuracion/application/views.ts';
 import { rutaDe } from '@/modules/comun/application/views.ts';
 import { FilterRow, T } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
@@ -69,7 +78,11 @@ export function SeccionCola() {
             <Lista
                 estado={{ data: lista, error: estado.error ?? resumen.error }}
                 onReintentar={() => (void colaStore.retry(), void colaResumenStore.retry())}
-                vacia={<ListaVacia titulo={filtro ? `Ningún trabajo en «${filtro}»` : 'La cola está vacía'}>Los trabajos aparecen aquí cuando una acción encola un correo, un PDF o un archivo para Drive.</ListaVacia>}
+                vacia={
+                    <ListaVacia titulo={filtro ? `Ningún trabajo en «${filtro}»` : 'La cola está vacía'}>
+                        Los trabajos aparecen aquí cuando una acción encola un correo, un PDF o un archivo para Drive.
+                    </ListaVacia>
+                }
             >
                 {() => (
                     <>

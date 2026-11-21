@@ -30,7 +30,11 @@ export function Section({ title, blurb, children }: { title: string; blurb?: Rea
             <div className="flex flex-col gap-1">
                 <h2 className="group text-subtitle font-semibold">
                     {title}
-                    <a href={`#${id}`} className="ml-2 text-ink-3 no-underline opacity-0 group-hover:opacity-100 focus-visible:opacity-100" aria-label={`Enlace a ${title}`}>
+                    <a
+                        href={`#${id}`}
+                        className="ml-2 text-ink-3 no-underline opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                        aria-label={`Enlace a ${title}`}
+                    >
                         #
                     </a>
                 </h2>
@@ -71,7 +75,9 @@ export function DoDont({ good, bad, goodNote, badNote }: { good: ReactNode; bad:
                 <figure key={String(ok)} className={`flex flex-col overflow-hidden ${CARD}`}>
                     <div className="flex min-h-28 flex-1 items-center justify-center bg-surface-2 p-5">{body}</div>
                     <figcaption className={`flex gap-2 border-t-2 px-4 py-3 text-small ${ok ? 'border-success' : 'border-danger'}`}>
-                        <span className={`mt-px flex-none ${ok ? 'text-success-strong' : 'text-danger-strong'}`}>{ok ? <Check size={16} /> : <X size={16} />}</span>
+                        <span className={`mt-px flex-none ${ok ? 'text-success-strong' : 'text-danger-strong'}`}>
+                            {ok ? <Check size={16} /> : <X size={16} />}
+                        </span>
                         <span>
                             <b className={ok ? 'text-success-strong' : 'text-danger-strong'}>{ok ? 'Sí. ' : 'No. '}</b>
                             <span className="text-ink-2">{note}</span>

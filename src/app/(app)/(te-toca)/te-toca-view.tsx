@@ -28,9 +28,7 @@ export function TeTocaView() {
             <Lista
                 estado={estado}
                 onReintentar={() => void teTocaStore.retry()}
-                vacia={
-                    <ListaVacia titulo="No tienes nada pendiente">Aquí aparece lo que espera una acción tuya: liberar, validar, aprobar, pagar.</ListaVacia>
-                }
+                vacia={<ListaVacia titulo="No tienes nada pendiente">Aquí aparece lo que espera una acción tuya: liberar, validar, aprobar, pagar.</ListaVacia>}
             >
                 {(filas) => (
                     <div className="flex flex-col gap-4">

@@ -35,7 +35,13 @@ export function PorFirmar({ titulo = true }: { titulo?: boolean }) {
         </h2>
     );
 
-    if (bandeja.error && !bandeja.data) return (<>{cabecera}<ListaError mensaje={bandeja.error} onReintentar={() => void teTocaStore.retry()} /></>);
+    if (bandeja.error && !bandeja.data)
+        return (
+            <>
+                {cabecera}
+                <ListaError mensaje={bandeja.error} onReintentar={() => void teTocaStore.retry()} />
+            </>
+        );
     if (bandeja.data && !pendientes.length)
         return (
             <>
@@ -45,7 +51,13 @@ export function PorFirmar({ titulo = true }: { titulo?: boolean }) {
                 </ListaVacia>
             </>
         );
-    if (ordenes.error && !ordenes.data) return (<>{cabecera}<ListaError mensaje={ordenes.error} onReintentar={() => void porAprobarStore.reload(clave)} /></>);
+    if (ordenes.error && !ordenes.data)
+        return (
+            <>
+                {cabecera}
+                <ListaError mensaje={ordenes.error} onReintentar={() => void porAprobarStore.reload(clave)} />
+            </>
+        );
     if (!ordenes.data)
         return (
             <>

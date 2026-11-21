@@ -28,8 +28,8 @@ export default function Tipografia() {
                 title="Tipografía"
                 lead={
                     <>
-                        Montserrat en tres pesos (400, 500 y 600), cuerpo a 14 px, y una escala de <b>ocho pasos con nombre</b>. Los pasos ya traen su interlineado:{' '}
-                        <Code>text-ui</Code> basta.
+                        Montserrat en tres pesos (400, 500 y 600), cuerpo a 14 px, y una escala de <b>ocho pasos con nombre</b>. Los pasos ya traen su
+                        interlineado: <Code>text-ui</Code> basta.
                     </>
                 }
             />
@@ -73,9 +73,18 @@ export default function Tipografia() {
             <Section title="Reglas">
                 <Rules
                     items={[
-                        ['Las cifras van con tabular-nums y alineadas a la derecha.', 'Así los miles y los decimales quedan uno sobre otro y se comparan de un vistazo.'],
-                        ['Los pesos: 400 texto, 500 etiquetas, botones y chips, 600 títulos y cifras.', 'Montserrat es ancha y pesa mucho: nada de 700 ni 800.'],
-                        ['Las mayúsculas solo en text-caption con tracking-[.06em].', 'Para cabeceras de tabla y etiquetas de KPI. Un título en mayúsculas se lee peor.'],
+                        [
+                            'Las cifras van con tabular-nums y alineadas a la derecha.',
+                            'Así los miles y los decimales quedan uno sobre otro y se comparan de un vistazo.',
+                        ],
+                        [
+                            'Los pesos: 400 texto, 500 etiquetas, botones y chips, 600 títulos y cifras.',
+                            'Montserrat es ancha y pesa mucho: nada de 700 ni 800.',
+                        ],
+                        [
+                            'Las mayúsculas solo en text-caption con tracking-[.06em].',
+                            'Para cabeceras de tabla y etiquetas de KPI. Un título en mayúsculas se lee peor.',
+                        ],
                         ['El texto corrido no pasa de unos 70 caracteres por línea (max-w-2xl).', 'Las líneas muy largas cansan.'],
                     ]}
                 />
