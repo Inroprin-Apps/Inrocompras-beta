@@ -20,8 +20,9 @@ import {
 } from '@/modules/cuadro/application/views.ts';
 import { ESTADOS_APROBACION, ESTATUS, PROCEDENCIAS } from '@/modules/ordenes/application/views.ts';
 import { hoyLima } from '@/modules/pagos/application/views.ts';
-import { CONTROL, FilterRow, SearchBox, SectionTitle } from '@/shared/ui/bits.tsx';
-import { Button, buttonClass } from '@/shared/ui/button.tsx';
+import { CONTROL, FilterRow, SearchBox } from '@/shared/ui/bits.tsx';
+import { Button, LINK_CLASS, buttonClass } from '@/shared/ui/button.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
@@ -57,7 +58,7 @@ export function CuadroView() {
     if (!perfil.ve_precios) {
         return (
             <>
-                <SectionTitle title="Cuadro de aprobaciones" />
+                <Encabezado titulo="Cuadro de aprobaciones" />
                 <ListaVacia titulo="El cuadro lleva montos">Tu perfil no ve precios. El avance de cada ítem está en Seguimiento.</ListaVacia>
             </>
         );
@@ -69,7 +70,10 @@ export function CuadroView() {
         const r = tipo === 'excel' ? await exportarCuadro().excel(lista, archivo) : exportarCuadro().csv(lista, archivo);
         setBajando(null);
         if (r.isErr()) toast.error(r.error.message);
-        else toast.success(`Descargaste ${lista.length === 1 ? '1 orden' : `${lista.length} órdenes`}.`);
+        else
+            toast.success(
+                `Cuadro de aprobaciones descargado en ${tipo === 'excel' ? 'Excel' : 'CSV'}: ${lista.length === 1 ? '1 orden' : `${lista.length} órdenes`}.`,
+            );
     }
 
     const conFiltros = Object.entries(FILTROS_CUADRO).some(([k, d]) => v[k as keyof typeof FILTROS_CUADRO] !== d);
@@ -77,25 +81,29 @@ export function CuadroView() {
 
     return (
         <>
-            <SectionTitle title="Cuadro de aprobaciones" />
+            <Encabezado
+                titulo="Cuadro de aprobaciones"
+                actualizado={estado.actualizado}
+                accion={
+                    aprobador && (
+                        <Link href="/cuadro/aprobar" className={`${buttonClass('primary')} max-md:hidden`}>
+                            <Smartphone size={16} aria-hidden /> Ver órdenes por firmar
+                        </Link>
+                    )
+                }
+            />
             {aprobador && (
                 // En el celular, lo primero es lo que espera tu firma (criterio D: aprobar en 3 toques).
                 <section className="mb-6 md:hidden">
                     <PorFirmar />
                 </section>
             )}
-            <div className="mb-3.5 flex flex-wrap items-center gap-2.5">
-                {aprobador && (
-                    <Link href="/cuadro/aprobar" className={`${buttonClass('primary')} max-md:hidden`}>
-                        <Smartphone size={16} /> Por firmar
-                    </Link>
-                )}
-                <span className="flex-1" />
+            <div className="mb-3.5 flex flex-wrap items-center justify-end gap-2.5">
                 <Button variant="secondary" disabled={!estado.data || !lista.length || !!bajando} onClick={() => void bajar('excel')}>
-                    <FileSpreadsheet size={16} /> {bajando === 'excel' ? 'Armando el Excel…' : 'Descargar Excel'}
+                    <FileSpreadsheet size={16} aria-hidden /> {bajando === 'excel' ? 'Descargando…' : 'Descargar Excel'}
                 </Button>
                 <Button variant="secondary" disabled={!estado.data || !lista.length || !!bajando} onClick={() => void bajar('csv')}>
-                    <FileDown size={16} /> CSV
+                    <FileDown size={16} aria-hidden /> {bajando === 'csv' ? 'Descargando…' : 'Descargar CSV'}
                 </Button>
             </div>
             <FilterRow>
@@ -119,7 +127,7 @@ export function CuadroView() {
                     className="w-40"
                     value={v.procedencia}
                     onChange={(procedencia) => vista$.set({ procedencia })}
-                    options={[{ value: '', label: 'Nac. e import.' }, ...PROCEDENCIAS.map((e) => ({ value: e, label: e }))]}
+                    options={[{ value: '', label: 'Toda procedencia' }, ...PROCEDENCIAS.map((e) => ({ value: e, label: e }))]}
                 />
                 <SelectMenu
                     label="Empresa"
@@ -159,7 +167,16 @@ export function CuadroView() {
                 onReintentar={() => void cuadroStore.retry()}
                 vacia={
                     <ListaVacia titulo={conFiltros ? 'Ninguna orden coincide' : 'Aún no hay órdenes'}>
-                        {conFiltros ? 'Prueba con otra búsqueda, otras fechas o quita algún filtro.' : 'Cuando Compras arme una orden, aparecerá aquí.'}
+                        {conFiltros ? (
+                            <>
+                                <p>Prueba con otra búsqueda, otras fechas o quita los filtros.</p>
+                                <Button className="mt-4" variant="secondary" onClick={() => vista$.set({ ...FILTROS_CUADRO })}>
+                                    Quitar filtros
+                                </Button>
+                            </>
+                        ) : (
+                            'Cuando Compras arme una orden, aparecerá aquí.'
+                        )}
                     </ListaVacia>
                 }
             >
@@ -190,15 +207,17 @@ export function CuadroView() {
                                         <tr
                                             key={f.id}
                                             tabIndex={0}
-                                            className="group cursor-pointer"
+                                            className="group cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
                                             onClick={() => abrir(f)}
                                             onKeyDown={(e) => e.key === 'Enter' && abrir(f)}
                                         >
                                             <td className="sticky left-0 z-[5] border-r border-b border-divider bg-surface px-3 py-2.5 font-medium whitespace-nowrap group-hover:bg-surface-2">
-                                                {textoCelda(OC, f.valores.OC) || <span className="text-ink-3">Borrador</span>}
+                                                <Link href={`/ordenes?ver=${f.id}`} onClick={(e) => e.stopPropagation()} className={LINK_CLASS}>
+                                                    {textoCelda(OC, f.valores.OC) || 'Borrador'}
+                                                </Link>
                                             </td>
                                             {RESTO.map((c) => {
-                                                const t = textoCelda(c, f.valores[c.titulo]);
+                                                const t = textoCelda(c, f.valores[c.titulo], f.valores);
                                                 const num = c.tipo === 'moneda' || c.tipo === 'pct' || c.tipo === 'entero';
                                                 return (
                                                     <td
@@ -212,7 +231,7 @@ export function CuadroView() {
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 onClick={(e) => e.stopPropagation()}
-                                                                className="text-primary hover:underline"
+                                                                className={LINK_CLASS}
                                                             >
                                                                 Abrir carpeta
                                                             </a>

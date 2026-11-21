@@ -6,11 +6,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ordenes } from '@/modules/ordenes/composition.ts';
-import { FORMAS_PAGO, MONEDAS, leerNumero, monto, pideAdelanto, pideCredito, type FormaPago } from '@/modules/ordenes/application/views.ts';
+import { FORMAS_PAGO, MONEDAS, cantidad, leerNumero, monto, pideAdelanto, pideCredito, type FormaPago } from '@/modules/ordenes/application/views.ts';
 import { faltaEnLineaCarrito, lineasCarrito, type FilaPlan, type LineaCarrito } from '@/modules/plan/application/views.ts';
 import { Notice } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input } from '@/shared/ui/field.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
@@ -30,8 +30,13 @@ export function FormGenerarOc({ lineas: marcadas, onCerrar, onCreada }: { lineas
     const [dias, setDias] = useState('');
     const [lineas, setLineas] = useState<LineaCarrito[]>(() => lineasCarrito(marcadas, imp ? 'USD' : 'PEN'));
     const [error, setError] = useState<string | null>(null);
+    // Errores junto a su campo (guía, «Formulario»); el de una línea nombra la línea y va abajo.
+    const [errCampo, setErrCampo] = useState<{ proveedor?: string; pct?: string; dias?: string }>({});
     const [creando, setCreando] = useState(false);
     const prov = proveedores.find((p) => p.id === proveedorId);
+    const [inicialLineas] = useState(() => JSON.stringify(lineas));
+    const sucio = Boolean(proveedorId || pct || dias) || formaPago !== 'Contado' || JSON.stringify(lineas) !== inicialLineas;
+    const { cerrar, aviso } = useCerrarConCambios(sucio, onCerrar);
 
     const setLinea = (i: number, p: Partial<LineaCarrito>) => setLineas((ls) => ls.map((l, j) => (j === i ? { ...l, ...p } : l)));
     function cambiarMoneda(m: string) {
@@ -43,11 +48,16 @@ export function FormGenerarOc({ lineas: marcadas, onCerrar, onCreada }: { lineas
     const subtotal = lineas.reduce((s, l) => s + (leerNumero(l.cantidad) ?? 0) * (leerNumero(l.precio) ?? 0), 0);
 
     async function crear() {
-        if (!proveedorId) return setError(imp ? 'Elige el proveedor extranjero.' : 'Elige el proveedor.');
+        setError(null);
         const pctN = leerNumero(pct);
         const diasN = leerNumero(dias);
-        if (pideAdelanto(formaPago) && !(pctN && pctN > 0 && pctN < 100)) return setError('Escribe el % de adelanto (entre 1 y 99).');
-        if (pideCredito(formaPago) && !(diasN && diasN > 0)) return setError('Escribe los días de crédito.');
+        const errores = {
+            proveedor: proveedorId ? undefined : imp ? 'Elige el proveedor extranjero.' : 'Elige el proveedor.',
+            pct: pideAdelanto(formaPago) && !(pctN && pctN > 0 && pctN < 100) ? 'Escribe el % de adelanto, entre 1 y 99.' : undefined,
+            dias: pideCredito(formaPago) && !(diasN && diasN > 0) ? 'Escribe los días de crédito, mayor que cero.' : undefined,
+        };
+        setErrCampo(errores);
+        if (errores.proveedor || errores.pct || errores.dias) return;
         for (const l of lineas) {
             const f = faltaEnLineaCarrito(l, leerNumero);
             if (f) return setError(f);
@@ -80,7 +90,7 @@ export function FormGenerarOc({ lineas: marcadas, onCerrar, onCreada }: { lineas
                 toast.error(`El borrador se creó, pero falta el ${pideAdelanto(formaPago) ? '% de adelanto' : 'plazo de crédito'}: ${c.error.message}`);
         }
         setCreando(false);
-        toast.success('Borrador creado. Sube la cotización y emítelo.');
+        toast.success(`Borrador de OC para ${prov?.razonSocial ?? 'el proveedor'} creado. Sube la cotización y emítelo.`);
         refrescar(['ordenes', 'oc_lineas', 'plan']);
         onCreada();
         onCerrar();
@@ -90,29 +100,32 @@ export function FormGenerarOc({ lineas: marcadas, onCerrar, onCreada }: { lineas
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void crear()}
+            aviso={aviso}
             titulo="Generar OC"
             descripcion={`${marcadas.length === 1 ? '1 línea' : `${marcadas.length} líneas`} de ${imp ? 'importación' : 'compra nacional'}. Se crea en borrador: luego subes la cotización y la emites.`}
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar} disabled={creando}>
+                    <Button variant="secondary" onClick={cerrar} disabled={creando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void crear()} disabled={creando}>
-                        {creando ? 'Creando…' : 'Crear borrador'}
+                    <Button type="submit" disabled={creando}>
+                        {creando ? 'Creando…' : 'Crear borrador de OC'}
                     </Button>
                 </>
             }
         >
             <Field
                 label={imp ? 'Proveedor extranjero' : 'Proveedor'}
+                error={errCampo.proveedor}
                 hint={proveedores.length ? undefined : `No hay proveedores ${imp ? 'extranjeros' : 'nacionales'}: dalo de alta en Proveedores.`}
             >
                 {(p) => (
                     <SelectMenu
                         {...p}
                         value={proveedorId}
-                        onChange={setProveedorId}
+                        onChange={(x) => (setProveedorId(x), setErrCampo((e) => ({ ...e, proveedor: undefined })))}
                         placeholder="Elige el proveedor"
                         options={proveedores.map((x) => ({ value: x.id, label: `${x.razonSocial}${x.ruc ? ` · ${x.ruc}` : x.pais ? ` · ${x.pais}` : ''}` }))}
                     />
@@ -129,10 +142,14 @@ export function FormGenerarOc({ lineas: marcadas, onCerrar, onCreada }: { lineas
                     {(p) => <SelectMenu {...p} value={formaPago} onChange={(f) => setFormaPago(f as FormaPago)} options={op(FORMAS_PAGO)} />}
                 </Field>
                 {pideAdelanto(formaPago) && (
-                    <Field label="% de adelanto">{(p) => <Input {...p} inputMode="decimal" value={pct} onChange={(e) => setPct(e.target.value)} />}</Field>
+                    <Field label="% de adelanto" error={errCampo.pct}>
+                        {(p) => <Input {...p} inputMode="decimal" value={pct} onChange={(e) => setPct(e.target.value)} />}
+                    </Field>
                 )}
                 {pideCredito(formaPago) && (
-                    <Field label="Días de crédito">{(p) => <Input {...p} inputMode="numeric" value={dias} onChange={(e) => setDias(e.target.value)} />}</Field>
+                    <Field label="Días de crédito" error={errCampo.dias}>
+                        {(p) => <Input {...p} inputMode="numeric" value={dias} onChange={(e) => setDias(e.target.value)} />}
+                    </Field>
                 )}
             </div>
             <div className="flex flex-col gap-3">
@@ -142,7 +159,7 @@ export function FormGenerarOc({ lineas: marcadas, onCerrar, onCreada }: { lineas
                         <legend className="sr-only">{l.descripcion}</legend>
                         <div className="text-ui font-medium">{l.descripcion}</div>
                         <div className="grid grid-cols-2 gap-3">
-                            <Field label={`Cantidad (${l.unidad})`} hint={`Saldo: ${l.saldo}`}>
+                            <Field label={`Cantidad (${l.unidad})`} hint={`Saldo: ${cantidad(l.saldo)} ${l.unidad}`}>
                                 {(p) => <Input {...p} inputMode="decimal" value={l.cantidad} onChange={(e) => setLinea(i, { cantidad: e.target.value })} />}
                             </Field>
                             <Field label={`Precio unitario (${moneda})`} hint="Sin IGV.">

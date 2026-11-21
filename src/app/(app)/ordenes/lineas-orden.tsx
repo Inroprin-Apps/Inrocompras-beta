@@ -6,15 +6,17 @@
 import { useState } from 'react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { ordenes } from '@/modules/ordenes/composition.ts';
-import { cantidad as fmtCantidad, leerNumero, monto, type Edicion, type Linea, type OrdenDetalle } from '@/modules/ordenes/application/views.ts';
+import { cantidad as fmtCantidad, leerNumero, monto, nombreOrden, type Edicion, type Linea, type OrdenDetalle } from '@/modules/ordenes/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input, Textarea } from '@/shared/ui/field.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
 import { refrescar } from '../_lib/resource.ts';
 
 const TOCA = ['ordenes', 'oc_lineas', 'acciones'];
+/** «Línea 3» (o «Línea», si aún no tiene número), para los avisos. */
+const etiquetaLinea = (l: Linea) => (l.nLinea != null ? `Línea ${l.nLinea}` : 'Línea');
 
 export function LineasOrden({ o, edicion }: { o: OrdenDetalle; edicion: Edicion | null }) {
     const [editar, setEditar] = useState<Linea | null>(null);
@@ -69,12 +71,12 @@ export function LineasOrden({ o, edicion }: { o: OrdenDetalle; edicion: Edicion 
                             <span className="flex-1" />
                             {editable && !l.esDemasia && (
                                 <Button variant="ghost" onClick={() => setEditar(l)} aria-label={`Editar la línea ${l.nLinea ?? ''}`}>
-                                    <Pencil size={14} /> Editar
+                                    <Pencil size={14} aria-hidden /> Editar línea
                                 </Button>
                             )}
                             {edicion?.demasia[l.id] === null && (
                                 <Button variant="ghost" onClick={() => setDemasia(l)}>
-                                    <Plus size={14} /> Demasía
+                                    <Plus size={14} aria-hidden /> Agregar demasía
                                 </Button>
                             )}
                             {editable && (l.esDemasia || base > 1) && (
@@ -93,17 +95,20 @@ export function LineasOrden({ o, edicion }: { o: OrdenDetalle; edicion: Edicion 
     );
 }
 
+/** El pie de los diálogos: «Cancelar» y, a su derecha, el principal. Sin `onOk`, el principal envía el formulario (Enter). */
 function Pie({
     onCerrar,
     onOk,
     ocupado,
     texto,
+    textoOcupado = 'Guardando…',
     peligro = false,
 }: {
     onCerrar: () => void;
-    onOk: () => void;
+    onOk?: () => void;
     ocupado: boolean;
     texto: string;
+    textoOcupado?: string;
     peligro?: boolean;
 }) {
     return (
@@ -111,8 +116,8 @@ function Pie({
             <Button variant="secondary" onClick={onCerrar} disabled={ocupado}>
                 Cancelar
             </Button>
-            <Button variant={peligro ? 'danger' : 'primary'} onClick={onOk} disabled={ocupado}>
-                {ocupado ? 'Guardando…' : texto}
+            <Button variant={peligro ? 'danger' : 'primary'} type={onOk ? 'button' : 'submit'} onClick={onOk} disabled={ocupado}>
+                {ocupado ? textoOcupado : texto}
             </Button>
         </>
     );
@@ -131,33 +136,43 @@ function FormLinea({ o, l, onCerrar }: { o: OrdenDetalle; l: Linea; onCerrar: ()
     const [precio, setPrecio] = useState(String(l.precioUnit));
     const [desc, setDesc] = useState(l.descripcionProv);
     const [error, setError] = useState<string | null>(null);
+    const [errCampo, setErrCampo] = useState<{ cant?: string; precio?: string }>({});
     const [ocupado, setOcupado] = useState(false);
+    const sucio = cant !== String(l.cantidad) || precio !== String(l.precioUnit) || desc !== l.descripcionProv;
+    const { cerrar, aviso } = useCerrarConCambios(sucio, onCerrar);
     async function guardar() {
         const c = leerNumero(cant);
         const p = leerNumero(precio);
-        if (c === null || c <= 0) return setError('Escribe una cantidad mayor que cero.');
-        if (p === null || p < 0) return setError('Escribe el precio unitario (0 o más).');
+        const errores = {
+            cant: c === null || c <= 0 ? 'La cantidad tiene que ser mayor que cero. Usa punto para los decimales: 12.5' : undefined,
+            precio: p === null || p < 0 ? 'Escribe el precio unitario, 0 o más. Usa punto para los decimales: 1250.50' : undefined,
+        };
+        setErrCampo(errores);
+        setError(null);
+        if (errores.cant || errores.precio) return;
         setOcupado(true);
-        const r = await ordenes().guardarLinea(o.id, l.id, { cantidad: c, precioUnit: p, descripcionProv: desc });
+        const r = await ordenes().guardarLinea(o.id, l.id, { cantidad: c!, precioUnit: p!, descripcionProv: desc });
         setOcupado(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success('Línea guardada y montos recalculados.');
+        toast.success(`${etiquetaLinea(l)} de ${nombreOrden(o)} guardada. Montos recalculados.`);
         refrescar(TOCA);
         onCerrar();
     }
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo="Editar línea"
             descripcion={l.descripcion}
-            pie={<Pie onCerrar={onCerrar} onOk={() => void guardar()} ocupado={ocupado} texto="Guardar línea" />}
+            pie={<Pie onCerrar={cerrar} ocupado={ocupado} texto="Guardar línea" />}
         >
             <div className="grid grid-cols-2 gap-4">
-                <Field label={`Cantidad (${l.unidad})`} hint="Hasta el saldo; lo demás va como demasía.">
+                <Field label={`Cantidad (${l.unidad})`} error={errCampo.cant} hint="Hasta el saldo; lo demás va como demasía.">
                     {(p) => <Input {...p} inputMode="decimal" value={cant} onChange={(e) => setCant(e.target.value)} />}
                 </Field>
-                <Field label={`Precio unitario (${o.moneda})`} hint="Sin IGV.">
+                <Field label={`Precio unitario (${o.moneda})`} error={errCampo.precio} hint="Sin IGV.">
                     {(p) => <Input {...p} inputMode="decimal" value={precio} onChange={(e) => setPrecio(e.target.value)} />}
                 </Field>
             </div>
@@ -173,31 +188,40 @@ function FormDemasia({ o, l, onCerrar }: { o: OrdenDetalle; l: Linea; onCerrar: 
     const [cant, setCant] = useState('');
     const [motivo, setMotivo] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [errCampo, setErrCampo] = useState<{ cant?: string; motivo?: string }>({});
     const [ocupado, setOcupado] = useState(false);
+    const { cerrar, aviso } = useCerrarConCambios(Boolean(cant || motivo), onCerrar);
     async function guardar() {
         const c = leerNumero(cant);
-        if (c === null || c <= 0) return setError('Escribe la cantidad adicional.');
-        if (!motivo.trim()) return setError('Escribe el motivo: la GOP lo lee para decidir.');
+        const errores = {
+            cant: c === null || c <= 0 ? 'La cantidad adicional tiene que ser mayor que cero. Usa punto para los decimales: 12.5' : undefined,
+            motivo: motivo.trim() ? undefined : 'Escribe el motivo: la GOP lo lee para decidir.',
+        };
+        setErrCampo(errores);
+        setError(null);
+        if (errores.cant || errores.motivo) return;
         setOcupado(true);
-        const r = await ordenes().demasia(l.id, c, motivo.trim());
+        const r = await ordenes().demasia(l.id, c!, motivo.trim());
         setOcupado(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success('Demasía agregada. La decide la GOP al aprobar.');
+        toast.success(`Demasía agregada a ${nombreOrden(o)}. La decide la GOP al aprobar.`);
         refrescar(TOCA);
         onCerrar();
     }
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo="Agregar demasía"
             descripcion={`${l.descripcion}: lo que pidas por encima del saldo, al mismo precio (${monto(l.precioUnit, o.moneda)}).`}
-            pie={<Pie onCerrar={onCerrar} onOk={() => void guardar()} ocupado={ocupado} texto="Agregar demasía" />}
+            pie={<Pie onCerrar={cerrar} ocupado={ocupado} texto="Agregar demasía" textoOcupado="Agregando…" />}
         >
-            <Field label={`Cantidad adicional (${l.unidad})`}>
+            <Field label={`Cantidad adicional (${l.unidad})`} error={errCampo.cant}>
                 {(p) => <Input {...p} inputMode="decimal" value={cant} onChange={(e) => setCant(e.target.value)} />}
             </Field>
-            <Field label="Motivo" hint="Por ejemplo: el proveedor vende por caja de 12.">
+            <Field label="Motivo" error={errCampo.motivo} hint="Por ejemplo: el proveedor vende por caja de 12.">
                 {(p) => <Textarea {...p} rows={3} value={motivo} onChange={(e) => setMotivo(e.target.value)} />}
             </Field>
             <MensajeError e={error} />
@@ -213,7 +237,7 @@ function QuitarLinea({ o, l, onCerrar }: { o: OrdenDetalle; l: Linea; onCerrar: 
         const r = await ordenes().quitarLinea(o.id, l.id);
         setOcupado(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success('Línea quitada. El saldo vuelve al plan.');
+        toast.success(`${etiquetaLinea(l)} quitada de ${nombreOrden(o)}. El saldo vuelve al plan.`);
         refrescar([...TOCA, 'plan']);
         onCerrar();
     }
@@ -223,7 +247,7 @@ function QuitarLinea({ o, l, onCerrar }: { o: OrdenDetalle; l: Linea; onCerrar: 
             onCerrar={onCerrar}
             titulo="Quitar línea"
             descripcion={`«${l.descripcion}» sale de la orden y su cantidad vuelve al saldo del plan.`}
-            pie={<Pie onCerrar={onCerrar} onOk={() => void quitar()} ocupado={ocupado} texto="Quitar línea" peligro />}
+            pie={<Pie onCerrar={onCerrar} onOk={() => void quitar()} ocupado={ocupado} texto="Quitar línea" textoOcupado="Quitando…" peligro />}
         >
             <MensajeError e={error} />
         </Dialog>

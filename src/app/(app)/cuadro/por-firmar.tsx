@@ -81,7 +81,7 @@ export function PorFirmar({ titulo = true }: { titulo?: boolean }) {
             <ul className="flex flex-col gap-3">
                 {ordenarPorAprobar(ordenes.data, desde).map((o) => (
                     <li key={o.id}>
-                        <Tarjeta o={o} paso={paso.get(o.id) ?? ''} />
+                        <Tarjeta o={o} paso={paso.get(o.id) ?? ''} nivel={titulo ? 3 : 2} />
                     </li>
                 ))}
             </ul>
@@ -89,7 +89,9 @@ export function PorFirmar({ titulo = true }: { titulo?: boolean }) {
     );
 }
 
-function Tarjeta({ o, paso }: { o: OrdenPorAprobar; paso: string }) {
+/** `nivel`: h3 bajo el título «Por firmar» (h2); h2 si no hay título (en /cuadro/aprobar va bajo el h1). */
+function Tarjeta({ o, paso, nivel }: { o: OrdenPorAprobar; paso: string; nivel: 2 | 3 }) {
+    const H = nivel === 2 ? 'h2' : 'h3';
     const gente = personasStore.use().data;
     const nombre = (u: string | null) => (u ? (gente?.find((g) => g.id === u)?.nombre ?? 'Otra persona') : '');
     const firmas = yaFirmaron(o);
@@ -98,7 +100,7 @@ function Tarjeta({ o, paso }: { o: OrdenPorAprobar; paso: string }) {
             <div className="flex items-start gap-2">
                 <div className="min-w-0 flex-1">
                     <p className="text-caption font-medium text-ink-3">{paso}</p>
-                    <h3 className="text-heading font-semibold break-words">{o.proveedor || 'Sin proveedor'}</h3>
+                    <H className="text-heading font-semibold break-words">{o.proveedor || 'Sin proveedor'}</H>
                     <p className="truncate text-small text-ink-2">
                         {o.numero}
                         {o.proyecto && ` · ${o.proyecto}`}
@@ -145,7 +147,7 @@ function Tarjeta({ o, paso }: { o: OrdenPorAprobar; paso: string }) {
                     <p className="text-ink-3">Nadie todavía.</p>
                 )}
             </div>
-            <PanelAcciones tabla="ordenes" id={o.id} tocadas={TOCADAS} />
+            <PanelAcciones tabla="ordenes" id={o.id} nombre={o.numero} tocadas={TOCADAS} />
             <Link href={`/ordenes?ver=${o.id}`} className={`${LINK_CLASS} inline-flex items-center gap-1 self-start text-small`}>
                 Ver la orden completa <ChevronRight size={14} aria-hidden />
             </Link>

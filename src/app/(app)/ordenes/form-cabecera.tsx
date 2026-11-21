@@ -14,6 +14,7 @@ import {
     MONEDAS,
     faltaEnCabecera,
     leerNumero,
+    nombreOrden,
     pideAdelanto,
     pideCredito,
     type Cabecera,
@@ -21,7 +22,7 @@ import {
     type OrdenDetalle,
 } from '@/modules/ordenes/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input, Textarea } from '@/shared/ui/field.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
@@ -40,8 +41,14 @@ export function FormCabecera({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () =>
     const [dias, setDias] = useState(o.cabecera.diasCredito != null ? String(o.cabecera.diasCredito) : '');
     const [plazo, setPlazo] = useState(o.cabecera.plazoEntregaDias != null ? String(o.cabecera.plazoEntregaDias) : '');
     const [error, setError] = useState<string | null>(null);
+    // El error de forma va junto a su campo (guía, «Formulario»): proveedor, % de adelanto o días de crédito.
+    const [errCampo, setErrCampo] = useState<{ campo: 'proveedor' | 'pct' | 'dias'; texto: string } | null>(null);
     const [guardando, setGuardando] = useState(false);
-    const set = (p: Partial<Cabecera>) => setC((x) => ({ ...x, ...p }));
+    const set = (p: Partial<Cabecera>) => (setC((x) => ({ ...x, ...p })), setErrCampo(null));
+    const [inicial] = useState(() => JSON.stringify({ c, pct, dias, plazo }));
+    const sucio = JSON.stringify({ c, pct, dias, plazo }) !== inicial;
+    const { cerrar, aviso } = useCerrarConCambios(sucio, onCerrar);
+    const errDe = (campo: 'proveedor' | 'pct' | 'dias') => (errCampo?.campo === campo ? errCampo.texto : undefined);
     const deOrigen = proveedores.filter((p) => p.origen === (imp ? 'Extranjero' : 'Nacional'));
 
     async function guardar() {
@@ -56,13 +63,17 @@ export function FormCabecera({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () =>
             plazoEntregaDias: plazoN != null ? Math.round(plazoN) : null,
             tipoImpuesto: imp ? 'Sin IGV' : c.tipoImpuesto,
         };
+        setError(null);
         const falta = faltaEnCabecera(final);
-        if (falta) return setError(falta);
+        if (falta) {
+            const campo = !final.proveedorId ? 'proveedor' : pideAdelanto(final.formaPago) ? 'pct' : 'dias';
+            return setErrCampo({ campo, texto: falta });
+        }
         setGuardando(true);
         const r = await ordenes().guardarCabecera(o.id, final);
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success('Orden guardada y montos recalculados.');
+        toast.success(`Orden ${nombreOrden(o)} guardada. Montos recalculados.`);
         refrescar(['ordenes', 'acciones']);
         onCerrar();
     }
@@ -70,20 +81,27 @@ export function FormCabecera({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () =>
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo="Editar la orden"
+            descripcion={nombreOrden(o)}
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar} disabled={guardando}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
-                        {guardando ? 'Guardando…' : 'Guardar cambios'}
+                    <Button type="submit" disabled={guardando}>
+                        {guardando ? 'Guardando…' : 'Guardar orden'}
                     </Button>
                 </>
             }
         >
-            <Field label="Proveedor" hint={imp ? 'Una importación lleva proveedor extranjero.' : 'Una compra nacional lleva proveedor nacional.'}>
+            <Field
+                label="Proveedor"
+                error={errDe('proveedor')}
+                hint={imp ? 'Una importación lleva proveedor extranjero.' : 'Una compra nacional lleva proveedor nacional.'}
+            >
                 {(p) => (
                     <SelectMenu
                         {...p}
@@ -117,12 +135,14 @@ export function FormCabecera({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () =>
                     {(p) => <SelectMenu {...p} value={c.formaPago} onChange={(f) => set({ formaPago: f as FormaPago })} options={op(FORMAS_PAGO)} />}
                 </Field>
                 {pideAdelanto(c.formaPago) && (
-                    <Field label="% de adelanto" hint="Entre 1 y 99.">
-                        {(p) => <Input {...p} inputMode="decimal" value={pct} onChange={(e) => setPct(e.target.value)} />}
+                    <Field label="% de adelanto" error={errDe('pct')} hint="Entre 1 y 99.">
+                        {(p) => <Input {...p} inputMode="decimal" value={pct} onChange={(e) => (setPct(e.target.value), setErrCampo(null))} />}
                     </Field>
                 )}
                 {pideCredito(c.formaPago) && (
-                    <Field label="Días de crédito">{(p) => <Input {...p} inputMode="numeric" value={dias} onChange={(e) => setDias(e.target.value)} />}</Field>
+                    <Field label="Días de crédito" error={errDe('dias')}>
+                        {(p) => <Input {...p} inputMode="numeric" value={dias} onChange={(e) => (setDias(e.target.value), setErrCampo(null))} />}
+                    </Field>
                 )}
                 {pideAdelanto(c.formaPago) && (
                     <Field label="Hito del saldo">

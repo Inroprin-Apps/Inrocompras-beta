@@ -14,9 +14,10 @@ import {
     type OrdenProyecto,
     type Proyecto,
 } from '@/modules/proyectos/application/views.ts';
-import { FilterRow, SearchBox, SectionTitle, T } from '@/shared/ui/bits.tsx';
+import { FilterRow, SearchBox, T } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
@@ -53,20 +54,22 @@ export function ProyectosView() {
     const lista = useMemo(() => ordenarProyectos(filtrarProyectos(estado.data ?? [], v), v.orden), [estado.data, v]);
     const pag = usePaged(lista, lista, 25, vista$.usePage());
     const abierto = estado.data?.find((p) => p.id === v.ver) ?? null;
+    const conFiltros = Boolean(v.estado || v.texto);
     const gerente = (p: Proyecto) => gente?.find((g) => g.id === p.gerenteId)?.nombre ?? '';
 
     return (
         <>
-            <div className="flex items-start gap-3">
-                <div className="flex-1">
-                    <SectionTitle title="Proyectos" />
-                </div>
-                {puedeCrear(perfil.area, perfil.es_admin) && (
-                    <Button onClick={() => setCreando(true)}>
-                        <Plus size={16} /> Nuevo proyecto
-                    </Button>
-                )}
-            </div>
+            <Encabezado
+                titulo="Proyectos"
+                actualizado={estado.actualizado}
+                accion={
+                    puedeCrear(perfil.area, perfil.es_admin) && (
+                        <Button onClick={() => setCreando(true)}>
+                            <Plus size={16} aria-hidden /> Nuevo proyecto
+                        </Button>
+                    )
+                }
+            />
             <FilterRow>
                 <SearchBox value={v.texto} onChange={(texto) => vista$.set({ texto })} placeholder="Busca por código, nombre o cliente" />
                 <SelectMenu
@@ -82,10 +85,17 @@ export function ProyectosView() {
                 estado={{ data: estado.data ? lista : null, error: estado.error }}
                 onReintentar={() => void proyectosStore.retry()}
                 vacia={
-                    <ListaVacia titulo={estado.data?.length ? 'Ningún proyecto coincide' : 'Aún no hay proyectos'}>
-                        {estado.data?.length
-                            ? 'Prueba con otra búsqueda o quita el filtro de estado.'
-                            : 'Comercial, Control de Gestión o Planeamiento los dan de alta con «Nuevo proyecto».'}
+                    <ListaVacia titulo={conFiltros ? 'Ningún proyecto coincide' : 'Aún no hay proyectos'}>
+                        {conFiltros ? (
+                            <>
+                                <p>Prueba con otra búsqueda o quita los filtros.</p>
+                                <Button className="mt-4" variant="secondary" onClick={() => vista$.set({ ...FILTROS_PROYECTO })}>
+                                    Quitar filtros
+                                </Button>
+                            </>
+                        ) : (
+                            'Comercial, Control de Gestión o Planeamiento los dan de alta con «Nuevo proyecto».'
+                        )}
                     </ListaVacia>
                 }
             >
@@ -99,7 +109,7 @@ export function ProyectosView() {
                                         <th className={T.th}>Cliente</th>
                                         <th className={T.th}>Estado</th>
                                         <th className={T.th}>Gerente</th>
-                                        <th className={T.thNum}>Fecha meta</th>
+                                        <th className={`${T.thNum} text-right`}>Fecha meta</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -107,7 +117,7 @@ export function ProyectosView() {
                                         <tr
                                             key={p.id}
                                             tabIndex={0}
-                                            className={`${T.row} cursor-pointer ${v.ver === p.id ? 'bg-primary-soft' : ''}`}
+                                            className={`${T.row} cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${v.ver === p.id ? 'bg-primary-soft' : ''}`}
                                             onClick={() => vista$.set({ ver: p.id })}
                                             onKeyDown={(e) => e.key === 'Enter' && vista$.set({ ver: p.id })}
                                         >
@@ -120,7 +130,7 @@ export function ProyectosView() {
                                                 <Chip tone={tonoEstado(p.estado)}>{p.estado}</Chip>
                                             </td>
                                             <td className={T.td}>{gerente(p) || <span className="text-ink-3">—</span>}</td>
-                                            <td className={T.tdNum}>{p.fechaMeta ? dmy(p.fechaMeta) : '—'}</td>
+                                            <td className={`${T.tdNum} text-right`}>{p.fechaMeta ? dmy(p.fechaMeta) : '—'}</td>
                                         </tr>
                                     ))}
                                 </tbody>

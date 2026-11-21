@@ -19,9 +19,10 @@ import {
     resumir,
     type FilaPlan,
 } from '@/modules/plan/application/views.ts';
-import { FilterRow, SearchBox, SectionTitle, T } from '@/shared/ui/bits.tsx';
+import { FilterRow, SearchBox, T } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Kpi } from '@/shared/ui/card.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
@@ -96,7 +97,7 @@ export function PlanView() {
 
     return (
         <>
-            <SectionTitle title="Plan de compras" />
+            <Encabezado titulo="Plan de compras" actualizado={estado.actualizado} />
             <FilterRow>
                 <SelectMenu
                     label="Proyecto"
@@ -157,9 +158,16 @@ export function PlanView() {
                 onReintentar={() => alcance && void planStore.reload(alcance)}
                 vacia={
                     <ListaVacia titulo={conFiltros ? 'Ninguna línea coincide' : 'Este plan aún no tiene líneas'}>
-                        {conFiltros
-                            ? 'Prueba con otra búsqueda o quita algún filtro.'
-                            : 'Las líneas llegan cuando se libera una solicitud del proyecto y se crea su requerimiento.'}
+                        {conFiltros ? (
+                            <>
+                                <p>Prueba con otra búsqueda o quita los filtros.</p>
+                                <Button className="mt-4" variant="secondary" onClick={() => vista$.set({ ...FILTROS_PLAN })}>
+                                    Quitar filtros
+                                </Button>
+                            </>
+                        ) : (
+                            'Las líneas llegan cuando se libera una solicitud del proyecto y se crea su requerimiento.'
+                        )}
                     </ListaVacia>
                 }
             >
@@ -190,8 +198,9 @@ export function PlanView() {
                                         <th className={`${T.thNum} text-right`}>Cantidad</th>
                                         <th className={`${T.thNum} text-right`}>Saldo</th>
                                         <th className={T.th}>Validación técnica</th>
-                                        <th className={T.thNum}>Fechas</th>
+                                        <th className={`${T.thNum} text-right`}>Fechas</th>
                                         <th className={T.th}>Semáforo</th>
+                                        <th className={T.th}>Criticidad</th>
                                         <th className={T.th}>OC</th>
                                     </tr>
                                 </thead>
@@ -220,8 +229,8 @@ export function PlanView() {
                         <span className="font-semibold">{elegidas.length === 1 ? '1 línea' : `${elegidas.length} líneas`}</span> ·{' '}
                         {elegidas[0].canal?.toLowerCase()}
                     </span>
-                    <Button variant="secondary" onClick={() => setMarcadas([])}>
-                        Quitar todas
+                    <Button variant="ghost" onClick={() => setMarcadas([])}>
+                        Desmarcar líneas
                     </Button>
                     <Button onClick={() => setCarrito(true)}>Generar OC</Button>
                 </div>

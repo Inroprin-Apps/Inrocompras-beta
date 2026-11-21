@@ -9,7 +9,7 @@ import { FASES_PROYECTO, etapasSinAprobador, faseActual, tonoEstado, type Etapa,
 import { Notice } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input } from '@/shared/ui/field.tsx';
 import { Datos, Fases, Ficha, FichaSeccion } from '@/shared/ui/ficha.tsx';
 import { dmy } from '@/shared/ui/format.ts';
@@ -40,7 +40,7 @@ export function FichaProyecto({ proyecto: p, onCerrar }: { proyecto: Proyecto; o
     async function borrarEtapa(e: Etapa) {
         const r = await proyectos().borrarEtapa(e.id);
         if (r.isErr()) return toast.error(r.error.message);
-        toast.success(`Etapa «${e.nombre}» quitada.`);
+        toast.success(`Etapa ${e.nombre} quitada de ${p.codigo || p.nombre}.`);
         refrescar(['proyecto_etapas']);
     }
 
@@ -53,14 +53,14 @@ export function FichaProyecto({ proyecto: p, onCerrar }: { proyecto: Proyecto; o
         >
             <div className="flex flex-col gap-4 border-b border-divider px-5 py-4">
                 <Fases pasos={FASES_PROYECTO} actual={faseActual(p.estado)} />
-                <PanelAcciones tabla="proyectos" id={p.id} tocadas={['proyectos', 'proyecto_etapas']} />
+                <PanelAcciones tabla="proyectos" id={p.id} nombre={p.codigo || p.nombre} tocadas={['proyectos', 'proyecto_etapas']} />
             </div>
             <FichaSeccion
                 titulo="Datos"
                 accion={
                     editable && (
                         <Button variant="ghost" onClick={() => setEditando(true)}>
-                            <Pencil size={15} /> Editar
+                            <Pencil size={15} aria-hidden /> Editar proyecto
                         </Button>
                     )
                 }
@@ -81,7 +81,7 @@ export function FichaProyecto({ proyecto: p, onCerrar }: { proyecto: Proyecto; o
                 accion={
                     editable && (
                         <Button variant="dashed" onClick={() => setEtapa({ nombre: '', orden: (p.etapas.at(-1)?.orden ?? 0) + 1, aprobadores: [] })}>
-                            <Plus size={15} /> Etapa
+                            <Plus size={15} aria-hidden /> Agregar etapa
                         </Button>
                     )
                 }
@@ -131,35 +131,44 @@ function FormEtapa({ proyectoId, etapa, onCerrar }: { proyectoId: string; etapa:
     const [nombre, setNombre] = useState(etapa.nombre ?? '');
     const [aprobadores, setAprobadores] = useState<string[]>(etapa.aprobadores ?? []);
     const [error, setError] = useState<string | null>(null);
+    const [intento, setIntento] = useState(false);
     const [guardando, setGuardando] = useState(false);
+    const sucio = nombre !== (etapa.nombre ?? '') || aprobadores.join() !== (etapa.aprobadores ?? []).join();
+    const { cerrar, aviso } = useCerrarConCambios(sucio, onCerrar);
+    // Los errores de cada campo van junto a él (guía, «Formulario»).
+    const errNombre = intento && !nombre.trim() ? 'Escribe el nombre de la etapa.' : null;
+    const errAprobadores = intento && !aprobadores.length ? 'Elige al menos un aprobador: sin él nadie libera las solicitudes.' : null;
     async function guardar() {
-        if (!nombre.trim()) return setError('Escribe el nombre de la etapa.');
-        if (!aprobadores.length) return setError('Elige al menos un aprobador: sin él nadie libera las solicitudes.');
+        setIntento(true);
+        setError(null);
+        if (!nombre.trim() || !aprobadores.length) return;
         setGuardando(true);
         const r = await proyectos().guardarEtapa(proyectoId, { id: etapa.id, nombre, orden: etapa.orden ?? 1, aprobadores });
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success('Etapa guardada.');
+        toast.success(`Etapa ${nombre.trim()} guardada.`);
         refrescar(['proyecto_etapas']);
         onCerrar();
     }
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo={etapa.id ? 'Editar etapa' : 'Nueva etapa'}
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
+                    <Button type="submit" disabled={guardando}>
                         {guardando ? 'Guardando…' : 'Guardar etapa'}
                     </Button>
                 </>
             }
         >
-            <Field label="Nombre" hint="Por ejemplo: Muestras, Adquisición, Transporte.">
+            <Field label="Nombre" error={errNombre} hint="Por ejemplo: Muestras, Adquisición, Transporte.">
                 {(p) => <Input {...p} value={nombre} onChange={(e) => setNombre(e.target.value)} />}
             </Field>
             <div className="flex flex-col gap-1.5">
@@ -171,6 +180,11 @@ function FormEtapa({ proyectoId, etapa, onCerrar }: { proyectoId: string; etapa:
                     noneLabel="Nadie por ahora"
                     countLabel={(n) => `${n} aprobadores`}
                 />
+                {errAprobadores && (
+                    <p role="alert" className="text-small font-medium text-danger-strong">
+                        {errAprobadores}
+                    </p>
+                )}
             </div>
             {error && (
                 <p role="alert" className="text-small font-medium text-danger-strong">

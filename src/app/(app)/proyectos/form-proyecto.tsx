@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { proyectos } from '@/modules/proyectos/composition.ts';
 import { faltaEnProyecto, type NuevoProyecto, type Proyecto } from '@/modules/proyectos/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input } from '@/shared/ui/field.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
@@ -33,17 +33,24 @@ export function FormProyecto({ proyecto, onCerrar, onCreado }: { proyecto?: Proy
     const [f, setF, olvidar] = useBorrador<NuevoProyecto>(proyecto ? `proyecto:${proyecto.id}` : 'proyecto:nuevo', inicial);
     const [error, setError] = useState<string | null>(null);
     const [guardando, setGuardando] = useState(false);
-    const set = (patch: Partial<NuevoProyecto>) => setF({ ...f, ...patch });
+    const set = (patch: Partial<NuevoProyecto>) => (setF({ ...f, ...patch }), setError(null));
+    const sucio = JSON.stringify(f) !== JSON.stringify(inicial);
+    const { cerrar, aviso } = useCerrarConCambios(sucio, onCerrar);
+    const nombreProyecto = [f.codigo.trim(), f.nombre.trim()].filter(Boolean).join(' ');
+    // El error de un campo va junto a él (guía, «Formulario»); abajo solo lo que dice la base.
+    const [intento, setIntento] = useState(false);
+    const errNombre = intento && !f.nombre.trim() ? 'Escribe el nombre del proyecto.' : null;
 
     async function guardar() {
+        setIntento(true);
         const falta = faltaEnProyecto(f);
-        if (falta) return setError(falta);
+        if (falta) return setError(f.nombre.trim() ? falta : null);
         setGuardando(true);
         const r = proyecto ? (await proyectos().editar(proyecto.id, f)).map(() => proyecto.id) : await proyectos().crear(f);
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
         olvidar();
-        toast.success(proyecto ? 'Proyecto actualizado.' : 'Proyecto creado.');
+        toast.success(`Proyecto ${nombreProyecto} ${proyecto ? 'guardado' : 'creado'}.`);
         refrescar(['proyectos']);
         onCreado(r.value);
     }
@@ -51,20 +58,24 @@ export function FormProyecto({ proyecto, onCerrar, onCreado }: { proyecto?: Proy
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo={proyecto ? 'Editar proyecto' : 'Nuevo proyecto'}
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
-                        {guardando ? 'Guardando…' : proyecto ? 'Guardar cambios' : 'Crear proyecto'}
+                    <Button type="submit" disabled={guardando}>
+                        {guardando ? (proyecto ? 'Guardando…' : 'Creando…') : proyecto ? 'Guardar proyecto' : 'Crear proyecto'}
                     </Button>
                 </>
             }
         >
-            <Field label="Nombre">{(p) => <Input {...p} value={f.nombre} onChange={(e) => set({ nombre: e.target.value })} />}</Field>
+            <Field label="Nombre" error={errNombre}>
+                {(p) => <Input {...p} value={f.nombre} onChange={(e) => set({ nombre: e.target.value })} />}
+            </Field>
             <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Código" optional hint="Centro de costo o código interno.">
                     {(p) => <Input {...p} value={f.codigo} onChange={(e) => set({ codigo: e.target.value })} />}

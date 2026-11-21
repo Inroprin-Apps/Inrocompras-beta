@@ -21,8 +21,10 @@ import {
     type OrdenOrden,
     type PestanaOrden,
 } from '@/modules/ordenes/application/views.ts';
-import { FilterRow, SearchBox, SectionTitle, T } from '@/shared/ui/bits.tsx';
+import { FilterRow, SearchBox, T } from '@/shared/ui/bits.tsx';
+import { Button } from '@/shared/ui/button.tsx';
 import { Chip, Segmented } from '@/shared/ui/card.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
@@ -87,7 +89,7 @@ export function OrdenesView() {
     if (!perfil.ve_precios) {
         return (
             <>
-                <SectionTitle title="Órdenes" />
+                <Encabezado titulo="Órdenes" />
                 <ListaVacia titulo="Las órdenes llevan montos">
                     Tu perfil no ve precios. El avance de cada ítem (si tiene orden, su estado y si está pagado) está en Seguimiento.
                 </ListaVacia>
@@ -100,7 +102,7 @@ export function OrdenesView() {
 
     return (
         <>
-            <SectionTitle title="Órdenes" />
+            <Encabezado titulo="Órdenes" actualizado={estado.actualizado} />
             {pestanas.length > 1 && (
                 <div className="mb-3.5 overflow-x-auto">
                     <Segmented
@@ -134,7 +136,7 @@ export function OrdenesView() {
                     className="w-40"
                     value={v.procedencia}
                     onChange={(p) => vista$.set({ procedencia: p as typeof v.procedencia })}
-                    options={[{ value: '', label: 'Nac. e import.' }, ...PROCEDENCIAS.map((e) => ({ value: e, label: e }))]}
+                    options={[{ value: '', label: 'Toda procedencia' }, ...PROCEDENCIAS.map((e) => ({ value: e, label: e }))]}
                 />
                 <SelectMenu
                     label="Proyecto"
@@ -180,13 +182,20 @@ export function OrdenesView() {
                                     : 'Aún no hay órdenes'
                         }
                     >
-                        {conFiltros
-                            ? 'Prueba con otra búsqueda o quita algún filtro.'
-                            : tab === 'aprobar'
-                              ? 'Aquí aparecen las que esperan tu firma.'
-                              : perfil.es_compras
-                                ? 'Las órdenes se generan desde el Plan de compras: marca las líneas y pulsa «Generar OC».'
-                                : 'Cuando Compras emita una orden, aparecerá aquí.'}
+                        {conFiltros ? (
+                            <>
+                                <p>Prueba con otra búsqueda o quita los filtros.</p>
+                                <Button className="mt-4" variant="secondary" onClick={() => vista$.set({ ...FILTROS_ORDEN })}>
+                                    Quitar filtros
+                                </Button>
+                            </>
+                        ) : tab === 'aprobar' ? (
+                            'Aquí aparecen las que esperan tu firma.'
+                        ) : perfil.es_compras ? (
+                            'Las órdenes se generan desde el Plan de compras: marca las líneas y pulsa «Generar OC».'
+                        ) : (
+                            'Cuando Compras emita una orden, aparecerá aquí.'
+                        )}
                     </ListaVacia>
                 }
             >
@@ -227,7 +236,7 @@ export function OrdenesView() {
                                         <th className={T.th}>Estatus</th>
                                         <th className={T.th}>Aprobación</th>
                                         <th className={`${T.thNum} text-right`}>Total</th>
-                                        <th className={T.thNum}>Fecha</th>
+                                        <th className={`${T.thNum} text-right`}>Fecha</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -250,7 +259,7 @@ function FilaOrden({ o, activa, comprador }: { o: Orden; activa: boolean; compra
     return (
         <tr
             tabIndex={0}
-            className={`${T.row} cursor-pointer ${activa ? 'bg-primary-soft' : ''}`}
+            className={`${T.row} cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${activa ? 'bg-primary-soft' : ''}`}
             onClick={() => vista$.set({ ver: o.id })}
             onKeyDown={(e) => e.key === 'Enter' && vista$.set({ ver: o.id })}
         >
@@ -273,7 +282,7 @@ function FilaOrden({ o, activa, comprador }: { o: Orden; activa: boolean; compra
                 {monto(o.monto, o.moneda)}
                 {o.moneda !== 'PEN' && <div className={T.sub}>{monto(o.montoSoles)}</div>}
             </td>
-            <td className={T.tdNum}>{dmy(o.fechaEmision ?? o.creado)}</td>
+            <td className={`${T.tdNum} text-right`}>{dmy(o.fechaEmision ?? o.creado)}</td>
         </tr>
     );
 }

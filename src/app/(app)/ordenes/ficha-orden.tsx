@@ -22,6 +22,7 @@ import { Chip } from '@/shared/ui/card.tsx';
 import { Datos, Fases, Ficha, FichaSeccion } from '@/shared/ui/ficha.tsx';
 import { dayTime, dmy } from '@/shared/ui/format.ts';
 import { Hueco } from '@/shared/ui/hueco.tsx';
+import { ListaError } from '@/shared/ui/lista-estado.tsx';
 import { Historial } from '../_acciones/historial.tsx';
 import { PanelAcciones } from '../_acciones/panel-acciones.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
@@ -39,7 +40,11 @@ export function FichaOrden({ id, onCerrar }: { id: string; onCerrar: () => void 
         return (
             <Ficha titulo={error ? 'No se pudo abrir la orden' : 'Cargando la orden…'} onCerrar={onCerrar}>
                 <div className="flex flex-col gap-3 px-5 py-4">
-                    {error ? <p className="text-ui text-danger-strong">{error}</p> : [1, 2, 3].map((i) => <Hueco key={i} className="h-16 w-full" />)}
+                    {error ? (
+                        <ListaError mensaje={error} onReintentar={() => void ordenStore.reload(id)} />
+                    ) : (
+                        [1, 2, 3].map((i) => <Hueco key={i} className="h-16 w-full" />)
+                    )}
                 </div>
             </Ficha>
         );
@@ -79,7 +84,7 @@ function FichaCargada({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () => void }
                         {o.motivoAprob && o.estatus.startsWith('Observado') ? ` «${o.motivoAprob}»` : ''}
                     </p>
                 )}
-                <PanelAcciones tabla="ordenes" id={o.id} tocadas={TOCADAS} />
+                <PanelAcciones tabla="ordenes" id={o.id} nombre={o.numero} tocadas={TOCADAS} />
             </div>
 
             <FichaSeccion titulo="Totales">
@@ -96,7 +101,7 @@ function FichaCargada({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () => void }
                 accion={
                     editable && (
                         <Button variant="ghost" onClick={() => setEditando(true)}>
-                            <Pencil size={15} /> Editar
+                            <Pencil size={15} aria-hidden /> Editar orden
                         </Button>
                     )
                 }

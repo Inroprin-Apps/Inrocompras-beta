@@ -17,9 +17,10 @@ import {
     tonoEvaluacion,
     type OrdenProveedor,
 } from '@/modules/proveedores/application/views.ts';
-import { FilterRow, SearchBox, SectionTitle, T } from '@/shared/ui/bits.tsx';
+import { FilterRow, SearchBox, T } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
@@ -54,16 +55,17 @@ export function ProveedoresView() {
 
     return (
         <>
-            <div className="flex items-start gap-3">
-                <div className="flex-1">
-                    <SectionTitle title="Proveedores" />
-                </div>
-                {puedeEditarProveedores(perfil) && (
-                    <Button onClick={() => setCreando(true)}>
-                        <Plus size={16} /> Nuevo proveedor
-                    </Button>
-                )}
-            </div>
+            <Encabezado
+                titulo="Proveedores"
+                actualizado={estado.actualizado}
+                accion={
+                    puedeEditarProveedores(perfil) && (
+                        <Button onClick={() => setCreando(true)}>
+                            <Plus size={16} aria-hidden /> Nuevo proveedor
+                        </Button>
+                    )
+                }
+            />
             <FilterRow>
                 <SearchBox value={v.texto} onChange={(texto) => vista$.set({ texto })} placeholder="Busca por razón social, RUC, país o contacto" />
                 <SelectMenu
@@ -98,9 +100,16 @@ export function ProveedoresView() {
                 onReintentar={() => void proveedoresStore.retry()}
                 vacia={
                     <ListaVacia titulo={filtrando ? 'Ningún proveedor coincide' : 'Aún no hay proveedores'}>
-                        {filtrando
-                            ? 'Prueba con otra búsqueda o quita algún filtro.'
-                            : 'Compras, Importaciones o Finanzas los dan de alta con «Nuevo proveedor».'}
+                        {filtrando ? (
+                            <>
+                                <p>Prueba con otra búsqueda o quita los filtros.</p>
+                                <Button className="mt-4" variant="secondary" onClick={() => vista$.set({ ...FILTROS_PROVEEDOR })}>
+                                    Quitar filtros
+                                </Button>
+                            </>
+                        ) : (
+                            'Compras, Importaciones o Finanzas los dan de alta con «Nuevo proveedor».'
+                        )}
                     </ListaVacia>
                 }
             >
@@ -124,7 +133,7 @@ export function ProveedoresView() {
                                             <tr
                                                 key={p.id}
                                                 tabIndex={0}
-                                                className={`${T.row} cursor-pointer ${v.ver === p.id ? 'bg-primary-soft' : ''}`}
+                                                className={`${T.row} cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${v.ver === p.id ? 'bg-primary-soft' : ''}`}
                                                 onClick={() => vista$.set({ ver: p.id })}
                                                 onKeyDown={(e) => e.key === 'Enter' && vista$.set({ ver: p.id })}
                                             >
@@ -162,7 +171,7 @@ export function ProveedoresView() {
             {abierto && <FichaProveedor proveedor={abierto} onCerrar={() => vista$.set({ ver: '' })} />}
             {v.ver && estado.data && !abierto && (
                 <p role="status" className="mt-3 text-small text-ink-2">
-                    No encuentro ese proveedor. Puede que lo hayan borrado: búscalo en la lista.
+                    No se encontró ese proveedor. Puede que lo hayan borrado: búscalo en la lista.
                 </p>
             )}
             {creando && (

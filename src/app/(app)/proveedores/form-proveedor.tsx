@@ -23,9 +23,9 @@ import {
     type Origen,
     type Proveedor,
 } from '@/modules/proveedores/application/views.ts';
-import { Button } from '@/shared/ui/button.tsx';
+import { Button, LINK_CLASS } from '@/shared/ui/button.tsx';
 import { Segmented } from '@/shared/ui/card.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Checkbox, Field, Input } from '@/shared/ui/field.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
@@ -50,9 +50,14 @@ export function FormProveedor({
     const inicial: NuevoProveedor = proveedor ? { ...datosDe(proveedor), origen: proveedor.origen, ruc: proveedor.ruc } : NUEVO_PROVEEDOR;
     const [f, setF, olvidar] = useBorrador<NuevoProveedor>(proveedor ? `proveedor:${proveedor.id}` : 'proveedor:nuevo', inicial);
     const [error, setError] = useState<string | null>(null);
+    // Si lo que falta es de un campo, el error va junto a él (guía, «Formulario»); lo de las cuentas, abajo.
+    const [errCampo, setErrCampo] = useState<{ campo: 'razon' | 'pais' | 'correo' | 'idFiscal'; texto: string } | null>(null);
     const [tocoRuc, setTocoRuc] = useState(false);
     const [guardando, setGuardando] = useState(false);
-    const set = (patch: Partial<NuevoProveedor>) => (setF({ ...f, ...patch }), setError(null));
+    const set = (patch: Partial<NuevoProveedor>) => (setF({ ...f, ...patch }), setError(null), setErrCampo(null));
+    const sucio = JSON.stringify(f) !== JSON.stringify(inicial);
+    const { cerrar, aviso } = useCerrarConCambios(sucio, onCerrar);
+    const errDe = (campo: 'razon' | 'pais' | 'correo' | 'idFiscal') => (errCampo?.campo === campo ? errCampo.texto : undefined);
     const setCuenta = (i: number, patch: Partial<Cuenta>) => set({ cuentas: f.cuentas.map((c, j) => (j === i ? { ...c, ...patch } : c)) });
 
     const alta = !proveedor;
@@ -67,14 +72,29 @@ export function FormProveedor({
 
     async function guardar() {
         const falta = alta ? faltaEnAlta(f) : faltaEnDatos(f, f.origen);
-        if (falta) return (setTocoRuc(true), setError(falta));
+        if (falta) {
+            setTocoRuc(true);
+            // El RUC ya muestra su error junto al campo (errRuc).
+            if (alta && nacional && motivoRuc(f.ruc)) return;
+            const campo = !f.razonSocial.trim()
+                ? 'razon'
+                : !nacional && !f.pais.trim()
+                  ? 'pais'
+                  : falta.startsWith('El correo')
+                    ? 'correo'
+                    : falta.startsWith('El identificador')
+                      ? 'idFiscal'
+                      : null;
+            return campo ? setErrCampo({ campo, texto: falta }) : setError(falta);
+        }
         if (repetido) return setError(`Ya existe: ${repetido.razonSocial}. Ábrelo en vez de darlo de alta otra vez.`);
         setGuardando(true);
         const r = proveedor ? (await proveedores().editar(proveedor.id, f)).map(() => proveedor.id) : await proveedores().crear(f);
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
         olvidar();
-        toast.success(proveedor ? 'Proveedor actualizado.' : 'Proveedor dado de alta. Pide a Finanzas que lo evalúe desde su ficha.');
+        const nombre = f.razonSocial.trim();
+        toast.success(proveedor ? `Proveedor ${nombre} guardado.` : `Proveedor ${nombre} dado de alta. Pide a Finanzas que lo evalúe desde su ficha.`);
         refrescar(['proveedores']);
         onGuardado(r.value);
     }
@@ -82,15 +102,17 @@ export function FormProveedor({
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo={proveedor ? 'Editar proveedor' : 'Nuevo proveedor'}
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
-                        {guardando ? 'Guardando…' : proveedor ? 'Guardar cambios' : 'Dar de alta'}
+                    <Button type="submit" disabled={guardando}>
+                        {guardando ? 'Guardando…' : proveedor ? 'Guardar proveedor' : 'Dar de alta proveedor'}
                     </Button>
                 </>
             }
@@ -132,18 +154,22 @@ export function FormProveedor({
                 <p role="alert" className="text-small text-warning-strong">
                     Ese RUC ya está registrado: {repetido.razonSocial}.{' '}
                     {onVer && (
-                        <button type="button" className="font-medium text-primary hover:underline" onClick={() => onVer(repetido.id)}>
+                        <button type="button" className={`${LINK_CLASS} font-medium`} onClick={() => onVer(repetido.id)}>
                             Abrir su ficha
                         </button>
                     )}
                 </p>
             )}
-            <Field label="Razón social">{(p) => <Input {...p} value={f.razonSocial} onChange={(e) => set({ razonSocial: e.target.value })} />}</Field>
+            <Field label="Razón social" error={errDe('razon')}>
+                {(p) => <Input {...p} value={f.razonSocial} onChange={(e) => set({ razonSocial: e.target.value })} />}
+            </Field>
             {!nacional && (
                 <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="País">{(p) => <Input {...p} value={f.pais} onChange={(e) => set({ pais: e.target.value })} />}</Field>
+                    <Field label="País" error={errDe('pais')}>
+                        {(p) => <Input {...p} value={f.pais} onChange={(e) => set({ pais: e.target.value })} />}
+                    </Field>
                     {alta && (
-                        <Field label="Identificación fiscal" optional hint="Tax ID, VAT o equivalente.">
+                        <Field label="Identificación fiscal" optional error={errDe('idFiscal')} hint="Tax ID, VAT o equivalente.">
                             {(p) => <Input {...p} value={f.ruc} onChange={(e) => set({ ruc: e.target.value })} />}
                         </Field>
                     )}
@@ -157,7 +183,7 @@ export function FormProveedor({
                     {(p) => <Input {...p} value={f.telefono} inputMode="tel" onChange={(e) => set({ telefono: e.target.value })} />}
                 </Field>
             </div>
-            <Field label="Correo" optional hint="A este correo se envía la orden de compra.">
+            <Field label="Correo" optional error={errDe('correo')} hint="A este correo se envía la orden de compra.">
                 {(p) => <Input {...p} type="email" value={f.correo} onChange={(e) => set({ correo: e.target.value })} />}
             </Field>
 
@@ -216,7 +242,7 @@ export function FormProveedor({
                     </div>
                 ))}
                 <Button variant="dashed" onClick={() => set({ cuentas: [...f.cuentas, { ...CUENTA_VACIA, moneda: nacional ? 'PEN' : 'USD' }] })}>
-                    <Plus size={15} /> Cuenta
+                    <Plus size={15} aria-hidden /> Agregar cuenta
                 </Button>
             </fieldset>
 

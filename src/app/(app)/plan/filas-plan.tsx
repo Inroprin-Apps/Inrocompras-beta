@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { etiquetaSemaforo, tonoCriticidad, tonoSemaforo, type FilaPlan } from '@/modules/plan/application/views.ts';
 import { T } from '@/shared/ui/bits.tsx';
+import { LINK_CLASS } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
 import { dmy } from '@/shared/ui/format.ts';
 
@@ -11,15 +12,18 @@ const cant = (n: number) => new Intl.NumberFormat('es-PE', { maximumFractionDigi
 
 function Marca({ f, marcada, onMarcar }: { f: FilaPlan; marcada: boolean; onMarcar: () => void }) {
     const bloqueada = !!f.bloqueo || f.saldo <= 0;
+    // La casilla mide 16 px; la etiqueta que la envuelve da los 36 px que pide el dedo en el celular.
     return (
-        <input
-            type="checkbox"
-            checked={marcada}
-            onChange={onMarcar}
-            aria-label={`Marcar ${f.descripcion}`}
-            title={f.bloqueo ?? (f.saldo <= 0 ? 'Sin saldo' : 'Marcar para generar la OC')}
-            className={`size-4 cursor-pointer accent-primary ${bloqueada && !marcada ? 'opacity-40' : ''}`}
-        />
+        <label className="-m-2.5 inline-flex cursor-pointer p-2.5">
+            <input
+                type="checkbox"
+                checked={marcada}
+                onChange={onMarcar}
+                aria-label={`Marcar ${f.descripcion}`}
+                title={f.bloqueo ?? (f.saldo <= 0 ? 'Sin saldo' : 'Marcar para generar la OC')}
+                className={`size-4 cursor-pointer accent-primary ${bloqueada && !marcada ? 'opacity-40' : ''}`}
+            />
+        </label>
     );
 }
 
@@ -30,7 +34,7 @@ function Ocs({ f, verOc }: { f: FilaPlan; verOc: boolean }) {
             {f.ordenes.map((o) => (
                 <div key={o.id} className="text-small">
                     {verOc ? (
-                        <Link href={`/ordenes?ver=${o.id}`} className="font-medium text-primary hover:underline">
+                        <Link href={`/ordenes?ver=${o.id}`} className={`${LINK_CLASS} font-medium`}>
                             {o.numero ?? 'Borrador'}
                         </Link>
                     ) : (
@@ -109,15 +113,15 @@ export function FilaTabla({ f, compra, marcada, onMarcar, verOc }: { f: FilaPlan
             <td className={T.td}>
                 <Validacion f={f} />
             </td>
-            <td className={T.tdNum}>
+            <td className={`${T.tdNum} text-right`}>
                 <Fechas f={f} />
             </td>
             <td className={T.td}>
-                <div className="flex flex-col items-start gap-1">
-                    <Chip tone={tonoSemaforo(f.semaforo)}>{etiquetaSemaforo(f.semaforo)}</Chip>
-                    {diasTxt && <span className={T.sub}>{diasTxt}</span>}
-                    <Chip tone={tonoCriticidad(f.criticidad)}>{f.criticidad}</Chip>
-                </div>
+                <Chip tone={tonoSemaforo(f.semaforo)}>{etiquetaSemaforo(f.semaforo)}</Chip>
+                {diasTxt && <div className={T.sub}>{diasTxt}</div>}
+            </td>
+            <td className={T.td}>
+                <Chip tone={tonoCriticidad(f.criticidad)}>{f.criticidad}</Chip>
             </td>
             <td className={T.td}>
                 <Ocs f={f} verOc={verOc} />

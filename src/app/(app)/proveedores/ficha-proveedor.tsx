@@ -15,7 +15,7 @@ import {
     type Proveedor,
 } from '@/modules/proveedores/application/views.ts';
 import { Notice } from '@/shared/ui/bits.tsx';
-import { Button } from '@/shared/ui/button.tsx';
+import { Button, LINK_CLASS } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
 import { Datos, Fases, Ficha, FichaSeccion } from '@/shared/ui/ficha.tsx';
 import { dayTime } from '@/shared/ui/format.ts';
@@ -55,7 +55,7 @@ export function FichaProveedor({ proveedor: p, onCerrar }: { proveedor: Proveedo
                         Finanzas lo observó{p.evaluacionNota ? `: «${p.evaluacionNota}»` : '.'} Corrige los datos y pide otra evaluación.
                     </Notice>
                 )}
-                <PanelAcciones tabla="proveedores" id={p.id} tocadas={TOCADAS} />
+                <PanelAcciones tabla="proveedores" id={p.id} nombre={p.razonSocial} tocadas={TOCADAS} />
             </div>
 
             <FichaSeccion
@@ -63,7 +63,7 @@ export function FichaProveedor({ proveedor: p, onCerrar }: { proveedor: Proveedo
                 accion={
                     puedeEditarProveedores(perfil) && (
                         <Button variant="ghost" onClick={() => setEditando(true)}>
-                            <Pencil size={15} /> Editar
+                            <Pencil size={15} aria-hidden /> Editar proveedor
                         </Button>
                     )
                 }
@@ -76,7 +76,7 @@ export function FichaProveedor({ proveedor: p, onCerrar }: { proveedor: Proveedo
                         [
                             'Correo',
                             p.correo ? (
-                                <a className="text-primary hover:underline" href={`mailto:${p.correo}`}>
+                                <a className={LINK_CLASS} href={`mailto:${p.correo}`}>
                                     {p.correo}
                                 </a>
                             ) : (
@@ -91,7 +91,7 @@ export function FichaProveedor({ proveedor: p, onCerrar }: { proveedor: Proveedo
 
             <FichaSeccion titulo="Cuentas bancarias">
                 {p.cuentas.length === 0 ? (
-                    <p className="text-small text-ink-3">Sin cuentas registradas. Finanzas las necesita para pagar: agrégalas con «Editar».</p>
+                    <p className="text-small text-ink-3">Sin cuentas registradas. Finanzas las necesita para pagar: agrégalas con «Editar proveedor».</p>
                 ) : (
                     <ul className="flex flex-col divide-y divide-divider">
                         {p.cuentas.map((c, i) => (
