@@ -12,12 +12,12 @@ export const T = {
     headRow: 'text-left',
     // Cabecera sin fondo, con su línea debajo (divider-strong) y bordes verticales solo en los lados externos (la línea va en la celda: con border-separate un borde en la fila no se pinta).
     th: 'border-y border-y-divider bg-surface-2 border-b-divider-strong first:border-l first:border-l-divider last:border-r last:border-r-divider px-3 py-3 text-small font-medium text-ink-2',
-    thNum: 'border-y border-y-divider bg-surface-2 border-b-divider-strong first:border-l first:border-l-divider last:border-r last:border-r-divider px-3 py-3 text-small font-medium text-ink-2',
+    thNum: 'border-y border-y-divider bg-surface-2 border-b-divider-strong first:border-l first:border-l-divider last:border-r last:border-r-divider px-3 py-3 text-right text-small font-medium text-ink-2',
     // Filas holgadas (16 px arriba y abajo, 12 a los lados), como las de INROCONTA. La línea va en la celda: con
     // `border-separate` (que permite las esquinas redondeadas de la cabecera) un borde en la fila no se pinta.
     row: 'hover:bg-surface-2',
     td: 'border-b border-divider first:border-l last:border-r px-3 py-4 align-top',
-    tdNum: 'border-b border-divider first:border-l last:border-r px-3 py-4 align-top whitespace-nowrap tabular-nums',
+    tdNum: 'border-b border-divider first:border-l last:border-r px-3 py-4 align-top whitespace-nowrap text-right tabular-nums',
     sub: 'mt-0.5 text-caption text-ink-3',
 };
 

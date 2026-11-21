@@ -1,6 +1,7 @@
 'use client';
 
-// /cuadro/aprobar: solo las órdenes que esperan tu firma, en tarjetas grandes (pensada para el celular).
+// /cuadro/aprobar: solo las órdenes que esperan tu firma, en tarjetas grandes: una columna en el celular, rejilla en
+// escritorio para aprovechar el ancho.
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { LINK_CLASS } from '@/shared/ui/button.tsx';
@@ -15,7 +16,7 @@ export function AprobarView() {
     const actualizado = teTocaStore.use().actualizado;
     const aprobador = perfil.roles.some((r) => r === 'CONTROL_GESTION' || r === 'GOP' || r === 'GAF');
     return (
-        <div className="mx-auto w-full max-w-xl">
+        <div className="w-full">
             <Encabezado titulo="Órdenes por firmar" actualizado={aprobador ? actualizado : null} />
             <Link href="/cuadro" className={`${LINK_CLASS} mb-4 inline-flex items-center gap-1 text-small`}>
                 <ArrowLeft size={14} aria-hidden /> Cuadro de aprobaciones

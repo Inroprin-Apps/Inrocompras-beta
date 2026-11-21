@@ -29,6 +29,8 @@ export function PorFirmar({ titulo = true }: { titulo?: boolean }) {
     const paso = useMemo(() => new Map(pendientes.map((t) => [t.id, t.paso])), [pendientes]);
     const ordenes = porAprobarStore.use(clave || null);
 
+    // En su propia página (sin título) las tarjetas van en rejilla desde escritorio; dentro del cuadro, en columna.
+    const rejilla = titulo ? 'flex flex-col gap-3' : 'grid items-start gap-3 lg:grid-cols-2 2xl:grid-cols-3';
     const cabecera = titulo && (
         <h2 className="mb-2.5 text-heading font-semibold">
             Por firmar{bandeja.data && <span className="font-normal text-ink-2"> ({pendientes.length})</span>}
@@ -62,7 +64,7 @@ export function PorFirmar({ titulo = true }: { titulo?: boolean }) {
         return (
             <>
                 {cabecera}
-                <div className="flex flex-col gap-3" aria-busy="true" aria-label="Cargando">
+                <div className={rejilla} aria-busy="true" aria-label="Cargando">
                     {[1, 2].map((i) => (
                         <div key={i} className="flex flex-col gap-2.5 rounded-card border border-line bg-surface p-4">
                             <Hueco className="h-5 w-2/3" />
@@ -78,7 +80,7 @@ export function PorFirmar({ titulo = true }: { titulo?: boolean }) {
     return (
         <>
             {cabecera}
-            <ul className="flex flex-col gap-3">
+            <ul className={rejilla}>
                 {ordenarPorAprobar(ordenes.data, desde).map((o) => (
                     <li key={o.id}>
                         <Tarjeta o={o} paso={paso.get(o.id) ?? ''} nivel={titulo ? 3 : 2} />

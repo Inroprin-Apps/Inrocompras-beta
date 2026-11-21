@@ -3,7 +3,8 @@
 // La FICHA LATERAL del prototipo v3: al tocar una fila se abre a la derecha (en el celular, a pantalla
 // completa). Arriba el título y el hilo de fases con rombos; después, el recuadro azul «Lo que te toca»
 // (los botones de acciones_disponibles); abajo el detalle, los documentos y el historial.
-// Es un <aside> no modal: la lista sigue viva detrás y se puede abrir otra fila sin cerrar.
+// Es un <aside> no modal: la lista sigue viva detrás y se puede abrir otra fila sin cerrar. En laptop va encima de la
+// lista; desde 1536 px la corre (globals.css: html.con-ficha) y desde 1920 px mide 640 px.
 import { useEffect, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { Button } from './button.tsx';
@@ -34,7 +35,7 @@ export function Ficha({
     return (
         <aside
             aria-label="Ficha"
-            className="fixed inset-0 z-30 flex flex-col overflow-hidden bg-surface md:inset-y-0 md:right-0 md:left-auto md:w-[560px] md:border-l md:border-line md:shadow-float"
+            className="fixed inset-0 z-30 flex flex-col overflow-hidden bg-surface md:inset-y-0 md:right-0 md:left-auto md:w-[560px] min-[1920px]:w-[640px] md:border-l md:border-line md:shadow-float"
         >
             <header className="flex items-start gap-3 border-b border-divider px-5 py-4">
                 <div className="min-w-0 flex-1">

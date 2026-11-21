@@ -23,6 +23,7 @@ export function Dialog({
     pie,
     onEnviar,
     aviso,
+    amplio = false,
 }: {
     abierto: boolean;
     onCerrar: () => void;
@@ -34,6 +35,8 @@ export function Dialog({
     onEnviar?: () => void;
     /** Un aviso sobre el pie (p. ej. el de cambios sin guardar de useCerrarConCambios). */
     aviso?: ReactNode;
+    /** Formularios de dos columnas o con tablas: 720 px desde tablet en vez de 460 px. */
+    amplio?: boolean;
 }) {
     const ref = useRef<HTMLDialogElement>(null);
     useEffect(() => {
@@ -58,7 +61,7 @@ export function Dialog({
                 onCerrar();
             }}
             onClick={(e) => e.target === ref.current && onCerrar()}
-            className="m-0 mt-auto w-full max-w-none rounded-t-card border border-line bg-surface p-0 text-ink shadow-float backdrop:bg-ink/30 sm:m-auto sm:w-[460px] sm:rounded-card"
+            className={`m-0 mt-auto w-full max-w-none rounded-t-card border border-line bg-surface p-0 text-ink shadow-float backdrop:bg-ink/30 sm:m-auto sm:rounded-card ${amplio ? 'sm:w-[min(720px,calc(100vw-2rem))]' : 'sm:w-[460px]'}`}
         >
             {abierto && (
                 <div className="flex max-h-[85dvh] flex-col">
