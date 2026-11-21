@@ -9,7 +9,7 @@ import { leerTasa, tcVigentes, type Moneda } from '@/modules/configuracion/appli
 import { T } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Card } from '@/shared/ui/card.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input } from '@/shared/ui/field.tsx';
 import { dayTime, dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
@@ -37,7 +37,9 @@ export function SeccionMonedas({ tasas, tc }: { tasas: boolean; tc: boolean }) {
                 <Lista
                     estado={{ data: estado.data?.monedas ?? null, error: estado.error }}
                     onReintentar={() => void configuracionStore.retry()}
-                    vacia={<ListaVacia titulo="Sin monedas" />}
+                    vacia={
+                        <ListaVacia titulo="Aún no hay monedas">Se crean al aplicar las migraciones de la base. Si no aparecen, avisa a sistemas.</ListaVacia>
+                    }
                 >
                     {(ms) => (
                         <div className="overflow-x-auto">
@@ -45,7 +47,7 @@ export function SeccionMonedas({ tasas, tc }: { tasas: boolean; tc: boolean }) {
                                 <thead>
                                     <tr className={T.headRow}>
                                         <th className={T.th}>Moneda</th>
-                                        <th className={T.thNum}>Tasa a soles</th>
+                                        <th className={`${T.thNum} text-right`}>Tasa a soles</th>
                                         <th className={T.th}>Actualizada</th>
                                         {tasas && (
                                             <th className={T.th}>
@@ -61,13 +63,13 @@ export function SeccionMonedas({ tasas, tc }: { tasas: boolean; tc: boolean }) {
                                                 <div className="font-medium">{m.id}</div>
                                                 <div className={T.sub}>{m.nombre}</div>
                                             </td>
-                                            <td className={`${T.tdNum} text-right`}>{m.id === 'PEN' ? '1' : tasaFmt(m.tasa)}</td>
+                                            <td className={`${T.tdNum} text-right`}>{tasaFmt(m.id === 'PEN' ? 1 : m.tasa)}</td>
                                             <td className={T.td}>{dayTime(m.actualizado)}</td>
                                             {tasas && (
                                                 <td className={`${T.td} w-12`}>
                                                     {m.id !== 'PEN' && (
                                                         <Button variant="ghost" iconOnly aria-label={`Editar la tasa de ${m.id}`} onClick={() => setMoneda(m)}>
-                                                            <Pencil size={15} />
+                                                            <Pencil size={15} aria-hidden />
                                                         </Button>
                                                     )}
                                                 </td>
@@ -92,7 +94,7 @@ export function SeccionMonedas({ tasas, tc }: { tasas: boolean; tc: boolean }) {
                 {tc && (
                     <div className="mb-3">
                         <Button variant="dashed" onClick={() => setNuevoTc(true)}>
-                            <Plus size={15} /> Registrar TC
+                            <Plus size={15} aria-hidden /> Registrar TC
                         </Button>
                     </div>
                 )}
@@ -110,7 +112,7 @@ export function SeccionMonedas({ tasas, tc }: { tasas: boolean; tc: boolean }) {
                                     <tr className={T.headRow}>
                                         <th className={T.th}>Vigente desde</th>
                                         <th className={T.th}>Moneda</th>
-                                        <th className={T.thNum}>TC</th>
+                                        <th className={`${T.thNum} text-right`}>TC</th>
                                         <th className={T.th}>Registró</th>
                                     </tr>
                                 </thead>
@@ -142,29 +144,32 @@ function FormTasa({ moneda, onCerrar }: { moneda: Moneda; onCerrar: () => void }
     const [texto, setTexto] = useState(String(moneda.tasa));
     const [error, setError] = useState<string | null>(null);
     const [guardando, setGuardando] = useState(false);
+    const { cerrar, aviso } = useCerrarConCambios(texto !== String(moneda.tasa), onCerrar);
     async function guardar() {
         const tasa = leerTasa(texto);
-        if (tasa === null) return setError('Escribe una tasa mayor que cero, por ejemplo 3.75.');
+        if (tasa === null) return setError('La tasa tiene que ser mayor que cero. Usa punto para los decimales: 3.75');
         setGuardando(true);
         const r = await configuracion().guardarTasa(moneda.id, tasa);
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success(`Tasa de ${moneda.id} actualizada.`);
+        toast.success(`Tasa de ${moneda.id} guardada: ${tasaFmt(tasa)}.`);
         refrescar(['monedas']);
         onCerrar();
     }
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo={`Tasa de ${moneda.nombre}`}
             descripcion="Cuántos soles vale una unidad. Las órdenes nuevas la usan desde ahora."
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
+                    <Button type="submit" disabled={guardando}>
                         {guardando ? 'Guardando…' : 'Guardar tasa'}
                     </Button>
                 </>
@@ -182,32 +187,37 @@ function FormTc({ monedas, onCerrar }: { monedas: Moneda[]; onCerrar: () => void
     const [texto, setTexto] = useState('');
     const [desde, setDesde] = useState(hoyLima());
     const [comentario, setComentario] = useState('');
-    const [error, setError] = useState<string | null>(null);
+    const [inicial] = useState(() => JSON.stringify({ moneda, texto, desde, comentario }));
+    // El error de un campo va junto a ese campo; el de la base, en el aviso del diálogo.
+    const [error, setError] = useState<{ campo: 'tc' | 'desde' | null; texto: string } | null>(null);
     const [guardando, setGuardando] = useState(false);
+    const { cerrar, aviso } = useCerrarConCambios(JSON.stringify({ moneda, texto, desde, comentario }) !== inicial, onCerrar);
     async function guardar() {
         const tc = leerTasa(texto);
-        if (tc === null) return setError('Escribe un tipo de cambio mayor que cero, por ejemplo 3.77.');
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(desde)) return setError('Elige desde qué fecha vale.');
+        if (tc === null) return setError({ campo: 'tc', texto: 'El TC tiene que ser mayor que cero. Usa punto para los decimales: 3.77' });
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(desde)) return setError({ campo: 'desde', texto: 'Elige desde qué fecha vale.' });
         setGuardando(true);
         const r = await configuracion().agregarTc({ moneda, tc, vigenteDesde: desde, comentario });
         setGuardando(false);
-        if (r.isErr()) return setError(r.error.message);
-        toast.success('Tipo de cambio de costeo registrado.');
+        if (r.isErr()) return setError({ campo: null, texto: r.error.message });
+        toast.success(`TC de costeo de ${moneda} registrado: ${tasaFmt(tc)} desde el ${dmy(desde)}.`);
         refrescar(['tc_costeo']);
         onCerrar();
     }
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo="Registrar TC de costeo"
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
-                        {guardando ? 'Guardando…' : 'Registrar'}
+                    <Button type="submit" disabled={guardando}>
+                        {guardando ? 'Registrando…' : 'Registrar TC'}
                     </Button>
                 </>
             }
@@ -223,17 +233,19 @@ function FormTc({ monedas, onCerrar }: { monedas: Moneda[]; onCerrar: () => void
                         />
                     )}
                 </Field>
-                <Field label="TC (en soles)">
+                <Field label="TC (en soles)" error={error?.campo === 'tc' ? error.texto : null}>
                     {(p) => <Input {...p} inputMode="decimal" value={texto} onChange={(e) => (setTexto(e.target.value), setError(null))} />}
                 </Field>
             </div>
-            <Field label="Vale desde">{(p) => <Input {...p} type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />}</Field>
+            <Field label="Vale desde" error={error?.campo === 'desde' ? error.texto : null}>
+                {(p) => <Input {...p} type="date" value={desde} onChange={(e) => (setDesde(e.target.value), setError(null))} />}
+            </Field>
             <Field label="Comentario" optional hint="Por ejemplo: cierre de mes, TC SBS del día.">
                 {(p) => <Input {...p} value={comentario} onChange={(e) => setComentario(e.target.value)} />}
             </Field>
-            {error && (
+            {error && !error.campo && (
                 <p role="alert" className="text-small font-medium text-danger-strong">
-                    {error}
+                    {error.texto}
                 </p>
             )}
         </Dialog>

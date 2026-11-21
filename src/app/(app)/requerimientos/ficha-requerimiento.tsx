@@ -25,7 +25,7 @@ import { Notice } from '@/shared/ui/bits.tsx';
 import { Button, LINK_CLASS } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
 import { Datos, Fases, Ficha, FichaSeccion } from '@/shared/ui/ficha.tsx';
-import { dayTime, dmy } from '@/shared/ui/format.ts';
+import { dayTime, dmy, money } from '@/shared/ui/format.ts';
 import { Hueco } from '@/shared/ui/hueco.tsx';
 import { Historial } from '../_acciones/historial.tsx';
 import { PanelAcciones } from '../_acciones/panel-acciones.tsx';
@@ -37,7 +37,6 @@ import { FormCabecera, FormItemReq, FormSku } from './form-requerimiento.tsx';
 import { requerimientoStore } from './store.ts';
 
 const fmtNum = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 3 });
-const fmtMonto = new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
 const TOCADAS = ['requerimientos', 'requerimiento_items', 'anulaciones', 'solicitudes'];
 
 export function FichaRequerimiento({ id, anulacionMarcada, onCerrar }: { id: string; anulacionMarcada: string; onCerrar: () => void }) {
@@ -99,6 +98,7 @@ function FichaCargada({ d, anulacionMarcada, onCerrar }: { d: RequerimientoDetal
                 <PanelAcciones
                     tabla="requerimientos"
                     id={r.id}
+                    nombre={r.numero}
                     tocadas={TOCADAS}
                     vacio={editable ? 'Completa la cabecera y los conceptos; «Emitir» aparece cuando esté listo.' : 'Por ahora no te toca nada aquí.'}
                 />
@@ -108,7 +108,7 @@ function FichaCargada({ d, anulacionMarcada, onCerrar }: { d: RequerimientoDetal
                 accion={
                     editable && (
                         <Button variant="ghost" onClick={() => setDialogo({ tipo: 'cabecera' })}>
-                            <Pencil size={15} /> Completar
+                            <Pencil size={15} /> Completar requerimiento
                         </Button>
                     )
                 }
@@ -171,13 +171,13 @@ function FichaCargada({ d, anulacionMarcada, onCerrar }: { d: RequerimientoDetal
                         />
                     ))}
                 </ul>
-                {!items.length && <p className="text-small text-ink-3">Sin ítems.</p>}
+                {!items.length && <p className="text-small text-ink-3">Este requerimiento no tiene ítems.</p>}
             </FichaSeccion>
             {anulaciones.length > 0 && (
                 <FichaSeccion titulo="Anulaciones">
                     <ul className="flex flex-col gap-3">
                         {anulaciones.map((a) => (
-                            <FilaAnulacion key={a.id} a={a} items={items} marcada={a.id === anulacionMarcada} nombre={nombre} />
+                            <FilaAnulacion key={a.id} a={a} items={items} numero={r.numero} marcada={a.id === anulacionMarcada} nombre={nombre} />
                         ))}
                     </ul>
                 </FichaSeccion>
@@ -186,9 +186,11 @@ function FichaCargada({ d, anulacionMarcada, onCerrar }: { d: RequerimientoDetal
                 <Historial tabla="requerimientos" id={r.id} />
             </FichaSeccion>
             {dialogo?.tipo === 'cabecera' && <FormCabecera req={r} onCerrar={() => setDialogo(null)} />}
-            {dialogo?.tipo === 'item' && <FormItemReq item={dialogo.item} onCerrar={() => setDialogo(null)} />}
+            {dialogo?.tipo === 'item' && <FormItemReq item={dialogo.item} numero={r.numero} onCerrar={() => setDialogo(null)} />}
             {dialogo?.tipo === 'sku' && <FormSku item={dialogo.item} onCerrar={() => setDialogo(null)} />}
-            {dialogo?.tipo === 'anular' && <FormAnulacion requerimientoId={r.id} items={items} itemId={dialogo.itemId} onCerrar={() => setDialogo(null)} />}
+            {dialogo?.tipo === 'anular' && (
+                <FormAnulacion requerimientoId={r.id} numero={r.numero} items={items} itemId={dialogo.itemId} onCerrar={() => setDialogo(null)} />
+            )}
         </Ficha>
     );
 }
@@ -220,7 +222,7 @@ function FilaItem({
         i.concepto ? `concepto ${i.concepto}` : conceptoGeneral ? '' : 'sin concepto',
         i.fechaMeta ? `meta ${dmy(i.fechaMeta)}` : '',
         i.plazoEntregaDias != null ? `${i.plazoEntregaDias} días de entrega` : '',
-        verMontos && i.presupuestoUnit != null ? `ppto ${i.monedaPpto ?? ''} ${fmtMonto.format(i.presupuestoUnit)} c/u` : '',
+        verMontos && i.presupuestoUnit != null ? `ppto ${money(i.presupuestoUnit, i.monedaPpto ?? 'PEN')} c/u` : '',
     ].filter(Boolean);
     return (
         <li className={`flex items-start gap-2 py-2.5 ${nivel ? 'pl-6' : ''} ${i.anulado ? 'text-ink-3' : ''}`}>
@@ -230,7 +232,7 @@ function FilaItem({
                 <div className="text-small text-ink-2">{detalle.join(' · ')}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     {i.anulado ? (
-                        <Chip tone="danger">Anulado</Chip>
+                        <Chip tone="muted">Anulado</Chip>
                     ) : (
                         <Chip tone={tonoValidacion(i.validacionTecnica)} title="Validación técnica">
                             {i.validacionTecnica === 'Pendiente' ? 'Validación técnica pendiente' : i.validacionTecnica}
@@ -249,7 +251,7 @@ function FilaItem({
                     </Button>
                 )}
                 {onSku && (
-                    <Button variant="ghost" iconOnly aria-label={`SKU de ${i.descripcion}`} onClick={onSku}>
+                    <Button variant="ghost" iconOnly aria-label={`Asignar SKU a ${i.descripcion}`} onClick={onSku}>
                         <Barcode size={15} />
                     </Button>
                 )}
@@ -263,7 +265,19 @@ function FilaItem({
     );
 }
 
-function FilaAnulacion({ a, items, marcada, nombre }: { a: Anulacion; items: ItemRequerimiento[]; marcada: boolean; nombre: (id: string | null) => string }) {
+function FilaAnulacion({
+    a,
+    items,
+    numero,
+    marcada,
+    nombre,
+}: {
+    a: Anulacion;
+    items: ItemRequerimiento[];
+    numero: string;
+    marcada: boolean;
+    nombre: (id: string | null) => string;
+}) {
     const ref = useRef<HTMLLIElement>(null);
     useEffect(() => {
         if (marcada) ref.current?.scrollIntoView({ block: 'center' });
@@ -291,6 +305,7 @@ function FilaAnulacion({ a, items, marcada, nombre }: { a: Anulacion; items: Ite
                     <PanelAcciones
                         tabla="anulaciones"
                         id={a.id}
+                        nombre={numero}
                         tocadas={TOCADAS}
                         vacio="La decide el jefe de quien la pidió (error de emisión) o quien liberó la solicitud."
                     />

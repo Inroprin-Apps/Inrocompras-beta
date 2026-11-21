@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { Construction } from 'lucide-react';
 import { FECHA_HITO, TODAS } from '@/app/(app)/_lib/menu.ts';
-import { SectionTitle } from '@/shared/ui/bits.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 
 // Las secciones que aún no se construyen dicen en qué hito llegan, en vez de un 404.
 export default async function Pronto({ params }: { params: Promise<{ seccion: string[] }> }) {
@@ -10,7 +10,7 @@ export default async function Pronto({ params }: { params: Promise<{ seccion: st
     if (!entrada) notFound();
     return (
         <>
-            <SectionTitle title={entrada.label} />
+            <Encabezado titulo={entrada.label} />
             <div className="flex flex-col items-center rounded-card border border-line bg-surface px-6 py-14 text-center">
                 <Construction size={28} className="mb-3 text-ink-3" aria-hidden />
                 <p className="text-heading font-medium">Esta sección llega en el Hito {entrada.hito}</p>

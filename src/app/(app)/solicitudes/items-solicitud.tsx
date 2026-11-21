@@ -7,13 +7,12 @@ import { etiquetaFila, itemsAnidados, resumenCarga, type FilaCarga, type ItemSol
 import { Notice } from '@/shared/ui/bits.tsx';
 import { Button, LINK_CLASS } from '@/shared/ui/button.tsx';
 import { FichaSeccion } from '@/shared/ui/ficha.tsx';
-import { dmy } from '@/shared/ui/format.ts';
+import { dmy, money } from '@/shared/ui/format.ts';
 import { toast } from '@/shared/ui/toaster.tsx';
 import { ejecutarAccion } from '../_acciones/panel-acciones.tsx';
 import { refrescar } from '../_lib/resource.ts';
 
 const fmtNum = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 3 });
-const fmtMonto = new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
 
 export function ListaItems({
     items,
@@ -29,7 +28,11 @@ export function ListaItems({
     onQuitar: (i: ItemSolicitud) => void;
 }) {
     if (!items.length)
-        return <p className="text-small text-ink-3">{editable ? 'Sin ítems. Agrégalos uno a uno con «Ítem» o varios a la vez con «Excel».' : 'Sin ítems.'}</p>;
+        return (
+            <p className="text-small text-ink-3">
+                {editable ? 'Aún no hay ítems. Agrégalos uno a uno con «Agregar ítem» o varios a la vez con «Cargar Excel».' : 'Esta solicitud no tiene ítems.'}
+            </p>
+        );
     return (
         <ul className="flex flex-col divide-y divide-divider">
             {itemsAnidados(items).map(({ item: i, nivel }) => (
@@ -44,7 +47,7 @@ export function ListaItems({
                                 i.codigoCliente,
                                 i.canal,
                                 i.plazoAdquisicion ? `para el ${dmy(i.plazoAdquisicion)}` : '',
-                                verMontos && i.presupuestoUnit != null ? `ppto ${i.monedaPpto ?? ''} ${fmtMonto.format(i.presupuestoUnit)} c/u` : '',
+                                verMontos && i.presupuestoUnit != null ? `ppto ${money(i.presupuestoUnit, i.monedaPpto ?? 'PEN')} c/u` : '',
                             ]
                                 .filter(Boolean)
                                 .join(' · ')}
@@ -82,7 +85,7 @@ export function SeccionCarga({ filas, editable }: { filas: FilaCarga[]; editable
         const x = await ejecutarAccion('ac_carga_descartar_fila', { p_fila: f.id });
         setHaciendo(null);
         if (x.isErr()) return toast.error(x.error.message);
-        toast.success('Fila descartada.');
+        toast.success(`${etiquetaFila(f.datos, f.nFila)}: descartada.`);
         refrescar(['carga_items', 'acciones']);
     }
 
@@ -110,7 +113,7 @@ export function SeccionCarga({ filas, editable }: { filas: FilaCarga[]; editable
                                 </div>
                                 {editable && (
                                     <Button variant="secondary" disabled={!!haciendo} onClick={() => void descartar(f)}>
-                                        {haciendo === f.id ? 'Un momento…' : 'Descartar fila'}
+                                        {haciendo === f.id ? 'Descartando…' : 'Descartar fila'}
                                     </Button>
                                 )}
                             </li>

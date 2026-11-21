@@ -10,7 +10,7 @@ import { AMBITOS_CONCEPTO, etiquetaAmbito, faltaEnConcepto, type AmbitoConcepto,
 import { T } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Chip, Segmented } from '@/shared/ui/card.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Checkbox, Field, Input } from '@/shared/ui/field.tsx';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
@@ -29,7 +29,7 @@ export function SeccionConceptos() {
         const r = await configuracion().activarConcepto(id, activo);
         setOcupado(null);
         if (r.isErr()) return toast.error(r.error.message);
-        toast.success(`«${id}» ${activo ? 'activado' : 'desactivado'}.`);
+        toast.success(`Concepto «${id}» ${activo ? 'activado' : 'desactivado'}.`);
         refrescar(['conceptos']);
     }
 
@@ -42,13 +42,13 @@ export function SeccionConceptos() {
                     options={AMBITOS_CONCEPTO.map((a) => ({ value: a, label: etiquetaAmbito(a) }))}
                 />
                 <Button variant="dashed" onClick={() => setNuevo(true)}>
-                    <Plus size={15} /> Concepto
+                    <Plus size={15} aria-hidden /> Agregar concepto
                 </Button>
             </div>
             <Lista
                 estado={{ data: lista, error: estado.error }}
                 onReintentar={() => void configuracionStore.retry()}
-                vacia={<ListaVacia titulo="Sin conceptos de este tipo">Agrégalos con «Concepto».</ListaVacia>}
+                vacia={<ListaVacia titulo="Aún no hay conceptos de este tipo">Agrégalos con «Agregar concepto».</ListaVacia>}
             >
                 {(cs) => (
                     <ul className="flex flex-col divide-y divide-divider rounded-card border border-line bg-surface">
@@ -56,7 +56,12 @@ export function SeccionConceptos() {
                             <li key={c.id} className="flex items-center gap-3 px-4 py-2.5">
                                 <span className={`min-w-0 flex-1 text-ui ${c.activo ? '' : 'text-ink-3'}`}>{c.id}</span>
                                 {!c.activo && <Chip tone="muted">Inactivo</Chip>}
-                                <Button variant="ghost" disabled={ocupado === c.id} onClick={() => void activar(c.id, !c.activo)}>
+                                <Button
+                                    variant="ghost"
+                                    aria-label={`${c.activo ? 'Desactivar' : 'Activar'} ${c.id}`}
+                                    disabled={ocupado === c.id}
+                                    onClick={() => void activar(c.id, !c.activo)}
+                                >
                                     {c.activo ? 'Desactivar' : 'Activar'}
                                 </Button>
                             </li>
@@ -74,6 +79,7 @@ function FormConcepto({ ambito: inicial, existentes, onCerrar }: { ambito: Ambit
     const [ambito, setAmbito] = useState<AmbitoConcepto>(inicial);
     const [error, setError] = useState<string | null>(null);
     const [guardando, setGuardando] = useState(false);
+    const { cerrar, aviso } = useCerrarConCambios(nombre.trim() !== '' || ambito !== inicial, onCerrar);
     async function guardar() {
         const f = faltaEnConcepto(nombre, existentes);
         if (f) return setError(f);
@@ -81,27 +87,29 @@ function FormConcepto({ ambito: inicial, existentes, onCerrar }: { ambito: Ambit
         const r = await configuracion().agregarConcepto(nombre, ambito);
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success('Concepto agregado.');
+        toast.success(`Concepto «${nombre.trim()}» agregado.`);
         refrescar(['conceptos']);
         onCerrar();
     }
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo="Nuevo concepto"
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
-                        {guardando ? 'Guardando…' : 'Agregar'}
+                    <Button type="submit" disabled={guardando}>
+                        {guardando ? 'Agregando…' : 'Agregar concepto'}
                     </Button>
                 </>
             }
         >
-            <div className="flex flex-col gap-1.5">
+            <div role="group" aria-label="Para" className="flex flex-col gap-1.5">
                 <span className="text-ui font-medium">Para</span>
                 <Segmented<AmbitoConcepto>
                     value={ambito}
@@ -132,20 +140,20 @@ export function SeccionGastos() {
                         })
                     }
                 >
-                    <Plus size={15} /> Concepto de gasto
+                    <Plus size={15} aria-hidden /> Agregar concepto de gasto
                 </Button>
             </div>
             <Lista
                 estado={{ data: gastos, error: estado.error }}
                 onReintentar={() => void configuracionStore.retry()}
-                vacia={<ListaVacia titulo="Sin conceptos de gasto" />}
+                vacia={<ListaVacia titulo="Aún no hay conceptos de gasto">Agrégalos con «Agregar concepto de gasto».</ListaVacia>}
             >
                 {(gs) => (
                     <div className="overflow-x-auto">
                         <table className={T.table}>
                             <thead>
                                 <tr className={T.headRow}>
-                                    <th className={T.thNum}>Orden</th>
+                                    <th className={`${T.thNum} text-right`}>Orden</th>
                                     <th className={T.th}>Concepto</th>
                                     <th className={T.th}>Entra al costo</th>
                                     <th className={T.th}>Reparto</th>
@@ -157,7 +165,7 @@ export function SeccionGastos() {
                             <tbody>
                                 {gs.map((g) => (
                                     <tr key={g.concepto} className={T.row}>
-                                        <td className={T.tdNum}>{g.orden}</td>
+                                        <td className={`${T.tdNum} text-right`}>{g.orden}</td>
                                         <td className={T.td}>
                                             <span className={g.activo ? '' : 'text-ink-3'}>{g.concepto}</span>
                                             {!g.activo && (
@@ -175,7 +183,7 @@ export function SeccionGastos() {
                                                 aria-label={`Editar ${g.concepto}`}
                                                 onClick={() => setEditando({ g, nuevo: false })}
                                             >
-                                                <Pencil size={15} />
+                                                <Pencil size={15} aria-hidden />
                                             </Button>
                                         </td>
                                     </tr>
@@ -193,43 +201,48 @@ export function SeccionGastos() {
 function FormGasto({ g: inicial, nuevo, existentes, onCerrar }: { g: ConceptoGasto; nuevo: boolean; existentes: string[]; onCerrar: () => void }) {
     const [g, setG] = useState(inicial);
     const [orden, setOrden] = useState(String(inicial.orden));
-    const [error, setError] = useState<string | null>(null);
+    // El error de un campo va junto a ese campo; el de la base, en el aviso del diálogo.
+    const [error, setError] = useState<{ campo: 'concepto' | 'orden' | null; texto: string } | null>(null);
     const [guardando, setGuardando] = useState(false);
+    const { cerrar, aviso } = useCerrarConCambios(JSON.stringify(g) !== JSON.stringify(inicial) || orden !== String(inicial.orden), onCerrar);
     async function guardar() {
         const f = nuevo ? faltaEnConcepto(g.concepto, existentes) : null;
-        if (f) return setError(f);
+        if (f) return setError({ campo: 'concepto', texto: f });
         const n = Number(orden);
-        if (!Number.isInteger(n) || n < 0) return setError('El orden es un número entero.');
+        if (!orden.trim() || !Number.isInteger(n) || n < 0)
+            return setError({ campo: 'orden', texto: 'El orden tiene que ser un número entero, 0 o más. Por ejemplo: 3' });
         setGuardando(true);
         const r = await configuracion().guardarGasto({ ...g, orden: n }, nuevo);
         setGuardando(false);
-        if (r.isErr()) return setError(r.error.message);
-        toast.success('Concepto de gasto guardado.');
+        if (r.isErr()) return setError({ campo: null, texto: r.error.message });
+        toast.success(`Concepto de gasto «${g.concepto.trim()}» guardado.`);
         refrescar(['conceptos_gasto_imp', 'conceptos']);
         onCerrar();
     }
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo={nuevo ? 'Nuevo concepto de gasto' : g.concepto}
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
-                        {guardando ? 'Guardando…' : 'Guardar'}
+                    <Button type="submit" disabled={guardando}>
+                        {guardando ? 'Guardando…' : 'Guardar concepto'}
                     </Button>
                 </>
             }
         >
             {nuevo && (
-                <Field label="Concepto">
+                <Field label="Concepto" error={error?.campo === 'concepto' ? error.texto : null}>
                     {(p) => <Input {...p} value={g.concepto} onChange={(e) => (setG({ ...g, concepto: e.target.value }), setError(null))} />}
                 </Field>
             )}
-            <div className="flex flex-col gap-1.5">
+            <div role="group" aria-label="Reparto en el costeo" className="flex flex-col gap-1.5">
                 <span className="text-ui font-medium">Reparto en el costeo</span>
                 <Segmented<ConceptoGasto['reparto']>
                     value={g.reparto}
@@ -240,8 +253,8 @@ function FormGasto({ g: inicial, nuevo, existentes, onCerrar }: { g: ConceptoGas
                     ]}
                 />
             </div>
-            <Field label="Orden" hint="Posición en la lista de gastos.">
-                {(p) => <Input {...p} inputMode="numeric" value={orden} onChange={(e) => setOrden(e.target.value)} />}
+            <Field label="Orden" hint="Posición en la lista de gastos." error={error?.campo === 'orden' ? error.texto : null}>
+                {(p) => <Input {...p} inputMode="numeric" value={orden} onChange={(e) => (setOrden(e.target.value), setError(null))} />}
             </Field>
             <Checkbox
                 label="Entra al costo"
@@ -250,9 +263,9 @@ function FormGasto({ g: inicial, nuevo, existentes, onCerrar }: { g: ConceptoGas
                 onChange={(e) => setG({ ...g, entraCosto: e.target.checked })}
             />
             <Checkbox label="Activo" checked={g.activo} onChange={(e) => setG({ ...g, activo: e.target.checked })} />
-            {error && (
+            {error && !error.campo && (
                 <p role="alert" className="text-small font-medium text-danger-strong">
-                    {error}
+                    {error.texto}
                 </p>
             )}
         </Dialog>

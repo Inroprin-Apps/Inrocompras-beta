@@ -72,7 +72,7 @@ function FichaCargada({ d, onCerrar }: { d: DesaduanajeDetalle; onCerrar: () => 
                         Costeo reabierto: «{d.motivoReapertura}». El próximo cierre será la versión {d.versionCosteo + 1}.
                     </p>
                 )}
-                <PanelAcciones tabla="desaduanajes" id={d.id} tocadas={TOCADAS} />
+                <PanelAcciones tabla="desaduanajes" id={d.id} nombre={nombreDes(d)} tocadas={TOCADAS} />
             </div>
 
             {d.estado === 'Borrador' && (
@@ -90,7 +90,7 @@ function FichaCargada({ d, onCerrar }: { d: DesaduanajeDetalle; onCerrar: () => 
                 accion={
                     edita && (
                         <Button variant="ghost" onClick={() => setEditando(true)}>
-                            <Pencil size={15} /> Editar
+                            <Pencil size={15} aria-hidden /> Editar datos
                         </Button>
                     )
                 }

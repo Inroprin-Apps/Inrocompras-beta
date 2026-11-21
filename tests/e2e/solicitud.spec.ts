@@ -18,10 +18,10 @@ test('solicitante crea, completa y emite una solicitud', async ({ page, errores 
     // Sin ítems no se puede emitir: la base no ofrece el botón.
     await expect(page.getByRole('button', { name: 'Emitir solicitud' })).toHaveCount(0);
 
-    await page.getByRole('button', { name: 'Ítem', exact: true }).click();
+    await page.getByRole('button', { name: 'Agregar ítem' }).click();
     await page.getByLabel('Descripción').fill(`Mesa de trabajo (${marca})`);
     await page.getByLabel('Cantidad').fill('3');
-    await page.getByRole('button', { name: 'Agregar ítem' }).click();
+    await page.getByRole('button', { name: 'Guardar ítem' }).click();
     await expect(page.getByText(`Mesa de trabajo (${marca})`)).toBeVisible();
 
     await page.getByRole('button', { name: 'Emitir solicitud' }).click();

@@ -8,7 +8,7 @@ import { solicitudes } from '@/modules/solicitudes/composition.ts';
 import { TIPOS_SOLICITUD, faltaEnSolicitud, type NuevaSolicitud, type Solicitud, type TipoSolicitud } from '@/modules/solicitudes/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
 import { Segmented } from '@/shared/ui/card.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Textarea } from '@/shared/ui/field.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
@@ -34,6 +34,8 @@ export function FormSolicitud({ solicitud, onCerrar, onCreado }: { solicitud?: S
     const [error, setError] = useState<string | null>(null);
     const [guardando, setGuardando] = useState(false);
     const set = (patch: Partial<NuevaSolicitud>) => setF({ ...f, ...patch });
+    const sucio = JSON.stringify(f) !== JSON.stringify(inicial);
+    const { cerrar, aviso } = useCerrarConCambios(sucio, onCerrar);
 
     // Una administrativa sin jefe elegido propone el que asignó el administrador en Equipo.
     useEffect(() => {
@@ -52,7 +54,7 @@ export function FormSolicitud({ solicitud, onCerrar, onCreado }: { solicitud?: S
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
         olvidar();
-        toast.success(solicitud ? 'Solicitud actualizada.' : 'Borrador creado. Ahora agrega los ítems.');
+        toast.success(solicitud ? `Solicitud ${solicitud.numero || 'en borrador'} guardada.` : 'Borrador de solicitud creado. Ahora agrega los ítems.');
         refrescar(['solicitudes', 'acciones']);
         onCreado(r.value);
     }
@@ -60,16 +62,18 @@ export function FormSolicitud({ solicitud, onCerrar, onCreado }: { solicitud?: S
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo={solicitud ? 'Editar solicitud' : 'Nueva solicitud'}
             descripcion={solicitud ? undefined : 'Se crea como borrador. Después agregas los ítems (uno a uno o desde Excel) y la emites.'}
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar}>
+                    <Button variant="secondary" onClick={cerrar}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
-                        {guardando ? 'Guardando…' : solicitud ? 'Guardar cambios' : 'Crear borrador'}
+                    <Button type="submit" disabled={guardando}>
+                        {guardando ? (solicitud ? 'Guardando…' : 'Creando…') : solicitud ? 'Guardar solicitud' : 'Crear borrador'}
                     </Button>
                 </>
             }

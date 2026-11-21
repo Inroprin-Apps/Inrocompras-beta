@@ -3,6 +3,7 @@
 // El estado de la cola de trabajos (Drive, PDF, correo, lectura, InroPay): cuántos hay por estado, y cada trabajo con
 // su mensaje. Uno en Error se reintenta (vuelve a Pendiente desde cero) o se descarta con motivo. Funciones
 // solo-admin de 0021 (cola_resumen, cola_listar, ac_cola_reintentar, ac_cola_descartar).
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { cola } from '@/modules/configuracion/composition.ts';
@@ -18,9 +19,9 @@ import {
 } from '@/modules/configuracion/application/views.ts';
 import { rutaDe } from '@/modules/comun/application/views.ts';
 import { FilterRow, T } from '@/shared/ui/bits.tsx';
-import { Button } from '@/shared/ui/button.tsx';
+import { Button, LINK_CLASS } from '@/shared/ui/button.tsx';
 import { Chip, Kpi } from '@/shared/ui/card.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Textarea } from '@/shared/ui/field.tsx';
 import { dayTime } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
@@ -72,7 +73,7 @@ export function SeccionCola() {
                     options={[{ value: '', label: 'Todos los estados' }, ...ESTADOS_COLA.map((e) => ({ value: e, label: e }))]}
                 />
                 <Button variant="secondary" onClick={() => refrescar(['cola'])}>
-                    <RefreshCw size={15} /> Actualizar
+                    <RefreshCw size={15} aria-hidden /> Actualizar cola
                 </Button>
             </FilterRow>
             <Lista
@@ -80,7 +81,18 @@ export function SeccionCola() {
                 onReintentar={() => (void colaStore.retry(), void colaResumenStore.retry())}
                 vacia={
                     <ListaVacia titulo={filtro ? `Ningún trabajo en «${filtro}»` : 'La cola está vacía'}>
-                        Los trabajos aparecen aquí cuando una acción encola un correo, un PDF o un archivo para Drive.
+                        {filtro ? (
+                            <>
+                                Prueba con otro estado o quita el filtro.
+                                <div className="mt-4">
+                                    <Button variant="secondary" onClick={() => setFiltro('')}>
+                                        Quitar filtro
+                                    </Button>
+                                </div>
+                            </>
+                        ) : (
+                            'Los trabajos aparecen aquí cuando una acción encola un correo, un PDF o un archivo para Drive.'
+                        )}
                     </ListaVacia>
                 }
             >
@@ -108,9 +120,9 @@ export function SeccionCola() {
                                                     {x.refTabla && x.refId && rutaDe(x.refTabla, x.refId) !== '/' && (
                                                         <>
                                                             {' · '}
-                                                            <a className="text-primary hover:underline" href={rutaDe(x.refTabla, x.refId)}>
+                                                            <Link className={LINK_CLASS} href={rutaDe(x.refTabla, x.refId)}>
                                                                 Ver registro
-                                                            </a>
+                                                            </Link>
                                                         </>
                                                     )}
                                                 </div>
@@ -126,12 +138,22 @@ export function SeccionCola() {
                                             <td className={`${T.td} whitespace-nowrap`}>
                                                 <div className="flex gap-1.5">
                                                     {puedeReintentar(x) && (
-                                                        <Button variant="secondary" disabled={ocupado === x.id} onClick={() => void reintentar(x)}>
-                                                            Reintentar
+                                                        <Button
+                                                            variant="secondary"
+                                                            aria-label={`Reintentar el trabajo ${x.id}`}
+                                                            disabled={ocupado === x.id}
+                                                            onClick={() => void reintentar(x)}
+                                                        >
+                                                            {ocupado === x.id ? 'Reintentando…' : 'Reintentar'}
                                                         </Button>
                                                     )}
                                                     {puedeDescartar(x) && (
-                                                        <Button variant="ghost" className="text-danger-strong" onClick={() => setDescartando(x)}>
+                                                        <Button
+                                                            variant="ghost"
+                                                            className="text-danger-strong"
+                                                            aria-label={`Descartar el trabajo ${x.id}`}
+                                                            onClick={() => setDescartando(x)}
+                                                        >
                                                             Descartar
                                                         </Button>
                                                     )}
@@ -155,6 +177,7 @@ function FormDescartar({ t, onCerrar }: { t: TrabajoCola; onCerrar: () => void }
     const [motivo, setMotivo] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [guardando, setGuardando] = useState(false);
+    const { cerrar, aviso } = useCerrarConCambios(motivo.trim() !== '', onCerrar);
     async function descartar() {
         if (!motivo.trim()) return setError('Escribe por qué lo descartas.');
         setGuardando(true);
@@ -168,16 +191,18 @@ function FormDescartar({ t, onCerrar }: { t: TrabajoCola; onCerrar: () => void }
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
-            titulo={`Descartar: ${etiquetaTipo(t.tipo)}`}
+            onCerrar={cerrar}
+            onEnviar={() => void descartar()}
+            aviso={aviso}
+            titulo={`Descartar el trabajo ${t.id}: ${etiquetaTipo(t.tipo)}`}
             descripcion="El trabajo no se volverá a intentar. Queda en la lista con tu motivo."
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button variant="danger" onClick={() => void descartar()} disabled={guardando}>
-                        {guardando ? 'Un momento…' : 'Descartar'}
+                    <Button type="submit" variant="danger" disabled={guardando}>
+                        {guardando ? 'Descartando…' : 'Descartar trabajo'}
                     </Button>
                 </>
             }

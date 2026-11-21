@@ -131,7 +131,7 @@ export function keyed<T>(cargarDe: (key: string) => Promise<Result<T, ErrorFuent
         asked.add(key);
         return leer(() => cargarDe(key))
             .then(
-                (data) => void states.set(key, { data, error: null }),
+                (data) => void states.set(key, { data, error: null, actualizado: Date.now() }),
                 (e: unknown) => {
                     asked.delete(key);
                     if (!prefetching || open.has(key)) states.set(key, { data: null, error: mensaje(e) });

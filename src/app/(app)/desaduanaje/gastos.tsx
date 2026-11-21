@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { desaduanajes } from '@/modules/desaduanaje/composition.ts';
-import { monto, totalesCosteo, type DesaduanajeDetalle, type GastoDes } from '@/modules/desaduanaje/application/views.ts';
+import { monto, tc, totalesCosteo, type DesaduanajeDetalle, type GastoDes } from '@/modules/desaduanaje/application/views.ts';
 import { Notice } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
@@ -56,21 +56,20 @@ export function Gastos({ d, registra, nombre }: { d: DesaduanajeDetalle; registr
                                 </div>
                                 <div className="flex flex-none flex-col items-end gap-0.5">
                                     <span className={`text-ui tabular-nums ${g.tipoComprobante === 'Nota de crédito' ? 'text-success-strong' : ''}`}>
-                                        {g.tipoComprobante === 'Nota de crédito' ? '− ' : ''}
-                                        {monto(g.montoS)}
+                                        {monto(g.tipoComprobante === 'Nota de crédito' ? -g.montoS : g.montoS)}
                                     </span>
                                     {g.moneda !== 'PEN' && (
                                         <span className="text-caption text-ink-3 tabular-nums">
-                                            {monto(g.montoSinIgv, g.moneda)} × {g.tcCosteo}
+                                            {monto(g.montoSinIgv, g.moneda)} × {tc(g.tcCosteo)}
                                         </span>
                                     )}
                                     {registra && (
                                         <span className="flex gap-1">
                                             <Button variant="ghost" iconOnly aria-label={`Editar ${g.concepto}`} onClick={() => setForm({ gasto: g })}>
-                                                <Pencil size={15} />
+                                                <Pencil size={15} aria-hidden />
                                             </Button>
                                             <Button variant="ghost" iconOnly aria-label={`Borrar ${g.concepto}`} onClick={() => setBorrando(g)}>
-                                                <Trash2 size={15} />
+                                                <Trash2 size={15} aria-hidden />
                                             </Button>
                                         </span>
                                     )}
@@ -93,7 +92,7 @@ export function Gastos({ d, registra, nombre }: { d: DesaduanajeDetalle; registr
             {registra && (
                 <div>
                     <Button variant="secondary" onClick={() => setForm({})}>
-                        <Plus size={16} /> Registrar gasto
+                        <Plus size={16} aria-hidden /> Registrar gasto
                     </Button>
                 </div>
             )}
@@ -111,7 +110,7 @@ function ConfirmarBorrado({ g, onCerrar }: { g: GastoDes; onCerrar: () => void }
         const r = await desaduanajes().borrarGasto(g.id);
         setBorrando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success('Gasto borrado. Vuelve a calcular el costeo.');
+        toast.success(`Gasto de ${g.concepto} borrado. Vuelve a calcular el costeo.`);
         refrescar(['des_gastos', 'desaduanajes']);
         onCerrar();
     }
@@ -119,8 +118,8 @@ function ConfirmarBorrado({ g, onCerrar }: { g: GastoDes; onCerrar: () => void }
         <Dialog
             abierto
             onCerrar={onCerrar}
-            titulo="¿Borrar este gasto?"
-            descripcion={`${g.concepto} · ${monto(g.montoS)}. No se puede deshacer.`}
+            titulo={`Borrar el gasto de ${g.concepto}`}
+            descripcion={`${monto(g.montoS)}. No se puede deshacer: si lo necesitas otra vez, regístralo de nuevo.`}
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar} disabled={borrando}>

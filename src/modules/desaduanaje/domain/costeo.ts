@@ -80,9 +80,11 @@ export const montoS = (monto: number, tc: number) => Math.round(monto * tc * 100
 /** Qué falta para guardar un gasto (en palabras), o null. */
 export function faltaEnGasto(g: NuevoGasto): string | null {
     if (!g.concepto) return 'Elige el concepto del gasto.';
-    if (g.montoSinIgv == null || !(g.montoSinIgv > 0)) return 'Escribe el monto sin IGV, mayor que cero (una nota de crédito también va en positivo).';
-    if (g.moneda !== 'PEN' && (g.tcCosteo == null || !(g.tcCosteo > 0))) return 'Escribe el tipo de cambio de costeo.';
-    if (g.rucEmisor.trim() && !/^\d{11}$/.test(g.rucEmisor.trim())) return 'El RUC del emisor tiene 11 dígitos.';
+    if (g.montoSinIgv == null || !(g.montoSinIgv > 0))
+        return 'El monto sin IGV tiene que ser mayor que cero (una nota de crédito también va en positivo). Usa punto para los decimales: 1250.50';
+    if (g.moneda !== 'PEN' && (g.tcCosteo == null || !(g.tcCosteo > 0)))
+        return 'Escribe el tipo de cambio de costeo, mayor que cero. Usa punto para los decimales: 3.785';
+    if (g.rucEmisor.trim() && !/^\d{11}$/.test(g.rucEmisor.trim())) return 'El RUC del emisor tiene 11 dígitos. Revísalo o déjalo vacío.';
     return null;
 }
 

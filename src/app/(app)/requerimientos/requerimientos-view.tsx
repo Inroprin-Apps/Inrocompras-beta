@@ -12,8 +12,10 @@ import {
     type OrdenReq,
 } from '@/modules/requerimientos/application/views.ts';
 import { AREAS } from '@/shared/tipos.ts';
-import { FilterRow, Notice, SearchBox, SectionTitle, T } from '@/shared/ui/bits.tsx';
+import { FilterRow, Notice, SearchBox, T } from '@/shared/ui/bits.tsx';
+import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
@@ -28,6 +30,9 @@ const ORDENES: { value: OrdenReq; label: string }[] = [
     { value: 'antiguos', label: 'Más antiguos' },
     { value: 'numero', label: 'Número' },
 ];
+
+/** La fila abre la ficha: se toca entera, se ve el foco del teclado. */
+const FILA = 'cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary';
 
 const vista$ = urlState(
     { ...FILTROS_REQ, orden: 'recientes' as OrdenReq, page: '1', ver: '', anulacion: '' },
@@ -59,9 +64,11 @@ export function RequerimientosView() {
         return proyectos.filter((p) => ids.has(p.id));
     }, [estado.data, proyectos]);
 
+    const conFiltros = !!(v.texto || v.estado || v.proyecto || v.area);
+
     return (
         <>
-            <SectionTitle title="Requerimientos" />
+            <Encabezado titulo="Requerimientos" actualizado={estado.actualizado} />
             {v.anulacion && deAnulacion.error && (
                 <Notice tone="danger" onClose={() => vista$.set({ anulacion: '' })}>
                     {deAnulacion.error}
@@ -98,15 +105,27 @@ export function RequerimientosView() {
                 estado={{ data: estado.data ? lista : null, error: estado.error }}
                 onReintentar={() => void requerimientosStore.retry()}
                 vacia={
-                    <ListaVacia titulo={estado.data?.length ? 'Ningún requerimiento coincide' : 'Aún no hay requerimientos'}>
-                        {estado.data?.length
-                            ? 'Prueba con otra búsqueda o quita los filtros.'
-                            : 'Nacen solos al liberarse una solicitud. Planeamiento los completa y los emite.'}
-                    </ListaVacia>
+                    conFiltros ? (
+                        <ListaVacia titulo="Ningún requerimiento coincide">
+                            Prueba con otra búsqueda o quita los filtros.
+                            <div className="mt-4">
+                                <Button variant="secondary" onClick={() => vista$.set({ texto: '', estado: '', proyecto: '', area: '' })}>
+                                    Quitar filtros
+                                </Button>
+                            </div>
+                        </ListaVacia>
+                    ) : (
+                        <ListaVacia titulo="Aún no hay requerimientos">
+                            Nacen solos al liberarse una solicitud. Planeamiento los completa y los emite.
+                        </ListaVacia>
+                    )
                 }
             >
                 {() => (
                     <>
+                        <p className="mb-2 text-small text-ink-3">
+                            {lista.length} {lista.length === 1 ? 'requerimiento' : 'requerimientos'}
+                        </p>
                         <div className="overflow-x-auto">
                             <table className={T.table}>
                                 <thead>
@@ -115,8 +134,8 @@ export function RequerimientosView() {
                                         <th className={T.th}>Proyecto o motivo</th>
                                         <th className={`${T.th} hidden sm:table-cell`}>Estado</th>
                                         <th className={`${T.th} hidden md:table-cell`}>Área emisora</th>
-                                        <th className={`${T.thNum} hidden sm:table-cell`}>Ítems</th>
-                                        <th className={`${T.thNum} hidden sm:table-cell`}>Creado</th>
+                                        <th className={`${T.thNum} hidden text-right sm:table-cell`}>Ítems</th>
+                                        <th className={`${T.thNum} hidden text-right sm:table-cell`}>Creado</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -124,7 +143,7 @@ export function RequerimientosView() {
                                         <tr
                                             key={r.id}
                                             tabIndex={0}
-                                            className={`${T.row} cursor-pointer ${v.ver === r.id ? 'bg-primary-soft' : ''}`}
+                                            className={`${T.row} ${FILA} ${v.ver === r.id ? 'bg-primary-soft' : ''}`}
                                             onClick={() => vista$.set({ ver: r.id, anulacion: '' })}
                                             onKeyDown={(e) => e.key === 'Enter' && vista$.set({ ver: r.id, anulacion: '' })}
                                         >
@@ -143,8 +162,8 @@ export function RequerimientosView() {
                                                 <Chip tone={tonoEstado(r.estado)}>{r.estado}</Chip>
                                             </td>
                                             <td className={`${T.td} hidden md:table-cell`}>{r.areaEmisora}</td>
-                                            <td className={`${T.tdNum} hidden sm:table-cell`}>{r.nItems}</td>
-                                            <td className={`${T.tdNum} hidden sm:table-cell`}>{dmy(r.creado)}</td>
+                                            <td className={`${T.tdNum} hidden text-right sm:table-cell`}>{r.nItems}</td>
+                                            <td className={`${T.tdNum} hidden text-right sm:table-cell`}>{dmy(r.creado)}</td>
                                         </tr>
                                     ))}
                                 </tbody>

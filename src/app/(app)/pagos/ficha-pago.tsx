@@ -6,12 +6,11 @@
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 import { TIPOS_ORDEN } from '@/modules/documentos/application/views.ts';
-import { monto } from '@/modules/ordenes/application/views.ts';
-import { FASES_PAGO, fasePago, formatoCuota, hoyLima, nombrePago, notaPago, tonoPago, vencida, type Pago } from '@/modules/pagos/application/views.ts';
+import { FASES_PAGO, diaPago, fasePago, formatoCuota, hoyLima, nombrePago, notaPago, tonoPago, vencida, type Pago } from '@/modules/pagos/application/views.ts';
 import { LINK_CLASS } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
 import { Datos, Fases, Ficha, FichaSeccion } from '@/shared/ui/ficha.tsx';
-import { dayTime, dmy } from '@/shared/ui/format.ts';
+import { dmy, money } from '@/shared/ui/format.ts';
 import { Hueco } from '@/shared/ui/hueco.tsx';
 import { Historial } from '../_acciones/historial.tsx';
 import { PanelAcciones } from '../_acciones/panel-acciones.tsx';
@@ -57,15 +56,15 @@ function FichaCargada({ p, onCerrar }: { p: Pago; onCerrar: () => void }) {
             <div className="flex flex-col gap-3 border-b border-divider px-5 py-4">
                 <Fases pasos={FASES_PAGO} actual={fasePago(p.estado)} />
                 {nota && <p className={`text-small ${p.estado === 'Observado Finanzas' ? 'text-warning-strong' : 'text-ink-2'}`}>{nota}</p>}
-                <PanelAcciones tabla="pagos" id={p.id} tocadas={TOCADAS} />
+                <PanelAcciones tabla="pagos" id={p.id} nombre={`${p.ordenNumero || 'Orden'} cuota ${formatoCuota(p.nCuota)}`} tocadas={TOCADAS} />
             </div>
 
             <FichaSeccion titulo="Montos">
                 <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <Total k="Cuota" v={monto(p.monto, p.moneda)} fuerte />
-                    <Total k="Retención 3 %" v={p.aplicaRetencion ? `−${monto(p.retencion, p.moneda)}` : 'No aplica'} />
-                    <Total k="Neto a pagar" v={monto(p.neto ?? p.monto - p.retencion, p.moneda)} />
-                    <Total k="En soles" v={monto(p.montoSoles)} />
+                    <Total k="Cuota" v={money(p.monto, p.moneda)} fuerte />
+                    <Total k="Retención 3 %" v={p.aplicaRetencion ? money(-p.retencion, p.moneda) : 'No aplica'} />
+                    <Total k="Neto a pagar" v={money(p.neto ?? p.monto - p.retencion, p.moneda)} />
+                    <Total k="En soles" v={money(p.montoSoles)} />
                 </dl>
                 {!p.aplicaRetencion && p.estado === 'Plan' && (
                     <p className="mt-2 text-small text-ink-3">La retención se calcula al solicitar la cuota, con la factura.</p>
@@ -99,7 +98,7 @@ function FichaCargada({ p, onCerrar }: { p: Pago; onCerrar: () => void }) {
                             ),
                         ],
                         ['Programada para', p.fechaProgramada ? dmy(p.fechaProgramada) : ''],
-                        ['Pagada', p.fechaPago ? dayTime(p.fechaPago) : ''],
+                        ['Pagada', p.fechaPago ? dmy(diaPago(p)) : ''],
                         ['N° de operación', p.nOperacion],
                         ['Referencia InroPay', p.inropayRef],
                         ['Sustento sin factura', p.sustento || undefined],
@@ -115,7 +114,7 @@ function FichaCargada({ p, onCerrar }: { p: Pago; onCerrar: () => void }) {
                         filas={[
                             ['Número', p.factura.numero],
                             ['Fecha', p.factura.fecha ? dmy(p.factura.fecha) : ''],
-                            ['Monto', p.factura.monto != null ? monto(p.factura.monto, p.factura.moneda ?? p.moneda) : ''],
+                            ['Monto', p.factura.monto != null ? money(p.factura.monto, p.factura.moneda ?? p.moneda) : ''],
                         ]}
                     />
                 ) : (

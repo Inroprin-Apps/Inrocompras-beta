@@ -18,7 +18,8 @@ import {
     type TipoItem,
 } from '@/modules/solicitudes/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { DateField } from '@/shared/ui/date-field.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input, Textarea } from '@/shared/ui/field.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
@@ -46,6 +47,8 @@ export function FormItem({
     const [error, setError] = useState<string | null>(null);
     const [guardando, setGuardando] = useState(false);
     const set = (patch: Partial<NuevoItem>) => setF({ ...f, ...patch });
+    const sucio = JSON.stringify(f) !== JSON.stringify(inicial);
+    const { cerrar, aviso } = useCerrarConCambios(sucio, onCerrar);
     const contenedores = posiblesContenedores(items, f.id);
     const tieneHijos = !!f.id && items.some((i) => i.incluidoEn === f.id);
 
@@ -57,7 +60,7 @@ export function FormItem({
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
         olvidar();
-        toast.success(f.id ? 'Ítem actualizado.' : 'Ítem agregado.');
+        toast.success(f.id ? `Ítem «${f.descripcion.trim()}» guardado.` : `Ítem «${f.descripcion.trim()}» agregado.`);
         refrescar(['solicitud_items', 'acciones']);
         if (otro) {
             setError(null);
@@ -74,11 +77,13 @@ export function FormItem({
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar(false)}
+            aviso={aviso}
             titulo={f.id ? `Editar ítem ${f.nItem ?? ''}`.trim() : 'Nuevo ítem'}
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar}>
+                    <Button variant="secondary" onClick={cerrar}>
                         Cancelar
                     </Button>
                     {!f.id && (
@@ -86,8 +91,8 @@ export function FormItem({
                             Guardar y agregar otro
                         </Button>
                     )}
-                    <Button onClick={() => void guardar(false)} disabled={guardando}>
-                        {guardando ? 'Guardando…' : f.id ? 'Guardar cambios' : 'Agregar ítem'}
+                    <Button type="submit" disabled={guardando}>
+                        {guardando ? 'Guardando…' : 'Guardar ítem'}
                     </Button>
                 </>
             }
@@ -137,9 +142,13 @@ export function FormItem({
                         ))}
                     </datalist>
                 </div>
-                <Field label="Plazo de adquisición" optional hint="Fecha en que se necesita.">
-                    {(p) => <Input {...p} type="date" value={f.plazoAdquisicion ?? ''} onChange={(e) => set({ plazoAdquisicion: e.target.value || null })} />}
-                </Field>
+                <div className="flex min-w-0 flex-col gap-1.5">
+                    <span className="text-ui font-medium">
+                        Plazo de adquisición <span className="ml-1.5 font-normal text-ink-3">(opcional)</span>
+                    </span>
+                    <DateField label="Plazo de adquisición" value={f.plazoAdquisicion ?? ''} onChange={(d) => set({ plazoAdquisicion: d || null })} />
+                    <p className="text-small text-ink-3">Fecha en que se necesita.</p>
+                </div>
                 <Field label="Canal" optional>
                     {(p) => (
                         <SelectMenu

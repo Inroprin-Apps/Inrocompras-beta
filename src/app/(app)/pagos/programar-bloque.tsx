@@ -3,17 +3,18 @@
 // Programar varias cuotas en una misma fecha (Finanzas). Cada una pasa por la misma función que el botón de la ficha
 // (ac_pago_programar), una tras otra: la base decide cada una y, si alguna no se puede, aquí se dice cuál y por qué.
 import { useState } from 'react';
-import { monto } from '@/modules/ordenes/application/views.ts';
 import { hoyLima, nombrePago, resumenBloque, type Pago, type ResultadoBloque } from '@/modules/pagos/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input } from '@/shared/ui/field.tsx';
+import { dmy, money } from '@/shared/ui/format.ts';
 import { toast } from '@/shared/ui/toaster.tsx';
 import { ejecutarAccion } from '../_acciones/panel-acciones.tsx';
 import { refrescar } from '../_lib/resource.ts';
 
 export function ProgramarBloque({ cuotas, onCerrar }: { cuotas: Pago[]; onCerrar: (hechas: string[]) => void }) {
-    const [fecha, setFecha] = useState(hoyLima());
+    const [inicial] = useState(hoyLima);
+    const [fecha, setFecha] = useState(inicial);
     const [haciendo, setHaciendo] = useState<number | null>(null);
     const [resultados, setResultados] = useState<ResultadoBloque[] | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -31,13 +32,14 @@ export function ProgramarBloque({ cuotas, onCerrar }: { cuotas: Pago[]; onCerrar
         refrescar(['pagos', 'ordenes', 'acciones', 'te_toca', 'notificaciones']);
         const { hechas, fallidas } = resumenBloque(rs);
         if (!fallidas.length) {
-            toast.success(`${hechas === 1 ? 'Programaste 1 cuota' : `Programaste ${hechas} cuotas`}.`);
+            toast.success(`${hechas === 1 ? `${rs[0].nombre} programada` : `${hechas} cuotas programadas`} para el ${dmy(fecha)}.`);
             return onCerrar(rs.map((r) => r.id));
         }
         setResultados(rs);
     }
 
     const total = cuotas.reduce((s, c) => s + c.montoSoles, 0);
+    const { cerrar, aviso } = useCerrarConCambios(fecha !== inicial, () => onCerrar([]));
     if (resultados) {
         const { hechas, fallidas } = resumenBloque(resultados);
         return (
@@ -46,7 +48,7 @@ export function ProgramarBloque({ cuotas, onCerrar }: { cuotas: Pago[]; onCerrar
                 onCerrar={() => onCerrar(resultados.filter((r) => !r.error).map((r) => r.id))}
                 titulo="Programación en bloque"
                 descripcion={`${hechas} de ${resultados.length} quedaron programadas. Revisa las que no se pudieron.`}
-                pie={<Button onClick={() => onCerrar(resultados.filter((r) => !r.error).map((r) => r.id))}>Entendido</Button>}
+                pie={<Button onClick={() => onCerrar(resultados.filter((r) => !r.error).map((r) => r.id))}>Cerrar resumen</Button>}
             >
                 <ul className="flex flex-col divide-y divide-divider">
                     {fallidas.map((r) => (
@@ -63,16 +65,18 @@ export function ProgramarBloque({ cuotas, onCerrar }: { cuotas: Pago[]; onCerrar
     return (
         <Dialog
             abierto
-            onCerrar={() => haciendo === null && onCerrar([])}
+            onCerrar={() => haciendo === null && cerrar()}
+            onEnviar={() => void programar()}
+            aviso={aviso}
             titulo={`Programar ${cuotas.length === 1 ? '1 cuota' : `${cuotas.length} cuotas`}`}
-            descripcion={`Suman ${monto(total)} en soles. Todas quedan programadas para la misma fecha.`}
+            descripcion={`Suman ${money(total, 'PEN')}. Todas quedan programadas para la misma fecha.`}
             pie={
                 <>
-                    <Button variant="secondary" onClick={() => onCerrar([])} disabled={haciendo !== null}>
+                    <Button variant="secondary" onClick={cerrar} disabled={haciendo !== null}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void programar()} disabled={haciendo !== null}>
-                        {haciendo !== null ? `Programando ${haciendo} de ${cuotas.length}…` : 'Programar'}
+                    <Button type="submit" disabled={haciendo !== null}>
+                        {haciendo !== null ? `Programando ${haciendo} de ${cuotas.length}…` : cuotas.length === 1 ? 'Programar cuota' : 'Programar cuotas'}
                     </Button>
                 </>
             }
@@ -86,7 +90,7 @@ export function ProgramarBloque({ cuotas, onCerrar }: { cuotas: Pago[]; onCerrar
                         <span className="min-w-0 flex-1 truncate">
                             {nombrePago(c)} · {c.proveedor}
                         </span>
-                        <span className="tabular-nums">{monto(c.monto, c.moneda)}</span>
+                        <span className="tabular-nums">{money(c.monto, c.moneda)}</span>
                     </li>
                 ))}
             </ul>

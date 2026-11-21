@@ -14,7 +14,7 @@ import {
 } from '@/modules/requerimientos/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
 import { Segmented } from '@/shared/ui/card.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input, Textarea } from '@/shared/ui/field.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
 import { ejecutarAccion } from '../_acciones/panel-acciones.tsx';
@@ -46,6 +46,14 @@ export function CamposTecnica({ f, onChange }: { f: FormTecnica; onChange: (f: F
     );
 }
 
+/** El texto del botón según el resultado elegido (verbo y objeto). */
+export function textoRegistrar(r: ResultadoTecnica, haciendo: boolean): string {
+    if (haciendo) return 'Registrando…';
+    if (r === 'Validado') return 'Registrar validación';
+    if (r === 'Observado') return 'Registrar observación';
+    return 'Registrar «No aplica»';
+}
+
 export interface Fallo {
     item: ItemTecnica;
     mensaje: string;
@@ -66,6 +74,7 @@ export function DialogoTecnica({ items, onCerrar, onHecho }: { items: ItemTecnic
     const [f, setF] = useState<FormTecnica>(TECNICA_VACIA);
     const [error, setError] = useState<string | null>(null);
     const [haciendo, setHaciendo] = useState(false);
+    const { cerrar, aviso } = useCerrarConCambios(JSON.stringify(f) !== JSON.stringify(TECNICA_VACIA), onCerrar);
 
     async function confirmar() {
         const falta = faltaEnTecnica(f);
@@ -75,23 +84,28 @@ export function DialogoTecnica({ items, onCerrar, onHecho }: { items: ItemTecnic
         setHaciendo(false);
         const bien = items.length - fallos.length;
         if (bien) toast.success(`${bien} ${bien === 1 ? 'ítem quedó' : 'ítems quedaron'} como «${f.resultado}».`);
-        if (fallos.length) toast.error(`${fallos.length} no se pudieron registrar. Mira el detalle arriba de la lista.`);
+        if (fallos.length)
+            toast.error(
+                `${fallos.length} ${fallos.length === 1 ? 'ítem no se pudo registrar' : 'ítems no se pudieron registrar'}. Mira el detalle arriba de la lista.`,
+            );
         onHecho(fallos);
     }
 
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void confirmar()}
+            aviso={aviso}
             titulo={items.length === 1 ? 'Validación técnica' : `Validación técnica de ${items.length} ítems`}
             descripcion={items.length === 1 ? items[0].descripcion : 'El mismo resultado, marca y modelo para todos los marcados.'}
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar} disabled={haciendo}>
+                    <Button variant="secondary" onClick={cerrar} disabled={haciendo}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void confirmar()} disabled={haciendo}>
-                        {haciendo ? 'Registrando…' : `Registrar ${f.resultado.toLowerCase()}`}
+                    <Button type="submit" disabled={haciendo}>
+                        {textoRegistrar(f.resultado, haciendo)}
                     </Button>
                 </>
             }

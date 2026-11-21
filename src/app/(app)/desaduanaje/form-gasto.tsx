@@ -23,7 +23,7 @@ import {
 } from '@/modules/desaduanaje/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
 import { DateField } from '@/shared/ui/date-field.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input, Textarea } from '@/shared/ui/field.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
@@ -38,13 +38,20 @@ export function FormGasto({ d, gasto, onCerrar }: { d: DesaduanajeDetalle; gasto
     const tcs = tcCosteoStore.use().data ?? [];
     const ordenesLeidos = ordenesStore.use().data;
     const ordenes = useMemo(() => ordenesLeidos ?? [], [ordenesLeidos]);
-    const [g, setG] = useState<NuevoGasto>(gasto ? aNuevoGasto(gasto) : gastoVacio(d.monedaDam === 'EUR' ? 'EUR' : 'USD'));
-    const [montoTxt, setMontoTxt] = useState(gasto ? String(gasto.montoSinIgv) : '');
-    // null = usar el sugerido; texto = lo que escribió la persona.
-    const [tcTxt, setTcTxt] = useState<string | null>(gasto && gasto.moneda !== 'PEN' ? String(gasto.tcCosteo) : null);
+    const [inicial] = useState(() => ({
+        g: gasto ? aNuevoGasto(gasto) : gastoVacio(d.monedaDam === 'EUR' ? 'EUR' : 'USD'),
+        montoTxt: gasto ? String(gasto.montoSinIgv) : '',
+        // null = usar el sugerido; texto = lo que escribió la persona.
+        tcTxt: gasto && gasto.moneda !== 'PEN' ? String(gasto.tcCosteo) : null,
+    }));
+    const [g, setG] = useState<NuevoGasto>(inicial.g);
+    const [montoTxt, setMontoTxt] = useState(inicial.montoTxt);
+    const [tcTxt, setTcTxt] = useState<string | null>(inicial.tcTxt);
     const [error, setError] = useState<string | null>(null);
     const [guardando, setGuardando] = useState(false);
     const set = (p: Partial<NuevoGasto>) => setG((x) => ({ ...x, ...p }));
+    const sucio = JSON.stringify({ g, montoTxt, tcTxt }) !== JSON.stringify(inicial);
+    const { cerrar, aviso } = useCerrarConCambios(sucio, onCerrar);
 
     const sugerido = tcSugerido(g.moneda, g.fechaComprobante ?? hoyLima(), d, tcs);
     const tcFinal = g.moneda === 'PEN' ? 1 : tcTxt === null ? sugerido.tc : leerNumero(tcTxt);
@@ -61,7 +68,7 @@ export function FormGasto({ d, gasto, onCerrar }: { d: DesaduanajeDetalle; gasto
         const r = await desaduanajes().guardarGasto(d.id, final, gasto?.id);
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success(gasto ? 'Gasto corregido. Vuelve a calcular el costeo.' : 'Gasto registrado. Vuelve a calcular el costeo.');
+        toast.success(`Gasto de ${g.concepto} ${gasto ? 'guardado' : 'registrado'}. Vuelve a calcular el costeo.`);
         refrescar(['des_gastos', 'desaduanajes']);
         onCerrar();
     }
@@ -69,16 +76,18 @@ export function FormGasto({ d, gasto, onCerrar }: { d: DesaduanajeDetalle; gasto
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo={gasto ? 'Corregir gasto' : 'Registrar gasto'}
             descripcion="Montos sin IGV. El IGV y la percepción se registran con su concepto: no entran al costo."
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar} disabled={guardando}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
-                        {guardando ? 'Guardando…' : gasto ? 'Guardar cambios' : 'Registrar gasto'}
+                    <Button type="submit" disabled={guardando}>
+                        {guardando ? 'Guardando…' : gasto ? 'Guardar gasto' : 'Registrar gasto'}
                     </Button>
                 </>
             }

@@ -13,8 +13,10 @@ import {
     ordenarSeguimiento,
     type EstadoCompra,
 } from '@/modules/requerimientos/application/views.ts';
-import { FilterRow, SearchBox, SectionTitle, T } from '@/shared/ui/bits.tsx';
+import { FilterRow, SearchBox, T } from '@/shared/ui/bits.tsx';
+import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, usePaged } from '@/shared/ui/pager.tsx';
@@ -44,7 +46,7 @@ export function SeguimientoView() {
 
     return (
         <>
-            <SectionTitle title="Seguimiento" />
+            <Encabezado titulo="Seguimiento" actualizado={estado.actualizado} />
             <BarraPestanas<'' | EstadoCompra>
                 activa={v.estado}
                 onCambiar={(e) => vista$.set({ estado: e })}
@@ -70,15 +72,29 @@ export function SeguimientoView() {
                 estado={{ data: estado.data ? lista : null, error: estado.error }}
                 onReintentar={() => void seguimientoStore.reload(v.proyecto || 'todos')}
                 vacia={
-                    <ListaVacia titulo={estado.data?.length ? 'Ningún ítem coincide' : 'Aún no hay ítems que seguir'}>
-                        {estado.data?.length
-                            ? 'Prueba con otra búsqueda o cambia de pestaña.'
-                            : 'Aquí aparecen los ítems de los requerimientos en cuanto nacen.'}
-                    </ListaVacia>
+                    v.texto || v.estado ? (
+                        <ListaVacia titulo="Ningún ítem coincide">
+                            Prueba con otra búsqueda o quita los filtros.
+                            <div className="mt-4">
+                                <Button variant="secondary" onClick={() => vista$.set({ texto: '', estado: '' })}>
+                                    Quitar filtros
+                                </Button>
+                            </div>
+                        </ListaVacia>
+                    ) : (
+                        <ListaVacia titulo={unProyecto ? 'Este proyecto aún no tiene ítems' : 'Aún no hay ítems que seguir'}>
+                            {unProyecto
+                                ? 'Aparecen en cuanto nace un requerimiento del proyecto. Elige «Todos los proyectos» para ver los demás.'
+                                : 'Aquí aparecen los ítems de los requerimientos en cuanto nacen.'}
+                        </ListaVacia>
+                    )
                 }
             >
                 {() => (
                     <>
+                        <p className="mb-2 text-small text-ink-3">
+                            {lista.length} {lista.length === 1 ? 'ítem' : 'ítems'}
+                        </p>
                         {/* Celular: una tarjeta por ítem; desde tablet, la tabla. */}
                         <ul className="flex flex-col gap-2 md:hidden">
                             {pag.rows.map((f) => {
@@ -113,10 +129,10 @@ export function SeguimientoView() {
                                         {!unProyecto && <th className={T.th}>Proyecto</th>}
                                         <th className={T.th}>Requerimiento</th>
                                         <th className={T.th}>Validación técnica</th>
-                                        <th className={T.thNum}>Cantidad</th>
-                                        <th className={T.thNum}>Por comprar</th>
+                                        <th className={`${T.thNum} text-right`}>Cantidad</th>
+                                        <th className={`${T.thNum} text-right`}>Por comprar</th>
                                         <th className={T.th}>Compra</th>
-                                        <th className={T.thNum}>Fecha meta</th>
+                                        <th className={`${T.thNum} text-right`}>Fecha meta</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -139,14 +155,15 @@ export function SeguimientoView() {
                                                     {f.validacionTecnica}
                                                     {(f.marca || f.modelo) && <div className={T.sub}>{[f.marca, f.modelo].filter(Boolean).join(' · ')}</div>}
                                                 </td>
-                                                <td className={T.tdNum}>{fmtNum.format(f.cantidad)}</td>
-                                                <td className={T.tdNum}>{fmtNum.format(f.saldo)}</td>
+                                                <td className={`${T.tdNum} text-right`}>{fmtNum.format(f.cantidad)}</td>
+                                                <td className={`${T.tdNum} text-right`}>{fmtNum.format(f.saldo)}</td>
                                                 <td className={T.td}>
                                                     <Chip tone={TONO[e]}>{ETIQUETA_COMPRA[e]}</Chip>
-                                                    {f.ordenes && <div className={T.sub}>{f.ordenes}</div>}
-                                                    {f.estadoOrden && <div className={T.sub}>{f.estadoOrden}</div>}
+                                                    {(f.ordenes || f.estadoOrden) && (
+                                                        <div className={T.sub}>{[f.ordenes, f.estadoOrden].filter(Boolean).join(' · ')}</div>
+                                                    )}
                                                 </td>
-                                                <td className={T.tdNum}>{f.fechaMeta ? dmy(f.fechaMeta) : '—'}</td>
+                                                <td className={`${T.tdNum} text-right`}>{f.fechaMeta ? dmy(f.fechaMeta) : '—'}</td>
                                             </tr>
                                         );
                                     })}

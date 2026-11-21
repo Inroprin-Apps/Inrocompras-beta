@@ -4,17 +4,17 @@
 // El N° de DAM y las fechas de numeración, llegada, levante y almacén los registran las acciones, no este formulario.
 import { useState } from 'react';
 import { desaduanajes } from '@/modules/desaduanaje/composition.ts';
-import { MONEDAS_DAM, type DatosDes, type DesaduanajeDetalle } from '@/modules/desaduanaje/application/views.ts';
+import { MONEDAS_DAM, nombreDes, type DatosDes, type DesaduanajeDetalle } from '@/modules/desaduanaje/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
 import { DateField } from '@/shared/ui/date-field.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Checkbox, Field, Input, Textarea } from '@/shared/ui/field.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
 import { refrescar } from '../_lib/resource.ts';
 
 export function FormDatos({ d, onCerrar }: { d: DesaduanajeDetalle; onCerrar: () => void }) {
-    const [x, setX] = useState<DatosDes>({
+    const [inicial] = useState<DatosDes>(() => ({
         agente: d.agente,
         blAwb: d.blAwb,
         fechaEmbarque: d.fechaEmbarque,
@@ -23,19 +23,21 @@ export function FormDatos({ d, onCerrar }: { d: DesaduanajeDetalle; onCerrar: ()
         requierePermiso: d.requierePermiso,
         tipoPermiso: d.tipoPermiso,
         comentario: d.comentario,
-    });
+    }));
+    const [x, setX] = useState<DatosDes>(inicial);
     const [error, setError] = useState<string | null>(null);
     const [guardando, setGuardando] = useState(false);
     const set = (p: Partial<DatosDes>) => setX((v) => ({ ...v, ...p }));
+    const { cerrar, aviso } = useCerrarConCambios(JSON.stringify(x) !== JSON.stringify(inicial), onCerrar);
 
     async function guardar() {
         if (x.fechaEmbarque && x.fechaLlegadaEst && x.fechaLlegadaEst < x.fechaEmbarque)
-            return setError('La llegada estimada no puede ser antes del embarque.');
+            return setError('La llegada estimada es anterior al embarque. Revisa las dos fechas.');
         setGuardando(true);
         const r = await desaduanajes().guardarDatos(d.id, x);
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success('Datos del embarque guardados.');
+        toast.success(`Datos del embarque de ${nombreDes(d)} guardados.`);
         refrescar(['desaduanajes', 'acciones']);
         onCerrar();
     }
@@ -43,15 +45,17 @@ export function FormDatos({ d, onCerrar }: { d: DesaduanajeDetalle; onCerrar: ()
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo="Datos del embarque"
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar} disabled={guardando}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
-                        {guardando ? 'Guardando…' : 'Guardar cambios'}
+                    <Button type="submit" disabled={guardando}>
+                        {guardando ? 'Guardando…' : 'Guardar datos'}
                     </Button>
                 </>
             }

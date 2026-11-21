@@ -1,11 +1,10 @@
 'use client';
 
 // Una cuota en la lista de Pagos: fila de la tabla (escritorio) o tarjeta (celular), y su fecha límite.
-import { monto } from '@/modules/ordenes/application/views.ts';
 import { formatoCuota, seleccionable, tonoPago, vencida, type Pago } from '@/modules/pagos/application/views.ts';
 import { T } from '@/shared/ui/bits.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
-import { dmy } from '@/shared/ui/format.ts';
+import { dmy, money } from '@/shared/ui/format.ts';
 
 function Limite({ p, hoy }: { p: Pago; hoy: string }) {
     if (!p.fechaLimite) return <span className="text-ink-3">—</span>;
@@ -38,7 +37,7 @@ export function FilaPago({
     return (
         <tr
             tabIndex={0}
-            className={`${T.row} cursor-pointer ${activa ? 'bg-primary-soft' : ''}`}
+            className={`${T.row} cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${activa ? 'bg-primary-soft' : ''}`}
             onClick={onAbrir}
             onKeyDown={(e) => e.key === 'Enter' && onAbrir()}
         >
@@ -65,14 +64,14 @@ export function FilaPago({
                 <div className={T.sub}>{p.factura ? `Factura ${p.factura.numero || 'sin número'}` : p.hito}</div>
             </td>
             <td className={`${T.tdNum} text-right`}>
-                {monto(p.monto, p.moneda)}
-                {p.moneda !== 'PEN' && <div className={T.sub}>{monto(p.montoSoles)}</div>}
+                {money(p.monto, p.moneda)}
+                {p.moneda !== 'PEN' && <div className={T.sub}>{money(p.montoSoles)}</div>}
             </td>
             <td className={`${T.tdNum} text-right`}>
                 {p.aplicaRetencion ? (
                     <>
-                        <span className="text-ink-2">−{monto(p.retencion, p.moneda)}</span>
-                        <div className={T.sub}>Neto {monto(p.neto ?? p.monto - p.retencion, p.moneda)}</div>
+                        <span className="text-ink-2">{money(-p.retencion, p.moneda)}</span>
+                        <div className={T.sub}>Neto {money(p.neto ?? p.monto - p.retencion, p.moneda)}</div>
                     </>
                 ) : (
                     <span className="text-ink-3">Sin retención</span>
@@ -111,7 +110,7 @@ export function TarjetaPago({
     return (
         <li className={`flex items-stretch rounded-card border border-line ${activa ? 'bg-primary-soft' : 'bg-surface'}`}>
             {marcable && (
-                <label className="flex items-center pl-3.5">
+                <label className="flex min-h-11 items-center pr-1 pl-3.5">
                     <input
                         type="checkbox"
                         aria-label={`Marcar ${p.ordenNumero} cuota ${formatoCuota(p.nCuota)}`}
@@ -124,13 +123,13 @@ export function TarjetaPago({
             <button
                 type="button"
                 onClick={onAbrir}
-                className="flex min-w-0 flex-1 flex-col gap-1.5 rounded-card px-4 py-3 text-left focus-visible:outline-2 focus-visible:outline-primary active:bg-surface-2"
+                className="flex min-w-0 flex-1 flex-col gap-1.5 rounded-card px-4 py-3 text-left hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-primary active:bg-surface-2"
             >
                 <div className="flex items-start gap-2">
                     <span className="min-w-0 flex-1 truncate text-ui font-semibold">
                         {p.ordenNumero} · {formatoCuota(p.nCuota)}
                     </span>
-                    <span className="text-ui font-medium tabular-nums">{monto(p.monto, p.moneda)}</span>
+                    <span className="text-ui font-medium tabular-nums">{money(p.monto, p.moneda)}</span>
                 </div>
                 <div className="truncate text-small text-ink-2">
                     {p.proveedor || 'Sin proveedor'} · {p.tipo}

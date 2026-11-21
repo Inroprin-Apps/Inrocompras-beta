@@ -12,7 +12,7 @@ import {
     type PedidoAnulacion,
 } from '@/modules/requerimientos/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Textarea } from '@/shared/ui/field.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
@@ -21,12 +21,15 @@ import { refrescar } from '../_lib/resource.ts';
 
 export function FormAnulacion({
     requerimientoId,
+    numero,
     items,
     itemId,
     onCerrar,
     onPedida,
 }: {
     requerimientoId: string;
+    /** El número del requerimiento, para el aviso. */
+    numero?: string;
     items: ItemRequerimiento[];
     itemId: string | null;
     onCerrar: () => void;
@@ -36,6 +39,8 @@ export function FormAnulacion({
     const [error, setError] = useState<string | null>(null);
     const [enviando, setEnviando] = useState(false);
     const vivos = items.filter((i) => !i.anulado);
+    const sucio = f.itemId !== itemId || !!f.causa || !!f.motivo.trim();
+    const { cerrar, aviso } = useCerrarConCambios(sucio, onCerrar);
 
     async function pedir() {
         const falta = faltaEnAnulacion(f);
@@ -44,7 +49,9 @@ export function FormAnulacion({
         const r = await ejecutarAccion('ac_anulacion_solicitar', { p_req: requerimientoId, p_item: f.itemId, p_causa: f.causa, p_motivo: f.motivo.trim() });
         setEnviando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success('Anulación pedida. Te avisamos cuando la decidan.');
+        const item = f.itemId ? items.find((i) => i.id === f.itemId) : null;
+        const que = item ? `del ítem ${item.nItem ?? `«${item.descripcion}»`} de` : 'de';
+        toast.success(`Anulación ${que} ${numero || 'el requerimiento'} pedida. Te avisamos cuando la decidan.`);
         refrescar(['anulaciones', 'requerimientos', 'acciones', 'te_toca', 'notificaciones']);
         if (typeof r.value.id === 'string') onPedida?.(r.value.id);
         onCerrar();
@@ -53,16 +60,18 @@ export function FormAnulacion({
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void pedir()}
+            aviso={aviso}
             titulo="Pedir anulación"
             descripcion="No se anula al momento: la decide el jefe de quien la pide (si es un error de emisión) o quien liberó la solicitud."
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar} disabled={enviando}>
+                    <Button variant="secondary" onClick={cerrar} disabled={enviando}>
                         Cancelar
                     </Button>
-                    <Button variant="danger" onClick={() => void pedir()} disabled={enviando}>
-                        {enviando ? 'Un momento…' : 'Pedir anulación'}
+                    <Button type="submit" variant="danger" disabled={enviando}>
+                        {enviando ? 'Pidiendo anulación…' : 'Pedir anulación'}
                     </Button>
                 </>
             }

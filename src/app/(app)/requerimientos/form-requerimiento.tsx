@@ -20,7 +20,8 @@ import {
     type TipoCompra,
 } from '@/modules/requerimientos/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { DateField } from '@/shared/ui/date-field.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input } from '@/shared/ui/field.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
@@ -29,13 +30,14 @@ import { useBorrador } from '../_lib/borrador.ts';
 import { refrescar } from '../_lib/resource.ts';
 import { catalogosStore } from '../_lib/stores.ts';
 
-function Pie({ onCerrar, onGuardar, guardando, texto }: { onCerrar: () => void; onGuardar: () => void; guardando: boolean; texto: string }) {
+/** Cancelar y el botón principal (submit: el diálogo va con onEnviar y Enter guarda). */
+function Pie({ onCerrar, guardando, texto }: { onCerrar: () => void; guardando: boolean; texto: string }) {
     return (
         <>
             <Button variant="secondary" onClick={onCerrar}>
                 Cancelar
             </Button>
-            <Button onClick={onGuardar} disabled={guardando}>
+            <Button type="submit" disabled={guardando}>
                 {guardando ? 'Guardando…' : texto}
             </Button>
         </>
@@ -62,6 +64,7 @@ export function FormCabecera({ req, onCerrar }: { req: Requerimiento; onCerrar: 
     const [error, setError] = useState<string | null>(null);
     const [guardando, setGuardando] = useState(false);
     const set = (p: Partial<CabeceraReq>) => setF({ ...f, ...p });
+    const { cerrar, aviso } = useCerrarConCambios(JSON.stringify(f) !== JSON.stringify(aCabecera(req)), onCerrar);
 
     async function guardar() {
         const falta = faltaEnCabecera(f);
@@ -71,7 +74,7 @@ export function FormCabecera({ req, onCerrar }: { req: Requerimiento; onCerrar: 
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
         olvidar();
-        toast.success('Requerimiento actualizado.');
+        toast.success(`Requerimiento ${req.numero || 'en proceso'} guardado.`);
         refrescar(['requerimientos', 'acciones']);
         onCerrar();
     }
@@ -79,9 +82,11 @@ export function FormCabecera({ req, onCerrar }: { req: Requerimiento; onCerrar: 
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo="Completar el requerimiento"
-            pie={<Pie onCerrar={onCerrar} onGuardar={() => void guardar()} guardando={guardando} texto="Guardar" />}
+            pie={<Pie onCerrar={cerrar} guardando={guardando} texto="Guardar requerimiento" />}
         >
             <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Empresa">
@@ -132,12 +137,13 @@ export function FormCabecera({ req, onCerrar }: { req: Requerimiento; onCerrar: 
     );
 }
 
-export function FormItemReq({ item, onCerrar }: { item: ItemRequerimiento; onCerrar: () => void }) {
+export function FormItemReq({ item, numero, onCerrar }: { item: ItemRequerimiento; numero?: string; onCerrar: () => void }) {
     const conceptos = useConceptos();
     const [f, setF, olvidar] = useBorrador<EdicionItem>(`req-item:${item.id}`, aEdicionItem(item));
     const [error, setError] = useState<string | null>(null);
     const [guardando, setGuardando] = useState(false);
     const set = (p: Partial<EdicionItem>) => setF({ ...f, ...p });
+    const { cerrar, aviso } = useCerrarConCambios(JSON.stringify(f) !== JSON.stringify(aEdicionItem(item)), onCerrar);
 
     async function guardar() {
         const falta = faltaEnItem(f);
@@ -147,7 +153,7 @@ export function FormItemReq({ item, onCerrar }: { item: ItemRequerimiento; onCer
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
         olvidar();
-        toast.success('Ítem actualizado.');
+        toast.success(`Ítem ${item.nItem ?? `«${item.descripcion}»`}${numero ? ` de ${numero}` : ''} guardado.`);
         refrescar(['requerimiento_items', 'acciones']);
         onCerrar();
     }
@@ -155,10 +161,12 @@ export function FormItemReq({ item, onCerrar }: { item: ItemRequerimiento; onCer
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo={`Ítem ${item.nItem ?? ''}`.trim()}
             descripcion={item.descripcion}
-            pie={<Pie onCerrar={onCerrar} onGuardar={() => void guardar()} guardando={guardando} texto="Guardar" />}
+            pie={<Pie onCerrar={cerrar} guardando={guardando} texto="Guardar ítem" />}
         >
             <Field label="Concepto" optional hint="Si lo dejas vacío, vale el concepto general.">
                 {(p) => (
@@ -181,9 +189,13 @@ export function FormItemReq({ item, onCerrar }: { item: ItemRequerimiento; onCer
                         />
                     )}
                 </Field>
-                <Field label="Fecha meta" optional hint="En almacén.">
-                    {(p) => <Input {...p} type="date" value={f.fechaMeta ?? ''} onChange={(e) => set({ fechaMeta: e.target.value || null })} />}
-                </Field>
+                <div className="flex min-w-0 flex-col gap-1.5">
+                    <span className="text-ui font-medium">
+                        Fecha meta <span className="ml-1.5 font-normal text-ink-3">(opcional)</span>
+                    </span>
+                    <DateField label="Fecha meta" value={f.fechaMeta ?? ''} onChange={(d) => set({ fechaMeta: d || null })} />
+                    <p className="text-small text-ink-3">En almacén.</p>
+                </div>
                 <Field label="Plazo de entrega (días)" optional>
                     {(p) => <Input {...p} inputMode="numeric" value={f.plazoEntregaDias} onChange={(e) => set({ plazoEntregaDias: e.target.value })} />}
                 </Field>
@@ -197,22 +209,25 @@ export function FormSku({ item, onCerrar }: { item: ItemRequerimiento; onCerrar:
     const [codigo, setCodigo] = useState(item.codigoSidige);
     const [error, setError] = useState<string | null>(null);
     const [guardando, setGuardando] = useState(false);
+    const { cerrar, aviso } = useCerrarConCambios(codigo.trim() !== item.codigoSidige, onCerrar);
     async function guardar() {
         setGuardando(true);
         const r = await ejecutarAccion('ac_item_sku', { p_item: item.id, p_codigo: codigo.trim() });
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success(codigo.trim() ? 'SKU asignado.' : 'SKU quitado.');
+        toast.success(codigo.trim() ? `SKU ${codigo.trim()} asignado a «${item.descripcion}».` : `SKU quitado de «${item.descripcion}».`);
         refrescar(['requerimiento_items', 'acciones']);
         onCerrar();
     }
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo="SKU del SIDIGE"
             descripcion={item.descripcion}
-            pie={<Pie onCerrar={onCerrar} onGuardar={() => void guardar()} guardando={guardando} texto="Guardar SKU" />}
+            pie={<Pie onCerrar={cerrar} guardando={guardando} texto="Guardar SKU" />}
         >
             <Field label="Código" hint="El que da el generador de códigos (ME00…). Vacío lo quita.">
                 {(p) => <Input {...p} value={codigo} onChange={(e) => setCodigo(e.target.value.toUpperCase())} />}

@@ -3,7 +3,8 @@
 // Configuración (administrador): los parámetros de la tabla config con su descripción y el tipo correcto, las monedas
 // (tasas: también Finanzas), el tipo de cambio de costeo, los conceptos, los conceptos de gasto de importación y el
 // estado de la cola de trabajos (pendientes y errores con su mensaje; reintentar o descartar). Pestañas en el #fragmento.
-import { Notice, SectionTitle } from '@/shared/ui/bits.tsx';
+import { Notice } from '@/shared/ui/bits.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { Tabs, type TabDef } from '@/shared/ui/tabs.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
 import { agregaTc, editaGastos, editaParametros, editaTasas, veCola } from './permisos.ts';
@@ -11,6 +12,7 @@ import { SeccionCola } from './seccion-cola.tsx';
 import { SeccionConceptos, SeccionGastos } from './seccion-conceptos.tsx';
 import { SeccionMonedas } from './seccion-monedas.tsx';
 import { SeccionParametros } from './seccion-parametros.tsx';
+import { configuracionStore } from './store.ts';
 
 export function ConfiguracionView() {
     const perfil = usePerfil();
@@ -24,7 +26,7 @@ export function ConfiguracionView() {
 
     return (
         <>
-            <SectionTitle title="Configuración" />
+            {tabs.length === 0 ? <Encabezado titulo="Configuración" /> : <EncabezadoConDatos />}
             {tabs.length === 0 ? (
                 <Notice tone="info" cerrable={false}>
                     La configuración la cambia el administrador (las tasas de cambio, también Finanzas). Si necesitas un cambio, pídeselo.
@@ -44,4 +46,9 @@ export function ConfiguracionView() {
             )}
         </>
     );
+}
+
+/** Con pestañas, el encabezado dice de cuándo es la configuración leída (sin pestañas no se lee nada). */
+function EncabezadoConDatos() {
+    return <Encabezado titulo="Configuración" actualizado={configuracionStore.use().actualizado} />;
 }

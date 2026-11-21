@@ -89,14 +89,14 @@ export function SolicitudesView() {
             </div>
         </ListaVacia>
     ) : v.pestana === 'liberar' ? (
-            <ListaVacia titulo="Nada por liberar">Aquí aparecen las solicitudes de las etapas que apruebas o de las personas a tu cargo.</ListaVacia>
-        ) : v.pestana === 'mias' && !(estado.data ?? []).some((s) => s.solicitanteId === perfil.id) ? (
-            <ListaVacia titulo="Aún no tienes solicitudes">
-                Crea una con «Nueva solicitud»: eliges el proyecto o a tu jefe, escribes el sustento y agregas los ítems.
-            </ListaVacia>
-        ) : (
-            <ListaVacia titulo="No hay solicitudes">Las solicitudes que puedes ver aparecen aquí en cuanto alguien las crea.</ListaVacia>
-        );
+        <ListaVacia titulo="Nada por liberar">Aquí aparecen las solicitudes de las etapas que apruebas o de las personas a tu cargo.</ListaVacia>
+    ) : v.pestana === 'mias' && !(estado.data ?? []).some((s) => s.solicitanteId === perfil.id) ? (
+        <ListaVacia titulo="Aún no tienes solicitudes">
+            Crea una con «Nueva solicitud»: eliges el proyecto o a tu jefe, escribes el sustento y agregas los ítems.
+        </ListaVacia>
+    ) : (
+        <ListaVacia titulo="No hay solicitudes">Las solicitudes que puedes ver aparecen aquí en cuanto alguien las crea.</ListaVacia>
+    );
 
     return (
         <>

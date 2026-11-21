@@ -227,14 +227,15 @@ export function aNumero(t: string): number | null {
 export function faltaEnItem(i: NuevoItem): string | null {
     if (!i.descripcion.trim()) return 'Escribe la descripción del ítem.';
     const c = aNumero(i.cantidad);
-    if (c === null || c <= 0) return 'La cantidad debe ser un número mayor que cero.';
+    if (c === null || c <= 0) return 'La cantidad tiene que ser un número mayor que cero, por ejemplo 3 o 2.5.';
     if (!i.unidad.trim()) return 'Escribe la unidad (por ejemplo, UND).';
     if (i.presupuestoUnit.trim()) {
         const p = aNumero(i.presupuestoUnit);
-        if (p === null || p < 0) return 'El presupuesto unitario debe ser un número.';
+        if (p === null || p < 0) return 'Escribe el presupuesto unitario solo con números, sin la moneda: 1250.50. Si no lo sabes, déjalo vacío.';
         if (!i.monedaPpto) return 'Elige la moneda del presupuesto.';
     }
-    if (i.referenciaLink.trim() && !/^https?:\/\//i.test(i.referenciaLink.trim())) return 'El link de referencia debe empezar con http:// o https://.';
+    if (i.referenciaLink.trim() && !/^https?:\/\//i.test(i.referenciaLink.trim()))
+        return 'El link de referencia tiene que empezar con http:// o https://. Cópialo entero desde el navegador.';
     return null;
 }
 

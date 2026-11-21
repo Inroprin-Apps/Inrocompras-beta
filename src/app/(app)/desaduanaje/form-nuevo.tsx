@@ -7,7 +7,7 @@ import { desaduanajes } from '@/modules/desaduanaje/composition.ts';
 import { ALCANCES, TIPOS_DES, filtrarOcs, monto, type Alcance, type TipoDes } from '@/modules/desaduanaje/application/views.ts';
 import { SearchBox } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field } from '@/shared/ui/field.tsx';
 import { Hueco } from '@/shared/ui/hueco.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
@@ -27,6 +27,7 @@ export function FormNuevo({ onCerrar, onCreado }: { onCerrar: () => void; onCrea
     const [creando, setCreando] = useState(false);
     const lista = useMemo(() => filtrarOcs(ocs.data ?? [], texto).slice(0, 30), [ocs.data, texto]);
     const elegida = ocs.data?.find((o) => o.id === oc);
+    const { cerrar, aviso } = useCerrarConCambios(oc !== '' || tipo !== 'Marítimo' || alcance !== 'Total', onCerrar);
 
     async function crear() {
         if (!oc) return setError('Elige la orden de importación.');
@@ -34,7 +35,7 @@ export function FormNuevo({ onCerrar, onCreado }: { onCerrar: () => void; onCrea
         const r = await desaduanajes().crear(oc, tipo, alcance);
         setCreando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success('Desaduanaje creado. Completa el checklist para avanzar.');
+        toast.success(`Desaduanaje de ${elegida?.numero ?? 'la orden'} creado. Completa el checklist para avanzar.`);
         refrescar(['desaduanajes', 'te_toca', 'acciones']);
         void fetch('/api/cola/despertar', { method: 'POST' }).catch(() => {});
         onCreado(r.value);
@@ -43,15 +44,17 @@ export function FormNuevo({ onCerrar, onCreado }: { onCerrar: () => void; onCrea
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void crear()}
+            aviso={aviso}
             titulo="Nuevo desaduanaje"
             descripcion="De una orden de importación aprobada. Trae sus líneas como productos."
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar} disabled={creando}>
+                    <Button variant="secondary" onClick={cerrar} disabled={creando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void crear()} disabled={creando || !oc}>
+                    <Button type="submit" disabled={creando || !oc}>
                         {creando ? 'Creando…' : 'Crear desaduanaje'}
                     </Button>
                 </>

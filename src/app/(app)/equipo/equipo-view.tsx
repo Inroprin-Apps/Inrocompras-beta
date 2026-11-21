@@ -18,9 +18,10 @@ import {
 } from '@/modules/equipo/application/views.ts';
 import { equipo } from '@/modules/equipo/composition.ts';
 import { AMBITOS, AREAS, ROLES, rolLabel } from '@/shared/tipos.ts';
-import { FilterRow, Notice, SearchBox, SectionTitle, T } from '@/shared/ui/bits.tsx';
+import { FilterRow, Notice, SearchBox, T } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
-import { Chip } from '@/shared/ui/card.tsx';
+import { Chip, Segmented } from '@/shared/ui/card.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { Checkbox, Field } from '@/shared/ui/field.tsx';
 import { Ficha, FichaSeccion } from '@/shared/ui/ficha.tsx';
 import { dayTime } from '@/shared/ui/format.ts';
@@ -45,7 +46,7 @@ export function EquipoView() {
     if (!perfil.es_admin)
         return (
             <>
-                <SectionTitle title="Equipo" />
+                <Encabezado titulo="Equipo" />
                 <Notice tone="info" cerrable={false}>
                     Solo el administrador asigna áreas y roles. Si necesitas un cambio, pídeselo.
                 </Notice>
@@ -70,20 +71,15 @@ function EquipoAdmin({ yo }: { yo: string }) {
 
     return (
         <>
-            <SectionTitle title="Equipo" />
+            <Encabezado titulo="Equipo" actualizado={estado.actualizado} />
             <FilterRow>
                 <SearchBox value={v.texto} onChange={(texto) => vista$.set({ texto })} placeholder="Busca por nombre, correo, área o rol" />
-                <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar">
-                    {FILTROS_EQUIPO.map((k) => (
-                        <Button
-                            key={k}
-                            variant={v.filtro === k ? 'primary' : 'secondary'}
-                            onClick={() => vista$.set({ filtro: k })}
-                            aria-pressed={v.filtro === k}
-                        >
-                            {etiquetas[k]}
-                        </Button>
-                    ))}
+                <div className="overflow-x-auto">
+                    <Segmented<FiltroEquipo>
+                        value={v.filtro}
+                        onChange={(filtro) => vista$.set({ filtro })}
+                        options={FILTROS_EQUIPO.map((k) => ({ value: k, label: etiquetas[k] }))}
+                    />
                 </div>
             </FilterRow>
             <Lista
@@ -91,7 +87,18 @@ function EquipoAdmin({ yo }: { yo: string }) {
                 onReintentar={() => void equipoStore.retry()}
                 vacia={
                     <ListaVacia titulo={personas.length ? 'Nadie coincide' : 'Aún no entra nadie'}>
-                        {personas.length ? 'Prueba con otra búsqueda o cambia el filtro.' : 'Cada persona aparece aquí la primera vez que inicia sesión.'}
+                        {personas.length ? (
+                            <>
+                                Prueba con otra búsqueda o quita los filtros.
+                                <div className="mt-4">
+                                    <Button variant="secondary" onClick={() => vista$.set({ filtro: 'todas', texto: '' })}>
+                                        Quitar filtros
+                                    </Button>
+                                </div>
+                            </>
+                        ) : (
+                            'Cada persona aparece aquí la primera vez que inicia sesión.'
+                        )}
                     </ListaVacia>
                 }
             >
@@ -113,7 +120,7 @@ function EquipoAdmin({ yo }: { yo: string }) {
                                             key={p.id}
                                             tabIndex={0}
                                             aria-selected={v.ver === p.id}
-                                            className={`${T.row} cursor-pointer ${v.ver === p.id ? 'bg-primary-soft' : ''}`}
+                                            className={`${T.row} cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${v.ver === p.id ? 'bg-primary-soft' : ''}`}
                                             onClick={() => vista$.set({ ver: p.id })}
                                             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), vista$.set({ ver: p.id }))}
                                         >
@@ -166,13 +173,17 @@ function FichaMiembro({ persona, personas, nombre, onCerrar }: { persona: Miembr
     const [error, setError] = useState<string | null>(null);
     const hist = historialEquipoStore.use(persona.id);
     const set = (patch: Partial<DatosEquipo>) => (setD({ ...d, ...patch }), setError(null));
+    const cambios = hayCambios(persona, d);
+    // Como useCerrarConCambios del diálogo, pero la ficha no tiene «Cancelar»: el primer cierre con cambios avisa.
+    const [avisado, setAvisado] = useState(false);
+    const cerrar = () => (cambios && !avisado ? setAvisado(true) : onCerrar());
 
     async function guardar() {
         setGuardando(true);
         const r = await equipo().guardar(persona.id, d);
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success(`Guardado: ${persona.nombre}`);
+        toast.success(`Área y roles de ${persona.nombre} guardados.`);
         refrescar(['usuarios', 'usuario_roles']);
     }
 
@@ -186,10 +197,17 @@ function FichaMiembro({ persona, personas, nombre, onCerrar }: { persona: Miembr
                     {!persona.activo && <Chip tone="muted">Desactivada</Chip>}
                 </div>
             }
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
         >
             <FichaSeccion titulo="Área, jefe y roles">
-                <div className="flex flex-col gap-4">
+                <form
+                    noValidate
+                    className="flex flex-col gap-4"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        if (cambios && !guardando) void guardar();
+                    }}
+                >
                     <Field label="Área">
                         {(p) => <SelectMenu {...p} value={d.area} onChange={(area) => set({ area })} options={AREAS.map((a) => ({ value: a, label: a }))} />}
                     </Field>
@@ -240,10 +258,17 @@ function FichaMiembro({ persona, personas, nombre, onCerrar }: { persona: Miembr
                             {error}
                         </p>
                     )}
-                    <Button onClick={() => void guardar()} disabled={!hayCambios(persona, d) || guardando}>
-                        {guardando ? 'Guardando…' : 'Guardar cambios'}
-                    </Button>
-                </div>
+                    {cambios && avisado && (
+                        <p role="alert" className="text-small font-medium text-ink">
+                            Tienes cambios sin guardar. Cierra la ficha otra vez para descartarlos, o guarda.
+                        </p>
+                    )}
+                    <div className="flex justify-end">
+                        <Button type="submit" disabled={!cambios || guardando}>
+                            {guardando ? 'Guardando…' : 'Guardar área y roles'}
+                        </Button>
+                    </div>
+                </form>
             </FichaSeccion>
             <FichaSeccion titulo="Historial">
                 {hist.error ? (

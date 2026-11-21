@@ -19,9 +19,10 @@ import {
     type FiltrosDes,
     type OrdenDes,
 } from '@/modules/desaduanaje/application/views.ts';
-import { FilterRow, SearchBox, SectionTitle, T } from '@/shared/ui/bits.tsx';
+import { FilterRow, SearchBox, T } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
@@ -57,7 +58,7 @@ export function DesaduanajeView() {
     if (!perfil.ve_precios) {
         return (
             <>
-                <SectionTitle title="Desaduanaje" />
+                <Encabezado titulo="Desaduanaje" />
                 <ListaVacia titulo="El desaduanaje lleva montos">
                     Tu perfil no ve precios. Pide a Importaciones el avance de tu importación o míralo en Seguimiento.
                 </ListaVacia>
@@ -67,16 +68,17 @@ export function DesaduanajeView() {
 
     return (
         <>
-            <div className="flex flex-wrap items-start gap-x-3">
-                <div className="min-w-0 flex-1">
-                    <SectionTitle title="Desaduanaje" />
-                </div>
-                {perfil.es_compras && (
-                    <Button className="mb-3" onClick={() => setCreando(true)}>
-                        <Plus size={16} /> Nuevo desaduanaje
-                    </Button>
-                )}
-            </div>
+            <Encabezado
+                titulo="Desaduanaje"
+                actualizado={estado.actualizado}
+                accion={
+                    perfil.es_compras && (
+                        <Button onClick={() => setCreando(true)}>
+                            <Plus size={16} aria-hidden /> Nuevo desaduanaje
+                        </Button>
+                    )
+                }
+            />
             <FilterRow>
                 <SearchBox value={v.texto} onChange={(texto) => vista$.set({ texto })} placeholder="Busca por número, OC, proveedor, DAM o BL" />
                 <SelectMenu
@@ -104,9 +106,18 @@ export function DesaduanajeView() {
                 onReintentar={() => void desaduanajesStore.retry()}
                 vacia={
                     <ListaVacia titulo={conFiltros && estado.data?.length ? 'Ningún desaduanaje coincide' : 'Aún no hay desaduanajes'}>
-                        {conFiltros && estado.data?.length
-                            ? 'Prueba con otra búsqueda o quita los filtros.'
-                            : 'Importaciones los crea con «Nuevo desaduanaje» desde una orden de importación aprobada.'}
+                        {conFiltros && estado.data?.length ? (
+                            <>
+                                Prueba con otra búsqueda o quita los filtros.
+                                <div className="mt-4">
+                                    <Button variant="secondary" onClick={() => vista$.set({ ...FILTROS_DES })}>
+                                        Quitar filtros
+                                    </Button>
+                                </div>
+                            </>
+                        ) : (
+                            'Importaciones los crea con «Nuevo desaduanaje» desde una orden de importación aprobada.'
+                        )}
                     </ListaVacia>
                 }
             >
@@ -120,7 +131,7 @@ export function DesaduanajeView() {
                                         <th className={T.th}>OC y proveedor</th>
                                         <th className={T.th}>Estado</th>
                                         <th className={T.th}>Fechas</th>
-                                        <th className={T.thNum}>FI</th>
+                                        <th className={`${T.thNum} text-right`}>FI</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -128,7 +139,7 @@ export function DesaduanajeView() {
                                         <tr
                                             key={d.id}
                                             tabIndex={0}
-                                            className={`${T.row} cursor-pointer ${v.ver === d.id ? 'bg-primary-soft' : ''}`}
+                                            className={`${T.row} cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary ${v.ver === d.id ? 'bg-primary-soft' : ''}`}
                                             onClick={() => vista$.set({ ver: d.id })}
                                             onKeyDown={(e) => e.key === 'Enter' && vista$.set({ ver: d.id })}
                                         >
@@ -150,7 +161,7 @@ export function DesaduanajeView() {
                                             <td className={T.td}>
                                                 <Fechas d={d} />
                                             </td>
-                                            <td className={T.tdNum}>{factor(d.fi)}</td>
+                                            <td className={`${T.tdNum} text-right`}>{factor(d.fi)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -162,7 +173,7 @@ export function DesaduanajeView() {
                                     <button
                                         type="button"
                                         onClick={() => vista$.set({ ver: d.id })}
-                                        className={`w-full rounded-card border border-line px-4 py-3 text-left ${v.ver === d.id ? 'bg-primary-soft' : 'bg-surface'} focus-visible:outline-2 focus-visible:outline-primary`}
+                                        className={`w-full rounded-card border border-line px-4 py-3 text-left ${v.ver === d.id ? 'bg-primary-soft' : 'bg-surface hover:bg-surface-2'} focus-visible:outline-2 focus-visible:outline-primary`}
                                     >
                                         <div className="flex items-start gap-2">
                                             <div className="min-w-0 flex-1">

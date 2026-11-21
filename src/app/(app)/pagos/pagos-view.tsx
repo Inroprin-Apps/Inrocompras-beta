@@ -6,7 +6,6 @@
 // URL: ?tab=&estado=&vence=&prov=&moneda=&texto=&orden=&pag=&ver=  (la bandeja enlaza /pagos?ver=<id>).
 import { useMemo, useState } from 'react';
 import { CalendarClock } from 'lucide-react';
-import { monto } from '@/modules/ordenes/application/views.ts';
 import {
     ESTADOS_PAGO,
     FILTROS_PAGO,
@@ -22,9 +21,11 @@ import {
     type PestanaPago,
     type Vence,
 } from '@/modules/pagos/application/views.ts';
-import { FilterRow, SearchBox, SectionTitle, T } from '@/shared/ui/bits.tsx';
+import { FilterRow, SearchBox, T } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Kpi, KpiNote, Segmented } from '@/shared/ui/card.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
+import { money } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
@@ -85,7 +86,7 @@ export function PagosView() {
     if (!perfil.ve_precios) {
         return (
             <>
-                <SectionTitle title="Pagos" />
+                <Encabezado titulo="Pagos" />
                 <ListaVacia titulo="Los pagos llevan montos">Tu perfil no ve precios. Si un ítem ya está pagado lo ves en Seguimiento.</ListaVacia>
             </>
         );
@@ -104,11 +105,11 @@ export function PagosView() {
     const todasMarcadas = visiblesMarcables.length > 0 && visiblesMarcables.every((p) => marcadas.has(p.id));
     const alternarTodas = () => setMarcadas(todasMarcadas ? new Set() : new Set(visiblesMarcables.map((p) => p.id)));
     const conFiltros = Object.entries(FILTROS_PAGO).some(([k, d]) => v[k as keyof typeof FILTROS_PAGO] !== d);
-    const soles = (x: number) => monto(x);
+    const soles = (x: number) => money(x, 'PEN');
 
     return (
         <>
-            <SectionTitle title="Pagos" />
+            <Encabezado titulo="Pagos" actualizado={estado.actualizado} />
             {pestanas.length > 1 && (
                 <div className="mb-3.5 overflow-x-auto">
                     <Segmented
@@ -162,7 +163,7 @@ export function PagosView() {
                     className="w-36"
                     value={v.moneda}
                     onChange={(moneda) => vista$.set({ moneda })}
-                    options={[{ value: '', label: 'Toda moneda' }, ...MONEDAS_PAGO.map((m) => ({ value: m, label: m }))]}
+                    options={[{ value: '', label: 'Todas las monedas' }, ...MONEDAS_PAGO.map((m) => ({ value: m, label: m }))]}
                 />
                 <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
             </FilterRow>
@@ -172,7 +173,7 @@ export function PagosView() {
                         {marcadasVivas.length} {marcadasVivas.length === 1 ? 'cuota marcada' : 'cuotas marcadas'}
                     </span>
                     <Button variant="secondary" onClick={() => setMarcadas(new Set())}>
-                        Desmarcar
+                        Desmarcar cuotas
                     </Button>
                     <Button onClick={() => setProgramando(true)}>
                         <CalendarClock size={16} /> Programar en una fecha
@@ -194,11 +195,20 @@ export function PagosView() {
                                     : 'Aún no hay cuotas'
                         }
                     >
-                        {conFiltros
-                            ? 'Prueba con otra búsqueda o quita algún filtro.'
-                            : tab === 'atender'
-                              ? 'Aquí aparecen las cuotas que Compras solicita y las que ya programaste.'
-                              : 'Las cuotas se generan cuando una orden queda aprobada.'}
+                        {conFiltros ? (
+                            <>
+                                Prueba con otra búsqueda o quita los filtros.
+                                <div className="mt-4">
+                                    <Button variant="secondary" onClick={() => vista$.set({ ...FILTROS_PAGO })}>
+                                        Quitar filtros
+                                    </Button>
+                                </div>
+                            </>
+                        ) : tab === 'atender' ? (
+                            'Aquí aparecen las cuotas que Compras solicita y las que ya programaste.'
+                        ) : (
+                            'Las cuotas se generan cuando una orden queda aprobada.'
+                        )}
                     </ListaVacia>
                 }
             >

@@ -10,7 +10,7 @@ import { excel, solicitudes } from '@/modules/solicitudes/composition.ts';
 import { COLUMNAS_PLANTILLA, esErrorLectura, leerFilas, siguienteNItem, type ItemSolicitud, type Lectura } from '@/modules/solicitudes/application/views.ts';
 import { Notice } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { DropZone } from '@/shared/ui/drop-zone.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
 import { ejecutarAccion } from '../_acciones/panel-acciones.tsx';
@@ -21,6 +21,8 @@ export function CargaExcel({ solicitudId, items, onCerrar }: { solicitudId: stri
     const [lectura, setLectura] = useState<Lectura | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [ocupado, setOcupado] = useState<string | null>(null);
+    // Un archivo ya leído y sin subir es trabajo que se perdería al cerrar.
+    const { cerrar, aviso } = useCerrarConCambios(!!lectura, onCerrar);
 
     async function elegir(files: File[]) {
         const f = files[0];
@@ -64,8 +66,10 @@ export function CargaExcel({ solicitudId, items, onCerrar }: { solicitudId: stri
         const cargados = Number(r.value.cargados ?? 0);
         const mal = Number(r.value.con_error ?? 0);
         if (mal)
-            toast.warning(`${cargados} ítems cargados; ${mal} filas con error. Revísalas en la ficha: corrige el Excel y vuelve a subirlo, o descártalas.`);
-        else toast.success(`${cargados} ítems cargados.`);
+            toast.warning(
+                `${cargados} ${cargados === 1 ? 'ítem cargado' : 'ítems cargados'} desde «${archivo}»; ${mal} ${mal === 1 ? 'fila' : 'filas'} con error. Revísalas en la ficha: corrige el Excel y vuelve a subirlo, o descártalas.`,
+            );
+        else toast.success(`${cargados} ${cargados === 1 ? 'ítem cargado' : 'ítems cargados'} desde «${archivo}».`);
         onCerrar();
     }
 
@@ -73,16 +77,18 @@ export function CargaExcel({ solicitudId, items, onCerrar }: { solicitudId: stri
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void subir()}
+            aviso={aviso}
             titulo="Cargar ítems desde Excel"
             descripcion="La primera hoja, con una fila de títulos. Las filas buenas se agregan a los ítems; las que tengan error quedan marcadas para que las corrijas o descartes."
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar} disabled={!!ocupado}>
+                    <Button variant="secondary" onClick={cerrar} disabled={!!ocupado}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void subir()} disabled={!lectura || !!ocupado}>
-                        {ocupado && lectura ? 'Validando…' : lectura ? `Subir y validar ${lectura.filas.length} filas` : 'Subir y validar'}
+                    <Button type="submit" disabled={!lectura || !!ocupado}>
+                        {ocupado && lectura ? 'Subiendo y validando…' : lectura ? `Subir y validar ${lectura.filas.length} filas` : 'Subir y validar'}
                     </Button>
                 </>
             }

@@ -9,7 +9,7 @@ import { aTexto, aValor, mostrar, parametros, type Parametro } from '@/modules/c
 import { AREAS } from '@/shared/tipos.ts';
 import { Button } from '@/shared/ui/button.tsx';
 import { Segmented } from '@/shared/ui/card.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input, Textarea } from '@/shared/ui/field.tsx';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
@@ -26,7 +26,9 @@ export function SeccionParametros() {
             <Lista
                 estado={{ data: lista, error: estado.error }}
                 onReintentar={() => void configuracionStore.retry()}
-                vacia={<ListaVacia titulo="Sin parámetros" />}
+                vacia={
+                    <ListaVacia titulo="Aún no hay parámetros">Se crean al aplicar las migraciones de la base. Si no aparecen, avisa a sistemas.</ListaVacia>
+                }
             >
                 {(ps) => (
                     <ul className="flex flex-col divide-y divide-divider rounded-card border border-line bg-surface">
@@ -38,7 +40,7 @@ export function SeccionParametros() {
                                     <div className={`mt-1 text-ui break-words ${p.valor === null ? 'text-ink-3' : ''}`}>{mostrar(p)}</div>
                                 </div>
                                 <Button variant="ghost" iconOnly aria-label={`Editar ${p.etiqueta}`} onClick={() => setEditando(p)}>
-                                    <Pencil size={15} />
+                                    <Pencil size={15} aria-hidden />
                                 </Button>
                             </li>
                         ))}
@@ -51,9 +53,11 @@ export function SeccionParametros() {
 }
 
 function FormParametro({ p, onCerrar }: { p: Parametro; onCerrar: () => void }) {
-    const [texto, setTexto] = useState(() => aTexto(p) || (p.tipo === 'booleano' ? 'false' : ''));
+    const [inicial] = useState(() => aTexto(p) || (p.tipo === 'booleano' ? 'false' : ''));
+    const [texto, setTexto] = useState(inicial);
     const [error, setError] = useState<string | null>(null);
     const [guardando, setGuardando] = useState(false);
+    const { cerrar, aviso } = useCerrarConCambios(texto !== inicial, onCerrar);
 
     async function guardar() {
         const v = aValor(p, texto);
@@ -62,7 +66,7 @@ function FormParametro({ p, onCerrar }: { p: Parametro; onCerrar: () => void }) 
         const r = await configuracion().guardarParametro(p.clave, v.valor, p.nota || p.descripcion);
         setGuardando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success(`${p.etiqueta}: guardado.`);
+        toast.success(`Parámetro «${p.etiqueta}» guardado.`);
         refrescar(['config']);
         onCerrar();
     }
@@ -70,29 +74,34 @@ function FormParametro({ p, onCerrar }: { p: Parametro; onCerrar: () => void }) 
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo={p.etiqueta}
             descripcion={p.descripcion}
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
-                        {guardando ? 'Guardando…' : 'Guardar'}
+                    <Button type="submit" disabled={guardando}>
+                        {guardando ? 'Guardando…' : 'Guardar parámetro'}
                     </Button>
                 </>
             }
         >
             {p.tipo === 'booleano' ? (
-                <Segmented
-                    value={texto}
-                    onChange={(v) => (setTexto(v), setError(null))}
-                    options={[
-                        { value: 'true', label: 'Sí' },
-                        { value: 'false', label: 'No' },
-                    ]}
-                />
+                <div role="group" aria-label="Valor" className="flex flex-col gap-1.5">
+                    <span className="text-ui font-medium">Valor</span>
+                    <Segmented
+                        value={texto}
+                        onChange={(v) => (setTexto(v), setError(null))}
+                        options={[
+                            { value: 'true', label: 'Sí' },
+                            { value: 'false', label: 'No' },
+                        ]}
+                    />
+                </div>
             ) : (
                 <Field
                     label="Valor"

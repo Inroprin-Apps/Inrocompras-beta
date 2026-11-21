@@ -10,7 +10,7 @@ function mensaje(error?: string, detalle?: string) {
     if (error === 'dominio' || /saving new user|Solo cuentas/i.test(detalle ?? '')) {
         return 'Solo puedes entrar con tu cuenta de la empresa (@inroprin.com). Elige esa cuenta en Google.';
     }
-    if (error === 'access_denied') return 'Cancelaste el inicio de sesión. Vuelve a intentarlo cuando quieras.';
+    if (error === 'access_denied') return 'Cancelaste el inicio de sesión. Pulsa «Iniciar sesión con Google» para entrar.';
     if (error === 'inactivo') return 'Tu usuario está desactivado. Pide al administrador que lo reactive.';
     return 'No se pudo iniciar sesión. Inténtalo otra vez; si se repite, avisa al administrador.';
 }

@@ -13,9 +13,10 @@ import {
     tonoValidacion,
     type ItemTecnica,
 } from '@/modules/requerimientos/application/views.ts';
-import { FilterRow, Notice, SearchBox, SectionTitle } from '@/shared/ui/bits.tsx';
+import { FilterRow, Notice, SearchBox } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
+import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
@@ -26,6 +27,9 @@ import { DialogoTecnica, type Fallo } from './form-tecnica.tsx';
 import { tecnicaStore } from './store.ts';
 
 const fmtNum = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 3 });
+/** La casilla mide 16 px; la etiqueta que la envuelve da el blanco de 36 px que pide el celular. */
+const CASILLA = '-m-2.5 flex size-9 flex-none cursor-pointer items-center justify-center';
+const CHECK = 'size-4 cursor-pointer accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
 
 const vista$ = urlState(
     { ...FILTROS_TECNICA, ver: '' },
@@ -67,9 +71,11 @@ export function ValidacionesView() {
             return n;
         });
 
+    const conFiltros = !!(v.texto || v.proyecto || v.estado !== FILTROS_TECNICA.estado);
+
     return (
         <>
-            <SectionTitle title="Validaciones técnicas" />
+            <Encabezado titulo="Validaciones técnicas" actualizado={estado.actualizado} />
             {!valida && (
                 <Notice tone="info" cerrable={false}>
                     La validación técnica la registra el área Técnica. Aquí puedes ver en qué está cada ítem.
@@ -113,7 +119,7 @@ export function ValidacionesView() {
                         Quitar marcas
                     </Button>
                     <Button onClick={() => setDialogo(true)}>
-                        <CheckCheck size={16} /> Validar {elegidos.length}
+                        <CheckCheck size={16} /> Validar {elegidos.length} {elegidos.length === 1 ? 'ítem' : 'ítems'}
                     </Button>
                 </div>
             )}
@@ -121,15 +127,27 @@ export function ValidacionesView() {
                 estado={{ data: estado.data ? lista : null, error: estado.error }}
                 onReintentar={() => void tecnicaStore.retry()}
                 vacia={
-                    <ListaVacia titulo={v.estado === 'Pendiente' && !v.texto && !v.proyecto ? 'No hay ítems por validar' : 'Ningún ítem coincide'}>
-                        {v.estado === 'Pendiente' && !v.texto && !v.proyecto
-                            ? 'Los ítems llegan aquí cuando nace un requerimiento. Para revisar lo ya validado, elige «Todas».'
-                            : 'Prueba con otra búsqueda o quita los filtros.'}
-                    </ListaVacia>
+                    conFiltros ? (
+                        <ListaVacia titulo="Ningún ítem coincide">
+                            Prueba con otra búsqueda o quita los filtros.
+                            <div className="mt-4">
+                                <Button variant="secondary" onClick={() => vista$.set({ ...FILTROS_TECNICA })}>
+                                    Quitar filtros
+                                </Button>
+                            </div>
+                        </ListaVacia>
+                    ) : (
+                        <ListaVacia titulo="No hay ítems por validar">
+                            Los ítems llegan aquí cuando nace un requerimiento. Para revisar lo ya validado, elige «Todas» en Validación.
+                        </ListaVacia>
+                    )
                 }
             >
                 {() => (
                     <div className="flex flex-col gap-4">
+                        <p className="-mb-2 text-small text-ink-3">
+                            {lista.length} {lista.length === 1 ? 'ítem' : 'ítems'}
+                        </p>
                         {grupos.map((g) => {
                             const ids = g.items.map((i) => i.id);
                             const todos = ids.every((id) => marcados.has(id));
@@ -137,13 +155,15 @@ export function ValidacionesView() {
                                 <section key={g.req.id} className="rounded-card border border-line bg-surface">
                                     <header className="flex items-center gap-3 border-b border-divider px-4 py-3">
                                         {valida && (
-                                            <input
-                                                type="checkbox"
-                                                className="size-4 flex-none accent-primary"
-                                                aria-label={`Marcar todos los ítems de ${g.req.numero || 'este requerimiento'}`}
-                                                checked={todos}
-                                                onChange={(e) => alternar(ids, e.target.checked)}
-                                            />
+                                            <label className={CASILLA}>
+                                                <input
+                                                    type="checkbox"
+                                                    className={CHECK}
+                                                    aria-label={`Marcar todos los ítems de ${g.req.numero || 'este requerimiento'}`}
+                                                    checked={todos}
+                                                    onChange={(e) => alternar(ids, e.target.checked)}
+                                                />
+                                            </label>
                                         )}
                                         <div className="min-w-0 flex-1">
                                             <h2 className="text-heading font-semibold">{g.req.numero || 'Requerimiento en proceso'}</h2>
@@ -203,18 +223,24 @@ function FilaTecnica({
 }) {
     return (
         <li
-            className={`flex items-start gap-3 border-b border-divider px-4 py-3 last:border-b-0 ${abierto ? 'bg-primary-soft' : marcado ? 'bg-surface-2' : ''}`}
+            className={`flex items-start gap-3 border-b border-divider px-4 py-3 last:border-b-0 ${abierto ? 'bg-primary-soft' : marcado ? 'bg-surface-2' : 'hover:bg-surface-2'}`}
         >
             {valida && (
-                <input
-                    type="checkbox"
-                    className="mt-1 size-4 flex-none accent-primary"
-                    aria-label={`Marcar ${i.descripcion}`}
-                    checked={marcado}
-                    onChange={(e) => onMarcar(e.target.checked)}
-                />
+                <label className={`${CASILLA} mt-[-0.375rem]`}>
+                    <input
+                        type="checkbox"
+                        className={CHECK}
+                        aria-label={`Marcar ${i.descripcion}`}
+                        checked={marcado}
+                        onChange={(e) => onMarcar(e.target.checked)}
+                    />
+                </label>
             )}
-            <button type="button" onClick={onAbrir} className="min-w-0 flex-1 cursor-pointer text-left focus-visible:outline-2 focus-visible:outline-primary">
+            <button
+                type="button"
+                onClick={onAbrir}
+                className="min-w-0 flex-1 cursor-pointer rounded-inner text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
                 <div className="text-ui font-medium break-words">
                     <span className="mr-1.5 text-ink-3 tabular-nums">{i.nItem ?? '—'}</span>
                     {i.descripcion}

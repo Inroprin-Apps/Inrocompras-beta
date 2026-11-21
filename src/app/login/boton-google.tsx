@@ -31,7 +31,11 @@ export function BotonGoogle({ volver }: { volver: string }) {
             <Button size="lg" className="w-full" onClick={entrar} disabled={cargando}>
                 {cargando ? 'Abriendo Google…' : 'Iniciar sesión con Google'}
             </Button>
-            {error && <p className="mt-3 text-small font-medium text-danger-strong">{error}</p>}
+            {error && (
+                <p role="alert" className="mt-3 text-small font-medium text-danger-strong">
+                    {error}
+                </p>
+            )}
         </>
     );
 }

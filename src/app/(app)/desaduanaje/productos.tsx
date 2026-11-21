@@ -9,7 +9,7 @@ import { desaduanajes } from '@/modules/desaduanaje/composition.ts';
 import { leerNumero, monto, numero, porcentaje, type DesaduanajeDetalle, type ProductoDes } from '@/modules/desaduanaje/application/views.ts';
 import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
+import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input, Textarea } from '@/shared/ui/field.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
 import { refrescar } from '../_lib/resource.ts';
@@ -42,7 +42,7 @@ export function Productos({ d, edita }: { d: DesaduanajeDetalle; edita: boolean 
                             </div>
                             {edita && (
                                 <Button variant="ghost" iconOnly aria-label={`Editar ${p.descripcion}`} onClick={() => setEditando(p)}>
-                                    <Pencil size={15} />
+                                    <Pencil size={15} aria-hidden />
                                 </Button>
                             )}
                         </div>
@@ -77,19 +77,27 @@ function FormProducto({ p, onCerrar }: { p: ProductoDes; onCerrar: () => void })
     const [adv, setAdv] = useState(p.adValoremUsd ? String(p.adValoremUsd) : '');
     const [recibida, setRecibida] = useState(p.cantRecibida != null ? String(p.cantRecibida) : '');
     const [incidencia, setIncidencia] = useState(p.incidencia);
-    const [error, setError] = useState<string | null>(null);
+    // El error de un campo va junto a ese campo; el de la base, en el aviso del diálogo.
+    const [error, setError] = useState<{ campo: 'adv' | 'recibida' | null; texto: string } | null>(null);
     const [guardando, setGuardando] = useState(false);
+    const sucio =
+        adv !== (p.adValoremUsd ? String(p.adValoremUsd) : '') ||
+        recibida !== (p.cantRecibida != null ? String(p.cantRecibida) : '') ||
+        incidencia !== p.incidencia;
+    const { cerrar, aviso } = useCerrarConCambios(sucio, onCerrar);
 
     async function guardar() {
         const a = adv.trim() ? leerNumero(adv) : 0;
         const r = recibida.trim() ? leerNumero(recibida) : null;
-        if (a == null || a < 0) return setError('El ad valorem es un monto en dólares, cero o más.');
-        if (recibida.trim() && (r == null || r < 0)) return setError('La cantidad recibida es un número, cero o más.');
+        if (a == null || a < 0)
+            return setError({ campo: 'adv', texto: 'El ad valorem va en dólares y tiene que ser cero o más. Usa punto para los decimales: 1250.50' });
+        if (recibida.trim() && (r == null || r < 0))
+            return setError({ campo: 'recibida', texto: 'La cantidad recibida tiene que ser cero o más. Usa punto para los decimales: 12.5' });
         setGuardando(true);
         const res = await desaduanajes().guardarProducto(p.id, { adValoremUsd: a, cantRecibida: r, incidencia });
         setGuardando(false);
-        if (res.isErr()) return setError(res.error.message);
-        toast.success('Producto guardado. Vuelve a calcular el costeo para ver el efecto.');
+        if (res.isErr()) return setError({ campo: null, texto: res.error.message });
+        toast.success(`Producto ${p.descripcion} guardado. Vuelve a calcular el costeo para ver el efecto.`);
         refrescar(['des_productos', 'desaduanajes']);
         onCerrar();
     }
@@ -97,34 +105,36 @@ function FormProducto({ p, onCerrar }: { p: ProductoDes; onCerrar: () => void })
     return (
         <Dialog
             abierto
-            onCerrar={onCerrar}
+            onCerrar={cerrar}
+            onEnviar={() => void guardar()}
+            aviso={aviso}
             titulo={p.descripcion}
             descripcion={`${numero(p.cantidad)} × ${monto(p.precioExw, p.moneda || 'USD')} EXW`}
             pie={
                 <>
-                    <Button variant="secondary" onClick={onCerrar} disabled={guardando}>
+                    <Button variant="secondary" onClick={cerrar} disabled={guardando}>
                         Cancelar
                     </Button>
-                    <Button onClick={() => void guardar()} disabled={guardando}>
-                        {guardando ? 'Guardando…' : 'Guardar'}
+                    <Button type="submit" disabled={guardando}>
+                        {guardando ? 'Guardando…' : 'Guardar producto'}
                     </Button>
                 </>
             }
         >
             <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Ad valorem (US$)" hint="El de la DAM para este producto.">
-                    {(f) => <Input {...f} inputMode="decimal" value={adv} onChange={(e) => setAdv(e.target.value)} />}
+                <Field label="Ad valorem (US$)" hint="El de la DAM para este producto." error={error?.campo === 'adv' ? error.texto : null}>
+                    {(f) => <Input {...f} inputMode="decimal" value={adv} onChange={(e) => (setAdv(e.target.value), setError(null))} />}
                 </Field>
-                <Field label="Cantidad recibida" optional>
-                    {(f) => <Input {...f} inputMode="decimal" value={recibida} onChange={(e) => setRecibida(e.target.value)} />}
+                <Field label="Cantidad recibida" optional error={error?.campo === 'recibida' ? error.texto : null}>
+                    {(f) => <Input {...f} inputMode="decimal" value={recibida} onChange={(e) => (setRecibida(e.target.value), setError(null))} />}
                 </Field>
             </div>
             <Field label="Incidencia" optional hint="Faltantes, daños o diferencias con la factura.">
                 {(f) => <Textarea {...f} rows={3} value={incidencia} onChange={(e) => setIncidencia(e.target.value)} />}
             </Field>
-            {error && (
+            {error && !error.campo && (
                 <p role="alert" className="text-small font-medium text-danger-strong">
-                    {error}
+                    {error.texto}
                 </p>
             )}
         </Dialog>

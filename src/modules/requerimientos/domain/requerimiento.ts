@@ -132,7 +132,7 @@ export function faltaEnCabecera(c: CabeceraReq): string | null {
 
 export function faltaEnItem(e: EdicionItem): string | null {
     const p = e.plazoEntregaDias.trim();
-    if (p && !/^\d{1,4}$/.test(p)) return 'El plazo de entrega va en días: un número entero.';
+    if (p && !/^\d{1,4}$/.test(p)) return 'El plazo de entrega va en días, como número entero: 45.';
     return null;
 }
 
@@ -140,7 +140,8 @@ export type TonoChip = 'ok' | 'warn' | 'danger' | 'info' | 'muted';
 export function tonoEstado(e: EstadoReq): TonoChip {
     if (e === 'Emitido') return 'ok';
     if (e === 'Observado') return 'warn';
-    if (e === 'Anulado') return 'danger';
+    // Anulado ya no pide nada a nadie: gris, como «anulado» en la guía (el rojo es para un problema por resolver).
+    if (e === 'Anulado') return 'muted';
     return 'info';
 }
 export function tonoValidacion(v: Validacion): TonoChip {
@@ -150,9 +151,8 @@ export function tonoValidacion(v: Validacion): TonoChip {
     return 'info';
 }
 export function tonoAnulacion(e: EstadoAnulacion): TonoChip {
-    if (e === 'Pendiente') return 'warn';
-    if (e === 'Ejecutada' || e === 'Aprobada') return 'danger';
-    if (e === 'En Compras') return 'warn';
+    // Pendiente y En Compras esperan a alguien; aprobada, ejecutada o rechazada ya se decidió (gris).
+    if (e === 'Pendiente' || e === 'En Compras') return 'warn';
     return 'muted';
 }
 

@@ -8,6 +8,7 @@ import {
     filtrarDes,
     gastoVacio,
     leerNumero,
+    monto,
     montoS,
     ordenarDes,
     tcSugerido,
@@ -175,5 +176,16 @@ describe('lista', () => {
     it('las fases siguen los siete estados', () => {
         expect(faseDes('Borrador')).toBe(0);
         expect(faseDes('Costeo cerrado')).toBe(6);
+    });
+});
+
+describe('formato de montos', () => {
+    it('como money() de la guía: símbolo, coma de miles, dos decimales y signo menos', () => {
+        expect(monto(1234.5)).toBe('S/ 1,234.50');
+        expect(monto(1234567.891, 'USD')).toBe('US$ 1,234,567.89');
+        expect(monto(-480.5)).toBe('-S/ 480.50');
+        expect(monto(10, 'EUR')).toBe('€ 10.00');
+        expect(monto(0)).toBe('S/ 0.00');
+        expect(monto(-0.001)).toBe('S/ 0.00');
     });
 });

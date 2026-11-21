@@ -14,7 +14,7 @@ import { Hueco } from '@/shared/ui/hueco.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
 import { Historial } from '../_acciones/historial.tsx';
 import { personasStore } from '../_lib/stores.ts';
-import { CamposTecnica, validarItems } from './form-tecnica.tsx';
+import { CamposTecnica, textoRegistrar, validarItems } from './form-tecnica.tsx';
 import { itemTecnicaStore } from './store.ts';
 
 const fmtNum = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 3 });
@@ -59,19 +59,26 @@ function Cargada({ i, valida, onCerrar }: { i: ItemTecnica; valida: boolean; onC
         setHaciendo(false);
         if (fallo) return setError(fallo.mensaje);
         setError(null);
-        toast.success(`Ítem ${f.resultado.toLowerCase()}.`);
+        toast.success(`Ítem ${i.nItem ?? `«${i.descripcion}»`} de ${i.req.numero || 'el requerimiento'}: «${f.resultado}» registrado.`);
     }
 
     return (
         <Ficha
             titulo={i.descripcion}
             subtitulo={`${i.req.numero || 'Requerimiento en proceso'} · ítem ${i.nItem ?? '—'}`}
-            estado={<Chip tone={i.anulado ? 'danger' : tonoValidacion(i.validacionTecnica)}>{i.anulado ? 'Anulado' : i.validacionTecnica}</Chip>}
+            estado={<Chip tone={i.anulado ? 'muted' : tonoValidacion(i.validacionTecnica)}>{i.anulado ? 'Anulado' : i.validacionTecnica}</Chip>}
             onCerrar={onCerrar}
         >
             {valida && abierto && (
                 <div className="flex flex-col gap-4 border-b border-divider px-5 py-4">
-                    <div className="flex flex-col gap-4 rounded-card border border-primary-line bg-primary-soft px-4 py-3.5">
+                    <form
+                        noValidate
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            void registrar();
+                        }}
+                        className="flex flex-col gap-4 rounded-card border border-primary-line bg-primary-soft px-4 py-3.5"
+                    >
                         <p className="text-small font-semibold text-primary-strong">Lo que te toca</p>
                         <CamposTecnica f={f} onChange={setF} />
                         {error && (
@@ -80,11 +87,11 @@ function Cargada({ i, valida, onCerrar }: { i: ItemTecnica; valida: boolean; onC
                             </p>
                         )}
                         <div>
-                            <Button onClick={() => void registrar()} disabled={haciendo}>
-                                {haciendo ? 'Registrando…' : `Registrar ${f.resultado.toLowerCase()}`}
+                            <Button type="submit" disabled={haciendo}>
+                                {textoRegistrar(f.resultado, haciendo)}
                             </Button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             )}
             <FichaSeccion titulo="Ítem">

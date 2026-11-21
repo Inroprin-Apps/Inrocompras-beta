@@ -71,6 +71,8 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
     const [item, setItem] = useState<NuevoItem | 'nuevo' | null>(null);
     const [cargando, setCargando] = useState(false);
     const [borrando, setBorrando] = useState(false);
+    const [eliminando, setEliminando] = useState(false);
+    const [errorBorrar, setErrorBorrar] = useState<string | null>(null);
     const nombre = (x: string | null) => (x ? (gente.find((g) => g.id === x)?.nombre ?? '') : '');
     const proyecto = proyectos.find((p) => p.id === s.proyectoId) ?? null;
     const etapa = proyecto?.etapas.find((e) => e.id === s.etapaId) ?? null;
@@ -79,14 +81,17 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
     async function quitarItem(i: ItemSolicitud) {
         const r = await solicitudes().borrarItem(i.id);
         if (r.isErr()) return toast.error(r.error.message);
-        toast.success(`Ítem «${i.descripcion}» quitado.`);
+        toast.success(`Ítem «${i.descripcion}» quitado de ${s.numero || 'el borrador'}.`);
         refrescar(['solicitud_items', 'acciones']);
     }
 
     async function borrarBorrador() {
+        setEliminando(true);
+        setErrorBorrar(null);
         const r = await solicitudes().borrar(s.id);
-        if (r.isErr()) return toast.error(r.error.message);
-        toast.success('Borrador eliminado.');
+        setEliminando(false);
+        if (r.isErr()) return setErrorBorrar(r.error.message);
+        toast.success('Borrador de solicitud eliminado.');
         refrescar(['solicitudes']);
         onCerrar();
     }
@@ -130,6 +135,7 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
                 <PanelAcciones
                     tabla="solicitudes"
                     id={s.id}
+                    nombre={s.numero}
                     tocadas={['solicitudes', 'solicitud_items', 'requerimientos', 'requerimiento_items']}
                     onHecho={(a, r) => {
                         if (a.accion === 'rehacer' && typeof r.id === 'string') onAbrir(r.id);
@@ -142,7 +148,7 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
                 accion={
                     editable && (
                         <Button variant="ghost" onClick={() => setEditando(true)}>
-                            <Pencil size={15} /> Editar
+                            <Pencil size={15} /> Editar solicitud
                         </Button>
                     )
                 }
@@ -181,10 +187,10 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
                     editable && (
                         <div className="flex gap-1.5">
                             <Button variant="ghost" onClick={() => setCargando(true)}>
-                                <FileSpreadsheet size={15} /> Excel
+                                <FileSpreadsheet size={15} /> Cargar Excel
                             </Button>
                             <Button variant="dashed" onClick={() => setItem('nuevo')}>
-                                <Plus size={15} /> Ítem
+                                <Plus size={15} /> Agregar ítem
                             </Button>
                         </div>
                     )
@@ -216,16 +222,23 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
             {borrando && (
                 <Dialog
                     abierto
-                    onCerrar={() => setBorrando(false)}
+                    onCerrar={() => (setBorrando(false), setErrorBorrar(null))}
                     titulo="Eliminar borrador"
                     descripcion="Se borran la solicitud y sus ítems. No se puede deshacer."
+                    aviso={
+                        errorBorrar && (
+                            <p role="alert" className="text-small font-medium text-danger-strong">
+                                {errorBorrar}
+                            </p>
+                        )
+                    }
                     pie={
                         <>
-                            <Button variant="secondary" onClick={() => setBorrando(false)}>
+                            <Button variant="secondary" onClick={() => (setBorrando(false), setErrorBorrar(null))} disabled={eliminando}>
                                 Cancelar
                             </Button>
-                            <Button variant="danger" onClick={() => void borrarBorrador()}>
-                                Eliminar borrador
+                            <Button variant="danger" onClick={() => void borrarBorrador()} disabled={eliminando}>
+                                {eliminando ? 'Eliminando…' : 'Eliminar borrador'}
                             </Button>
                         </>
                     }

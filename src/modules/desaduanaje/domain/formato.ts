@@ -1,15 +1,16 @@
 // Formato es-PE de montos, factores y tipos de cambio. PURO.
 
 // ───────────────────────── Formato ─────────────────────────
-const fmt = new Map<string, Intl.NumberFormat>();
+const SIMBOLO: Record<string, string> = { PEN: 'S/', USD: 'US$', EUR: '€' };
+/**
+ * Como money() de la guía (ux/formatos): «S/ 1,234.50», «US$ 10.00», «-S/ 480.50». Coma de miles, punto decimal,
+ * siempre dos decimales y signo menos. No depende del ICU del navegador (Intl da «USD» en unos y «US$» en otros).
+ */
 export function monto(n: number, moneda = 'PEN'): string {
-    try {
-        if (!fmt.has(moneda))
-            fmt.set(moneda, new Intl.NumberFormat('es-PE', { style: 'currency', currency: moneda, minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-        return fmt.get(moneda)!.format(n);
-    } catch {
-        return `${moneda} ${n.toFixed(2)}`;
-    }
+    const s = SIMBOLO[moneda] ?? moneda;
+    const [ent, dec] = Math.abs(n).toFixed(2).split('.');
+    const signo = n < 0 && Number(`${ent}.${dec}`) !== 0 ? '-' : '';
+    return `${signo}${s} ${ent.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}.${dec}`;
 }
 export const numero = (n: number, dec = 3) => new Intl.NumberFormat('es-PE', { maximumFractionDigits: dec }).format(n);
 export const porcentaje = (n: number | null) =>
