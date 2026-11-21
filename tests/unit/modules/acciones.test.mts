@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { faltante, necesitaDialogo, ordenar, parametroId, parametros, type Accion } from '@/modules/acciones/domain/accion.ts';
+import { avisoHecho, enCurso, faltante, necesitaDialogo, ordenar, parametroId, parametros, type Accion } from '@/modules/acciones/domain/accion.ts';
 
 const a = (x: Partial<Accion>): Accion => ({ accion: 'x', etiqueta: 'X', tipo: 's', funcion: 'ac_x', pide: [], ...x });
 
@@ -29,5 +29,17 @@ describe('acciones', () => {
         expect(parametroId('ac_oc_demasia')).toBe('p_linea');
         expect(parametroId('ac_item_tecnica')).toBe('p_item');
         expect(parametroId('ac_oc_emitir')).toBe('p_id');
+    });
+    it('el botón en curso dice qué hace, en gerundio', () => {
+        expect(enCurso('Emitir solicitud')).toBe('Emitiendo solicitud…');
+        expect(enCurso('Aprobar')).toBe('Aprobando…');
+        expect(enCurso('Corregir y reenviar')).toBe('Corrigiendo y reenviando…');
+        expect(enCurso('Emitir y enviar a aprobación')).toBe('Emitiendo y enviando a aprobación…');
+        expect(enCurso('Pedir anulación')).toBe('Pidiendo anulación…');
+        expect(enCurso('Nuevo desaduanaje')).toBe('Un momento…');
+    });
+    it('el aviso nombra la acción y el registro', () => {
+        expect(avisoHecho('Emitir solicitud', 'SOL-2026-0012')).toBe('Emitir solicitud SOL-2026-0012: hecho.');
+        expect(avisoHecho('Liberar')).toBe('Liberar: hecho.');
     });
 });

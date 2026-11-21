@@ -105,3 +105,22 @@ export function parametroId(funcion: string): string {
     if (funcion === 'ac_des_crear') return 'p_oc';
     return 'p_id';
 }
+
+const GERUNDIO_IRREGULAR: Record<string, string> = { corregir: 'corrigiendo', pedir: 'pidiendo', ir: 'yendo', leer: 'leyendo' };
+const gerundio = (v: string) => GERUNDIO_IRREGULAR[v] ?? (/ar$/.test(v) ? v.slice(0, -2) + 'ando' : /[ei]r$/.test(v) ? v.slice(0, -2) + 'iendo' : null);
+/**
+ * Lo que dice el botón mientras la acción viaja (guía: «el botón dice qué hace»): «Emitir y enviar a aprobación» →
+ * «Emitiendo y enviando a aprobación…». Si la etiqueta no empieza con un verbo, «Un momento…».
+ */
+export function enCurso(etiqueta: string): string {
+    const palabras = etiqueta.split(' ');
+    const primero = gerundio(palabras[0].toLowerCase());
+    if (!primero) return 'Un momento…';
+    const r = palabras.map((p, i) => (i === 0 ? primero : palabras[i - 1] === 'y' ? (gerundio(p) ?? p) : p));
+    return r[0][0].toUpperCase() + r.join(' ').slice(1) + '…';
+}
+
+/** El aviso tras una acción nombra qué se hizo y sobre qué: «Emitir solicitud SOL-2026-0012: hecho.» */
+export function avisoHecho(etiqueta: string, nombre?: string | null): string {
+    return `${etiqueta}${nombre ? ` ${nombre}` : ''}: hecho.`;
+}

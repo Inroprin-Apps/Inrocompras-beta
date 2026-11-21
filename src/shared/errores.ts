@@ -16,10 +16,15 @@ export function errorFuente(e: { message?: string; code?: string } | null | unde
     if (e?.code === '42501' && /no est[aá] activo/i.test(m)) return { kind: 'permiso', message: m };
     if (e?.code === '42501' || /permission denied|row-level security/i.test(m))
         return { kind: 'permiso', message: 'No tienes permiso para hacer esto. Si crees que deberías, pídelo al administrador.' };
-    if (e?.code === 'P0001' || e?.code === 'PGRST116') return { kind: e.code === 'PGRST116' ? 'no-encontrado' : 'regla', message: m || 'No se encontró.' };
-    if (e?.code === '23505') return { kind: 'regla', message: 'Ya existe un registro con esos datos.' };
-    if (e?.code === '23514') return { kind: 'regla', message: 'Algún dato no es válido. Revisa el formulario.' };
-    return { kind: 'fuente', message: m || 'No se pudo completar. Inténtalo otra vez.' };
+    // P0001: el motivo que escribe la base (app.p_*), ya en español y diciendo qué hacer. Va tal cual.
+    if (e?.code === 'P0001' && m) return { kind: 'regla', message: m };
+    if (e?.code === 'PGRST116') return { kind: 'no-encontrado', message: 'No se encontró. Puede que ya no exista: vuelve a la lista y búscalo otra vez.' };
+    if (e?.code === '23505') return { kind: 'regla', message: 'Ya existe un registro con esos datos. Búscalo en la lista antes de crear otro.' };
+    if (e?.code === '23514' || e?.code === '23502' || e?.code === '22P02' || e?.code === '22003')
+        return { kind: 'regla', message: 'Algún dato no es válido. Revisa el formulario.' };
+    // Lo demás es técnico: no se muestra (guía, «Vacío, carga y error»); queda en la consola para soporte.
+    if (m) console.error('Error de la fuente:', e?.code ?? '', m);
+    return { kind: 'fuente', message: 'No se pudo completar. Inténtalo otra vez en un momento; si sigue fallando, avisa a Sistemas.' };
 }
 
 /** Envuelve la respuesta { data, error } de supabase-js en un Result. */

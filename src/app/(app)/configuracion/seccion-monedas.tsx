@@ -162,7 +162,7 @@ function FormTasa({ moneda, onCerrar }: { moneda: Moneda; onCerrar: () => void }
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void guardar()} disabled={guardando}>
                         {guardando ? 'Guardando…' : 'Guardar tasa'}
@@ -204,7 +204,7 @@ function FormTc({ monedas, onCerrar }: { monedas: Moneda[]; onCerrar: () => void
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void guardar()} disabled={guardando}>
                         {guardando ? 'Guardando…' : 'Registrar'}

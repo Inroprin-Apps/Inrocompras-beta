@@ -93,7 +93,7 @@ function FormConcepto({ ambito: inicial, existentes, onCerrar }: { ambito: Ambit
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void guardar()} disabled={guardando}>
                         {guardando ? 'Guardando…' : 'Agregar'}
@@ -216,7 +216,7 @@ function FormGasto({ g: inicial, nuevo, existentes, onCerrar }: { g: ConceptoGas
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void guardar()} disabled={guardando}>
                         {guardando ? 'Guardando…' : 'Guardar'}

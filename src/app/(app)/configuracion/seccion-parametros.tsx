@@ -76,7 +76,7 @@ function FormParametro({ p, onCerrar }: { p: Parametro; onCerrar: () => void }) 
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void guardar()} disabled={guardando}>
                         {guardando ? 'Guardando…' : 'Guardar'}

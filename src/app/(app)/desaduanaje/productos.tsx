@@ -103,7 +103,7 @@ function FormProducto({ p, onCerrar }: { p: ProductoDes; onCerrar: () => void })
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar} disabled={guardando}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void guardar()} disabled={guardando}>
                         {guardando ? 'Guardando…' : 'Guardar'}

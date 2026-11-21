@@ -69,7 +69,7 @@ export function ProgramarBloque({ cuotas, onCerrar }: { cuotas: Pago[]; onCerrar
             pie={
                 <>
                     <Button variant="secondary" onClick={() => onCerrar([])} disabled={haciendo !== null}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void programar()} disabled={haciendo !== null}>
                         {haciendo !== null ? `Programando ${haciendo} de ${cuotas.length}…` : 'Programar'}

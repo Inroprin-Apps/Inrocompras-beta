@@ -59,7 +59,7 @@ export function FormAnulacion({
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar} disabled={enviando}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button variant="danger" onClick={() => void pedir()} disabled={enviando}>
                         {enviando ? 'Un momento…' : 'Pedir anulación'}

@@ -124,7 +124,7 @@ function ConfirmarBorrado({ g, onCerrar }: { g: GastoDes; onCerrar: () => void }
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar} disabled={borrando}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button variant="danger" onClick={() => void borrar()} disabled={borrando}>
                         {borrando ? 'Borrando…' : 'Borrar gasto'}

@@ -20,7 +20,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<Re
     const error = mensaje(q.error, q.error_description);
     const volver = q.volver && q.volver.startsWith('/') && !q.volver.startsWith('//') ? q.volver : '/';
     return (
-        <main className="flex min-h-dvh items-center justify-center bg-surface-2 px-4">
+        <main className="flex min-h-dvh items-center justify-center px-4">
             <div className="w-full max-w-sm rounded-card border border-line bg-surface p-8 shadow-card">
                 <div className="mb-6 flex items-center gap-3">
                     <CuboRombos size={40} variante="relleno" />

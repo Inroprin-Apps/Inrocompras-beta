@@ -66,7 +66,7 @@ export function FormSolicitud({ solicitud, onCerrar, onCreado }: { solicitud?: S
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void guardar()} disabled={guardando}>
                         {guardando ? 'Guardando…' : solicitud ? 'Guardar cambios' : 'Crear borrador'}

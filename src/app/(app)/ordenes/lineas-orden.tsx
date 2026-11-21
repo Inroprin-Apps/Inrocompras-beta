@@ -109,7 +109,7 @@ function Pie({
     return (
         <>
             <Button variant="secondary" onClick={onCerrar} disabled={ocupado}>
-                Volver
+                Cancelar
             </Button>
             <Button variant={peligro ? 'danger' : 'primary'} onClick={onOk} disabled={ocupado}>
                 {ocupado ? 'Guardando…' : texto}

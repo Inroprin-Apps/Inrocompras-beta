@@ -79,7 +79,7 @@ export function CargaExcel({ solicitudId, items, onCerrar }: { solicitudId: stri
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar} disabled={!!ocupado}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void subir()} disabled={!lectura || !!ocupado}>
                         {ocupado && lectura ? 'Validando…' : lectura ? `Subir y validar ${lectura.filas.length} filas` : 'Subir y validar'}

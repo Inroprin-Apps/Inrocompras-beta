@@ -174,7 +174,7 @@ function FormDescartar({ t, onCerrar }: { t: TrabajoCola; onCerrar: () => void }
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button variant="danger" onClick={() => void descartar()} disabled={guardando}>
                         {guardando ? 'Un momento…' : 'Descartar'}

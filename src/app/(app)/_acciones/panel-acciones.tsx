@@ -7,6 +7,8 @@
 import { useState } from 'react';
 import { acciones } from '@/modules/acciones/composition.ts';
 import {
+    avisoHecho,
+    enCurso,
     etiquetaCampo,
     faltante,
     necesitaDialogo,
@@ -46,10 +48,13 @@ export function PanelAcciones({
     id,
     tocadas,
     onHecho,
+    nombre,
     vacio = 'Por ahora no te toca nada aquí.',
 }: {
     tabla: string;
     id: string;
+    /** Cómo se llama el registro (su número) para el aviso: «Emitir solicitud SOL-2026-0012: hecho.» */
+    nombre?: string | null;
     /** Tablas que cambian con estas acciones: se recargan sus listas. */
     tocadas: readonly string[];
     onHecho?: (accion: Accion, respuesta: Record<string, unknown>) => void;
@@ -65,7 +70,8 @@ export function PanelAcciones({
         setHaciendo(null);
         if (r.isErr()) return r.error.message;
         setAbierta(null);
-        toast.success(`${a.etiqueta}: listo.`);
+        const numero = typeof r.value?.numero === 'string' ? r.value.numero : null;
+        toast.success(avisoHecho(a.etiqueta, numero ?? nombre));
         refrescar([...tocadas, 'acciones', 'te_toca', 'notificaciones']);
         // La acción pudo encolar correos, PDF o Drive: se despierta la cola (en el plan Hobby el cron es diario).
         void fetch('/api/cola/despertar', { method: 'POST' }).catch(() => {});
@@ -97,12 +103,12 @@ export function PanelAcciones({
                     {lista.map((a) => (
                         <Button
                             key={a.accion}
-                            variant={a.tipo === 'p' ? 'primary' : a.tipo === 'd' ? 'secondary' : 'secondary'}
+                            variant={a.tipo === 'p' ? 'primary' : 'secondary'}
                             className={a.tipo === 'd' ? 'text-danger-strong' : ''}
                             disabled={!!haciendo}
                             onClick={() => void pulsar(a)}
                         >
-                            {haciendo === a.accion ? 'Un momento…' : a.etiqueta}
+                            {haciendo === a.accion ? enCurso(a.etiqueta) : a.etiqueta}
                         </Button>
                     ))}
                 </div>
@@ -143,27 +149,31 @@ function DialogoAccion({
             abierto
             onCerrar={onCerrar}
             titulo={accion.etiqueta}
+            onEnviar={() => void confirmar()}
             descripcion={accion.tipo === 'd' ? 'Esta acción no se deshace con un clic. Revisa antes de confirmar.' : undefined}
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar} disabled={ocupado}>
-                        Volver
+                        Cancelar
                     </Button>
-                    <Button variant={accion.tipo === 'd' ? 'danger' : 'primary'} onClick={() => void confirmar()} disabled={ocupado}>
-                        {ocupado ? 'Un momento…' : accion.etiqueta}
+                    <Button type="submit" variant={accion.tipo === 'd' ? 'danger' : 'primary'} disabled={ocupado}>
+                        {ocupado ? enCurso(accion.etiqueta) : accion.etiqueta}
                     </Button>
                 </>
             }
         >
-            {campos.map((c) => (
-                <CampoAccion key={c.campo} campo={c} valor={valores[c.campo] ?? ''} onChange={(v) => setValores((x) => ({ ...x, [c.campo]: v }))} />
-            ))}
-            {!campos.length && <p className="text-ui text-ink-2">¿Confirmas?</p>}
-            {error && (
-                <p role="alert" className="text-small font-medium text-danger-strong">
-                    {error}
-                </p>
-            )}
+            {campos.length > 0 || error ? (
+                <>
+                    {campos.map((c) => (
+                        <CampoAccion key={c.campo} campo={c} valor={valores[c.campo] ?? ''} onChange={(v) => setValores((x) => ({ ...x, [c.campo]: v }))} />
+                    ))}
+                    {error && (
+                        <p role="alert" className="text-small font-medium text-danger-strong">
+                            {error}
+                        </p>
+                    )}
+                </>
+            ) : null}
         </Dialog>
     );
 }

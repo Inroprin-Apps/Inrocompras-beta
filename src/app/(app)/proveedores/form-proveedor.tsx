@@ -87,7 +87,7 @@ export function FormProveedor({
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void guardar()} disabled={guardando}>
                         {guardando ? 'Guardando…' : proveedor ? 'Guardar cambios' : 'Dar de alta'}

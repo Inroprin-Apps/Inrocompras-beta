@@ -222,7 +222,7 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
                     pie={
                         <>
                             <Button variant="secondary" onClick={() => setBorrando(false)}>
-                                Volver
+                                Cancelar
                             </Button>
                             <Button variant="danger" onClick={() => void borrarBorrador()}>
                                 Eliminar borrador

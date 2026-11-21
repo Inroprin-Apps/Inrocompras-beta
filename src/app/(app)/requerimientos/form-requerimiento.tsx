@@ -33,7 +33,7 @@ function Pie({ onCerrar, onGuardar, guardando, texto }: { onCerrar: () => void; 
     return (
         <>
             <Button variant="secondary" onClick={onCerrar}>
-                Volver
+                Cancelar
             </Button>
             <Button onClick={onGuardar} disabled={guardando}>
                 {guardando ? 'Guardando…' : texto}

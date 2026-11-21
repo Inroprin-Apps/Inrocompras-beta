@@ -88,7 +88,7 @@ export function DialogoTecnica({ items, onCerrar, onHecho }: { items: ItemTecnic
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar} disabled={haciendo}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void confirmar()} disabled={haciendo}>
                         {haciendo ? 'Registrando…' : `Registrar ${f.resultado.toLowerCase()}`}

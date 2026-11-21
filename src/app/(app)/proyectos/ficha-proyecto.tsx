@@ -151,7 +151,7 @@ function FormEtapa({ proyectoId, etapa, onCerrar }: { proyectoId: string; etapa:
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void guardar()} disabled={guardando}>
                         {guardando ? 'Guardando…' : 'Guardar etapa'}

@@ -15,6 +15,8 @@ const REVALIDATE_MS = 5 * 60 * 1000;
 export interface ResourceState<T> {
     data: T | null;
     error: string | null;
+    /** Cuándo se leyó lo que se ve (ms): el encabezado lo muestra para que se sepa si está al día. */
+    actualizado?: number;
 }
 
 type Cargador<T> = () => Promise<Result<T, ErrorFuente>>;
@@ -62,7 +64,7 @@ export function resource<T>(cargar: Cargador<T>, etiquetas: readonly string[] = 
         if (inFlight) return inFlight;
         const read = leer(cargar)
             .then(
-                (data) => set({ data, error: null }),
+                (data) => set({ data, error: null, actualizado: Date.now() }),
                 (e: unknown) => {
                     // Una revalidación que falla sigue mostrando lo que hay.
                     if (!state.data) set({ data: null, error: mensaje(e) });
@@ -97,7 +99,7 @@ export function resource<T>(cargar: Cargador<T>, etiquetas: readonly string[] = 
         load,
         /** Reintentar tras un error (el botón «Reintentar» de la lista). */
         retry: () => {
-            set({ data: state.data, error: null });
+            set({ ...state, error: null });
             return load();
         },
         /** Lo lee solo si no hay nada aquí ni en camino (precarga en tiempo ocioso). */

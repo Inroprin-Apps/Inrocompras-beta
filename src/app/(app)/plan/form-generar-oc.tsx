@@ -96,7 +96,7 @@ export function FormGenerarOc({ lineas: marcadas, onCerrar, onCreada }: { lineas
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar} disabled={creando}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void crear()} disabled={creando}>
                         {creando ? 'Creando…' : 'Crear borrador'}

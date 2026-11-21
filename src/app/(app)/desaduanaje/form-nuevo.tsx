@@ -49,7 +49,7 @@ export function FormNuevo({ onCerrar, onCreado }: { onCerrar: () => void; onCrea
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar} disabled={creando}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void crear()} disabled={creando || !oc}>
                         {creando ? 'Creando…' : 'Crear desaduanaje'}

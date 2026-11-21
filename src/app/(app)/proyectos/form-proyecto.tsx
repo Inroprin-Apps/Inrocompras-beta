@@ -56,7 +56,7 @@ export function FormProyecto({ proyecto, onCerrar, onCreado }: { proyecto?: Proy
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void guardar()} disabled={guardando}>
                         {guardando ? 'Guardando…' : proyecto ? 'Guardar cambios' : 'Crear proyecto'}

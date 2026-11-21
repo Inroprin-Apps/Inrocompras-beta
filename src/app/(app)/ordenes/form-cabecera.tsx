@@ -75,7 +75,7 @@ export function FormCabecera({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () =>
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar} disabled={guardando}>
-                        Volver
+                        Cancelar
                     </Button>
                     <Button onClick={() => void guardar()} disabled={guardando}>
                         {guardando ? 'Guardando…' : 'Guardar cambios'}

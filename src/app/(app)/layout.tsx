@@ -15,7 +15,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     const perfil = await miPerfil();
     if (!perfil || !perfil.activo) {
         return (
-            <main className="flex min-h-dvh items-center justify-center bg-surface-2 px-4">
+            <main className="flex min-h-dvh items-center justify-center px-4">
                 <div className="max-w-md rounded-card border border-line bg-surface p-8">
                     <h1 className="mb-2 text-subtitle font-semibold">{perfil ? 'Tu usuario está desactivado' : 'Tu usuario aún no está registrado'}</h1>
                     <p className="mb-5 text-body text-ink-2">
@@ -29,7 +29,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     const detalle = [perfil.area, ...perfil.roles.map(rolLabel)].join(' · ');
     return (
         <PerfilProvider perfil={perfil}>
-            <div className="flex min-h-dvh flex-col bg-surface-2 md:flex-row">
+            <div className="flex min-h-dvh flex-col md:flex-row">
                 <MenuLateral grupos={menuPara(perfil)} />
                 <div className="flex min-w-0 flex-1 flex-col">
                     <header className="flex items-center justify-end gap-2 px-4 pt-4 md:px-8">

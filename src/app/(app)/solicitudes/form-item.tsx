@@ -79,7 +79,7 @@ export function FormItem({
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
                     {!f.id && (
                         <Button variant="secondary" onClick={() => void guardar(true)} disabled={guardando}>

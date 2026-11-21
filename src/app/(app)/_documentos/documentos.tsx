@@ -22,7 +22,7 @@ import { Chip } from '@/shared/ui/card.tsx';
 import { Dialog } from '@/shared/ui/dialog.tsx';
 import { DropZone } from '@/shared/ui/drop-zone.tsx';
 import { Field, Input } from '@/shared/ui/field.tsx';
-import { dmy } from '@/shared/ui/format.ts';
+import { dmy, money } from '@/shared/ui/format.ts';
 import { Hueco } from '@/shared/ui/hueco.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
@@ -84,7 +84,7 @@ export function Documentos({
                                     {d.tipo}
                                     {d.numero && ` · ${d.numero}`}
                                     {d.fecha && ` · ${dmy(d.fecha)}`}
-                                    {d.monto != null && ` · ${d.moneda ?? ''} ${d.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`}
+                                    {d.monto != null && ` · ${money(d.monto, d.moneda ?? 'PEN')}`}
                                 </div>
                             </div>
                             <div className="flex flex-none flex-col items-end gap-1">
@@ -139,7 +139,7 @@ function FormSubida({
 
     async function subir() {
         const m = monto.trim() ? Number(monto.replace(',', '.')) : null;
-        if (m != null && !Number.isFinite(m)) return setError('El monto debe ser un número.');
+        if (m != null && !Number.isFinite(m)) return setError('El monto debe ser un número. Usa punto para los decimales: 1250.50');
         setSubiendo(true);
         const r = await documentos().subir(dueno, archivo, {
             tipo,
@@ -150,7 +150,7 @@ function FormSubida({
         });
         setSubiendo(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success(`${tipo} subida. Pasa a Drive en segundo plano.`);
+        toast.success(`Se subió ${tipo.toLowerCase()} ${numero.trim() || archivo.name}. Pasa a Drive en segundo plano.`);
         refrescar(['documentos', ...tocadas, 'acciones', 'te_toca']);
         onCerrar();
     }
@@ -160,12 +160,13 @@ function FormSubida({
             onCerrar={onCerrar}
             titulo="Subir documento"
             descripcion={archivo.name}
+            onEnviar={() => void subir()}
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
-                    <Button onClick={() => void subir()} disabled={subiendo}>
+                    <Button type="submit" disabled={subiendo}>
                         {subiendo ? 'Subiendo…' : 'Subir'}
                     </Button>
                 </>
@@ -209,11 +210,15 @@ function RevisarLectura({ doc, tocadas, onCerrar }: { doc: Documento; tocadas: r
     const [moneda, setMoneda] = useState(doc.moneda || l.moneda || 'PEN');
     const [ruc, setRuc] = useState(doc.rucEmisor || l.ruc || '');
     const [error, setError] = useState<string | null>(null);
+    const [confirmando, setConfirmando] = useState(false);
     async function confirmar() {
         const m = monto.trim() ? Number(monto.replace(',', '.')) : null;
+        if (m != null && !Number.isFinite(m)) return setError('El total debe ser un número. Usa punto para los decimales: 1250.50');
+        setConfirmando(true);
         const r = await documentos().confirmarLectura(doc.id, { numero, fecha: fecha || null, monto: m, moneda: moneda || null, ruc: ruc.trim() || null });
+        setConfirmando(false);
         if (r.isErr()) return setError(r.error.message);
-        toast.success('Lectura confirmada.');
+        toast.success(`Lectura de ${doc.nombre} confirmada.`);
         refrescar(['documentos', 'ordenes', ...tocadas]);
         onCerrar();
     }
@@ -222,13 +227,16 @@ function RevisarLectura({ doc, tocadas, onCerrar }: { doc: Documento; tocadas: r
             abierto
             onCerrar={onCerrar}
             titulo="Revisar lo que se leyó"
+            onEnviar={() => void confirmar()}
             descripcion={l.aviso ?? 'Corrige lo que no coincida con el documento y confirma.'}
             pie={
                 <>
                     <Button variant="secondary" onClick={onCerrar}>
-                        Volver
+                        Cancelar
                     </Button>
-                    <Button onClick={() => void confirmar()}>Confirmar</Button>
+                    <Button type="submit" disabled={confirmando}>
+                        {confirmando ? 'Confirmando…' : 'Confirmar lectura'}
+                    </Button>
                 </>
             }
         >
