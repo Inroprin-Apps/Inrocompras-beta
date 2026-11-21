@@ -15,6 +15,7 @@ import {
     semaforo,
     type ConfigPlan,
     type LineaPlan,
+    columnasExcelPlan,
 } from '@/modules/plan/domain/plan.ts';
 
 const l = (x: Partial<LineaPlan>): LineaPlan => ({
@@ -152,5 +153,15 @@ describe('carrito «Generar OC»', () => {
         expect(faltaEnLineaCarrito({ ...x, cantidad: '11' }, num)).toMatch(/saldo es 10/);
         expect(faltaEnLineaCarrito({ ...x, cantidad: '0' }, num)).toMatch(/cantidad/);
         expect(faltaEnLineaCarrito({ ...x, precio: '' }, num)).toMatch(/precio/);
+    });
+});
+
+describe('exportar el plan', () => {
+    it('cada dato en su columna, con las fechas como Date y las OC juntas', () => {
+        const [f] = calcular([l({ fechaMeta: '2026-12-31', plazoDias: 10, ordenes: [{ id: 'o', numero: 'OC-9', estatus: 'Borrador' }] })], cfg);
+        const v = Object.fromEntries(columnasExcelPlan().map((c) => [c.titulo, c.valor(f)]));
+        expect(v['Fecha meta']).toEqual(new Date(Date.UTC(2026, 11, 31)));
+        expect(v['OC']).toBe('OC-9 (Borrador)');
+        expect(columnasExcelPlan().some((c) => c.tipo === 'monto')).toBe(false);
     });
 });

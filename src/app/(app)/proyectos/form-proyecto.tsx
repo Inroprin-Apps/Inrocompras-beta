@@ -58,6 +58,7 @@ export function FormProyecto({ proyecto, onCerrar, onCreado }: { proyecto?: Proy
     return (
         <Dialog
             abierto
+            amplio
             onCerrar={cerrar}
             onEnviar={() => void guardar()}
             aviso={aviso}

@@ -7,6 +7,7 @@ import {
     ESTADOS_COMPRA,
     ETIQUETA_COMPRA,
     FILTROS_SEGUIMIENTO,
+    columnasSeguimiento,
     contarPorEstado,
     estadoCompra,
     filtrarSeguimiento,
@@ -21,6 +22,7 @@ import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
+import { BotonExportar } from '../_components/exportar.tsx';
 import { urlState } from '../_lib/url-state.ts';
 import { proyectosStore } from '../proyectos/store.ts';
 import { BarraPestanas } from '../solicitudes/pestanas.tsx';
@@ -67,6 +69,9 @@ export function SeguimientoView() {
                         ...proyectos.map((p) => ({ value: p.id, label: p.codigo ? `${p.codigo} · ${p.nombre}` : p.nombre })),
                     ]}
                 />
+                <div className="sm:ml-auto">
+                    <BotonExportar nombre="Seguimiento" columnas={columnasSeguimiento()} filas={estado.data ? lista : []} />
+                </div>
             </FilterRow>
             <Lista
                 estado={{ data: estado.data ? lista : null, error: estado.error }}
@@ -129,10 +134,10 @@ export function SeguimientoView() {
                                         {!unProyecto && <th className={T.th}>Proyecto</th>}
                                         <th className={T.th}>Requerimiento</th>
                                         <th className={T.th}>Validación técnica</th>
-                                        <th className={`${T.thNum} text-right`}>Cantidad</th>
-                                        <th className={`${T.thNum} text-right`}>Por comprar</th>
+                                        <th className={T.thNum}>Cantidad</th>
+                                        <th className={T.thNum}>Por comprar</th>
                                         <th className={T.th}>Compra</th>
-                                        <th className={`${T.thNum} text-right`}>Fecha meta</th>
+                                        <th className={T.thNum}>Fecha meta</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -148,22 +153,24 @@ export function SeguimientoView() {
                                                 </td>
                                                 {!unProyecto && <td className={T.td}>{f.proyecto || <span className="text-ink-3">Administrativa</span>}</td>}
                                                 <td className={T.td}>
-                                                    {f.requerimiento || <span className="text-ink-3">En proceso</span>}
-                                                    {f.rqSidige && <div className={T.sub}>RQ {f.rqSidige}</div>}
+                                                    <span className="whitespace-nowrap">
+                                                        {f.requerimiento || <span className="text-ink-3">En proceso</span>}
+                                                    </span>
+                                                    {f.rqSidige && <div className={`${T.sub} whitespace-nowrap`}>RQ {f.rqSidige}</div>}
                                                 </td>
                                                 <td className={T.td}>
-                                                    {f.validacionTecnica}
+                                                    <span className="whitespace-nowrap">{f.validacionTecnica}</span>
                                                     {(f.marca || f.modelo) && <div className={T.sub}>{[f.marca, f.modelo].filter(Boolean).join(' · ')}</div>}
                                                 </td>
-                                                <td className={`${T.tdNum} text-right`}>{fmtNum.format(f.cantidad)}</td>
-                                                <td className={`${T.tdNum} text-right`}>{fmtNum.format(f.saldo)}</td>
+                                                <td className={T.tdNum}>{fmtNum.format(f.cantidad)}</td>
+                                                <td className={T.tdNum}>{fmtNum.format(f.saldo)}</td>
                                                 <td className={T.td}>
                                                     <Chip tone={TONO[e]}>{ETIQUETA_COMPRA[e]}</Chip>
                                                     {(f.ordenes || f.estadoOrden) && (
                                                         <div className={T.sub}>{[f.ordenes, f.estadoOrden].filter(Boolean).join(' · ')}</div>
                                                     )}
                                                 </td>
-                                                <td className={`${T.tdNum} text-right`}>{f.fechaMeta ? dmy(f.fechaMeta) : '—'}</td>
+                                                <td className={T.tdNum}>{f.fechaMeta ? dmy(f.fechaMeta) : '—'}</td>
                                             </tr>
                                         );
                                     })}

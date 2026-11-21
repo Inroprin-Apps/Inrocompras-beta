@@ -18,6 +18,7 @@ import { toast } from '@/shared/ui/toaster.tsx';
 import { Historial } from '../_acciones/historial.tsx';
 import { PanelAcciones } from '../_acciones/panel-acciones.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
+import { useBorrarConDeshacer } from '../_lib/deshacer.ts';
 import { refrescar } from '../_lib/resource.ts';
 import { catalogosStore, personasStore } from '../_lib/stores.ts';
 import { FormProyecto } from './form-proyecto.tsx';
@@ -35,13 +36,17 @@ export function FichaProyecto({ proyecto: p, onCerrar }: { proyecto: Proyecto; o
     const [etapa, setEtapa] = useState<Partial<Etapa> | null>(null);
     const nombre = (id: string | null) => gente.find((g) => g.id === id)?.nombre ?? '';
     const editable = puedeEditar(p, perfil);
-    const sinAprobador = etapasSinAprobador(p);
+    // Quitar una etapa no pregunta: se oculta y el aviso ofrece «Deshacer» (guía, «Estado»).
+    const { ocultos, borrar } = useBorrarConDeshacer();
+    const etapas = p.etapas.filter((e) => !ocultos.has(e.id));
+    const sinAprobador = etapasSinAprobador({ ...p, etapas });
 
-    async function borrarEtapa(e: Etapa) {
-        const r = await proyectos().borrarEtapa(e.id);
-        if (r.isErr()) return toast.error(r.error.message);
-        toast.success(`Etapa ${e.nombre} quitada de ${p.codigo || p.nombre}.`);
-        refrescar(['proyecto_etapas']);
+    function borrarEtapa(e: Etapa) {
+        borrar(e.id, {
+            aviso: `Etapa ${e.nombre} quitada de ${p.codigo || p.nombre}.`,
+            ejecutar: () => proyectos().borrarEtapa(e.id),
+            tocadas: ['proyecto_etapas'],
+        });
     }
 
     return (
@@ -92,11 +97,11 @@ export function FichaProyecto({ proyecto: p, onCerrar }: { proyecto: Proyecto; o
                         libere.
                     </Notice>
                 )}
-                {p.etapas.length === 0 ? (
+                {etapas.length === 0 ? (
                     <p className="text-small text-ink-3">Sin etapas. Al marcar el proyecto como ganado se crea «General» con el gerente como aprobador.</p>
                 ) : (
                     <ul className="flex flex-col divide-y divide-divider">
-                        {p.etapas.map((e) => (
+                        {etapas.map((e) => (
                             <li key={e.id} className="flex items-start gap-2 py-2">
                                 <div className="min-w-0 flex-1">
                                     <div className="text-ui font-medium">{e.nombre}</div>
@@ -107,7 +112,7 @@ export function FichaProyecto({ proyecto: p, onCerrar }: { proyecto: Proyecto; o
                                         <Button variant="ghost" iconOnly aria-label={`Editar ${e.nombre}`} onClick={() => setEtapa(e)}>
                                             <Pencil size={15} />
                                         </Button>
-                                        <Button variant="ghost" iconOnly aria-label={`Quitar ${e.nombre}`} onClick={() => void borrarEtapa(e)}>
+                                        <Button variant="ghost" iconOnly aria-label={`Quitar la etapa ${e.nombre}`} onClick={() => borrarEtapa(e)}>
                                             <Trash2 size={15} />
                                         </Button>
                                     </>

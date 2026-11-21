@@ -10,12 +10,15 @@ import {
     FILTROS_SOLICITUD,
     PESTANAS,
     TIPOS_SOLICITUD,
+    columnasSolicitudes,
     filtrarSolicitudes,
     ordenarSolicitudes,
     tonoEstado,
     type OrdenSolicitud,
     type Pestana,
+    type Solicitud,
 } from '@/modules/solicitudes/application/views.ts';
+import { solicitudes } from '@/modules/solicitudes/composition.ts';
 import { FilterRow, SearchBox, T } from '@/shared/ui/bits.tsx';
 import { Button } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
@@ -24,7 +27,9 @@ import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
+import { BotonExportar } from '../_components/exportar.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
+import { useBorrarConDeshacer } from '../_lib/deshacer.ts';
 import { personasStore, teTocaStore } from '../_lib/stores.ts';
 import { urlState } from '../_lib/url-state.ts';
 import { proyectosStore } from '../proyectos/store.ts';
@@ -50,7 +55,9 @@ const vista$ = urlState(
 
 export function SolicitudesView() {
     const perfil = usePerfil();
-    const estado = solicitudesStore.use();
+    const leido = solicitudesStore.use();
+    const { ocultos, borrar } = useBorrarConDeshacer();
+    const estado = useMemo(() => ({ ...leido, data: leido.data?.filter((s) => !ocultos.has(s.id)) ?? null }), [leido, ocultos]);
     const proyectosLeidos = proyectosStore.use().data;
     const proyectos = useMemo(() => proyectosLeidos ?? [], [proyectosLeidos]);
     const gente = personasStore.use().data;
@@ -71,7 +78,8 @@ export function SolicitudesView() {
     const lista = useMemo(() => ordenarSolicitudes(filtrarSolicitudes(estado.data ?? [], v, ctx), v.orden), [estado.data, v, ctx]);
     const conteo = (p: Pestana) => filtrarSolicitudes(estado.data ?? [], { ...FILTROS_SOLICITUD, pestana: p }, ctx).length;
     const pag = usePaged(lista, lista, 25, vista$.usePage());
-    const quien = (id: string) => gente?.find((g) => g.id === id)?.nombre ?? '';
+    const quien = (id: string | null) => (id ? (gente?.find((g) => g.id === id)?.nombre ?? '') : '');
+    const columnas = columnasSolicitudes({ nombreProyecto, nombrePersona: quien });
     const proyectosConSolicitud = useMemo(() => {
         const ids = new Set((estado.data ?? []).map((s) => s.proyectoId).filter(Boolean));
         return proyectos.filter((p) => ids.has(p.id));
@@ -79,6 +87,12 @@ export function SolicitudesView() {
 
     const conFiltros = !!(v.texto || v.estado || v.tipo || v.proyecto);
     const quitarFiltros = () => vista$.set({ texto: '', estado: '', tipo: '', proyecto: '' });
+    const eliminarBorrador = (s: Solicitud) => {
+        vista$.set({ ver: '' });
+        const que = s.numero || (s.sustento.trim() ? `«${s.sustento.trim().slice(0, 40)}»` : 'de solicitud');
+        borrar(s.id, { aviso: `Borrador ${que} eliminado.`, ejecutar: () => solicitudes().borrar(s.id), tocadas: ['solicitudes'] });
+    };
+
     const vacia = conFiltros ? (
         <ListaVacia titulo="Ninguna solicitud coincide">
             Prueba con otra búsqueda o quita los filtros.
@@ -141,7 +155,10 @@ export function SolicitudesView() {
                     onChange={(proyecto) => vista$.set({ proyecto })}
                     options={[{ value: '', label: 'Todos los proyectos' }, ...proyectosConSolicitud.map((p) => ({ value: p.id, label: p.nombre }))]}
                 />
-                <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                <div className="flex flex-wrap items-center gap-2.5 sm:ml-auto">
+                    <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                    <BotonExportar nombre="Solicitudes" columnas={columnas} filas={estado.data ? lista : []} />
+                </div>
             </FilterRow>
             <Lista estado={{ data: estado.data ? lista : null, error: estado.error }} onReintentar={() => void solicitudesStore.retry()} vacia={vacia}>
                 {() => (
@@ -157,8 +174,8 @@ export function SolicitudesView() {
                                         <th className={T.th}>Destino</th>
                                         <th className={`${T.th} hidden sm:table-cell`}>Estado</th>
                                         <th className={`${T.th} hidden md:table-cell`}>Solicitante</th>
-                                        <th className={`${T.thNum} hidden text-right sm:table-cell`}>Ítems</th>
-                                        <th className={`${T.thNum} hidden text-right sm:table-cell`}>Creada</th>
+                                        <th className={`${T.thNum} hidden sm:table-cell`}>Ítems</th>
+                                        <th className={`${T.thNum} hidden sm:table-cell`}>Creada</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -171,7 +188,7 @@ export function SolicitudesView() {
                                             onKeyDown={(e) => e.key === 'Enter' && vista$.set({ ver: s.id })}
                                         >
                                             <td className={T.td}>
-                                                <div className="font-medium">{s.numero || 'Borrador sin número'}</div>
+                                                <div className="font-medium whitespace-nowrap">{s.numero || 'Borrador sin número'}</div>
                                                 <div className={`${T.sub} max-w-72 truncate`}>{s.sustento || 'Sin sustento'}</div>
                                                 <div className="mt-1 sm:hidden">
                                                     <Chip tone={tonoEstado(s.estado)}>{s.estado}</Chip>
@@ -190,8 +207,8 @@ export function SolicitudesView() {
                                             <td className={`${T.td} hidden md:table-cell`}>
                                                 {quien(s.solicitanteId) || <span className="text-ink-3">—</span>}
                                             </td>
-                                            <td className={`${T.tdNum} hidden text-right sm:table-cell`}>{s.nItems}</td>
-                                            <td className={`${T.tdNum} hidden text-right sm:table-cell`}>{dmy(s.creado)}</td>
+                                            <td className={`${T.tdNum} hidden sm:table-cell`}>{s.nItems}</td>
+                                            <td className={`${T.tdNum} hidden sm:table-cell`}>{dmy(s.creado)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -201,7 +218,14 @@ export function SolicitudesView() {
                     </>
                 )}
             </Lista>
-            {v.ver && <FichaSolicitud id={v.ver} onCerrar={() => vista$.set({ ver: '' })} onAbrir={(id) => vista$.set({ ver: id })} />}
+            {v.ver && (
+                <FichaSolicitud
+                    id={v.ver}
+                    onCerrar={() => vista$.set({ ver: '' })}
+                    onAbrir={(id) => vista$.set({ ver: id })}
+                    onEliminarBorrador={eliminarBorrador}
+                />
+            )}
             {creando && <FormSolicitud onCerrar={() => setCreando(false)} onCreado={(id) => (setCreando(false), vista$.set({ ver: id, pestana: 'mias' }))} />}
         </>
     );

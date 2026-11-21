@@ -2,6 +2,7 @@
 // Las reglas de negocio (quién evalúa, quién verifica la retención, RUC al dar de alta) viven en la base
 // (0002, 0003 y 0020): la ficha muestra lo que devuelve acciones_disponibles.
 import { limpiarRuc, motivoRuc } from './ruc.ts';
+import { type ColumnaExcel } from '@/shared/exportar/excel.ts';
 import { palabrasDe, plano } from '@/shared/texto.ts';
 
 export const ORIGENES = ['Nacional', 'Extranjero'] as const;
@@ -196,3 +197,18 @@ export const yaRegistrado = (lista: Proveedor[], ruc: string) => {
     const r = limpiarRuc(ruc);
     return r ? (lista.find((p) => p.ruc === r) ?? null) : null;
 };
+
+// ── Exportar ──
+/** Las columnas del Excel de la lista: las de la tabla, con cada sub-línea en su propia columna. Sin montos. */
+export function columnasExcelProveedores(): ColumnaExcel<Proveedor>[] {
+    return [
+        { titulo: 'Razón social', valor: (p) => p.razonSocial, ancho: 36 },
+        { titulo: 'RUC o identificación fiscal', valor: (p) => p.ruc, ancho: 16 },
+        { titulo: 'País', valor: (p) => (p.origen === 'Nacional' ? p.pais || 'Perú' : p.pais), ancho: 14 },
+        { titulo: 'Origen', valor: (p) => p.origen, ancho: 12 },
+        { titulo: 'Evaluación financiera', valor: (p) => etiquetaEvaluacion(p.evaluacion), ancho: 20 },
+        { titulo: 'Retención', valor: (p) => retencion(p).texto, ancho: 20 },
+        { titulo: 'Contacto', valor: (p) => p.contacto, ancho: 24 },
+        { titulo: 'Correo', valor: (p) => p.correo, ancho: 28 },
+    ];
+}

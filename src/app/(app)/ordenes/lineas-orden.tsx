@@ -2,7 +2,8 @@
 
 // Las líneas de la orden. Si la base deja editar (public.oc_edicion), cada línea se corrige (cantidad, precio,
 // descripción del proveedor) con un UPDATE directo y luego ac_oc_recalcular; «＋ Demasía» llama a ac_oc_demasia
-// (lo que excede el saldo, con motivo: lo decide la GOP). Las demasías se ven marcadas con su estado.
+// (lo que excede el saldo, con motivo: lo decide la GOP). Las demasías se ven marcadas con su estado. Quitar una
+// línea o una demasía no pregunta: se oculta y el aviso ofrece «Deshacer».
 import { useState } from 'react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { ordenes } from '@/modules/ordenes/composition.ts';
@@ -12,6 +13,7 @@ import { Chip } from '@/shared/ui/card.tsx';
 import { Dialog, useCerrarConCambios } from '@/shared/ui/dialog.tsx';
 import { Field, Input, Textarea } from '@/shared/ui/field.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
+import { useBorrarConDeshacer } from '../_lib/deshacer.ts';
 import { refrescar } from '../_lib/resource.ts';
 
 const TOCA = ['ordenes', 'oc_lineas', 'acciones'];
@@ -21,14 +23,24 @@ const etiquetaLinea = (l: Linea) => (l.nLinea != null ? `Línea ${l.nLinea}` : '
 export function LineasOrden({ o, edicion }: { o: OrdenDetalle; edicion: Edicion | null }) {
     const [editar, setEditar] = useState<Linea | null>(null);
     const [demasia, setDemasia] = useState<Linea | null>(null);
-    const [quitar, setQuitar] = useState<Linea | null>(null);
     const editable = edicion?.editar === null;
-    const base = o.lineas.filter((l) => !l.esDemasia).length;
+    // Quitar una línea o una demasía no pregunta: se oculta y el aviso ofrece «Deshacer» (guía, «Estado»).
+    const { ocultos, borrar } = useBorrarConDeshacer();
+    const lineas = o.lineas.filter((l) => !ocultos.has(l.id));
+    const base = lineas.filter((l) => !l.esDemasia).length;
+    const quitar = (l: Linea) =>
+        borrar(l.id, {
+            aviso: l.esDemasia
+                ? `Demasía de «${l.descripcion}» quitada de ${nombreOrden(o)}.`
+                : `${etiquetaLinea(l)} quitada de ${nombreOrden(o)}. El saldo vuelve al plan.`,
+            ejecutar: () => ordenes().quitarLinea(o.id, l.id),
+            tocadas: [...TOCA, 'plan'],
+        });
 
     return (
         <>
             <ul className="flex flex-col divide-y divide-divider">
-                {o.lineas.map((l) => (
+                {lineas.map((l) => (
                     <li key={l.id} className={`flex flex-col gap-1.5 py-2.5 ${l.esDemasia ? 'border-l-2 border-l-warning pl-3' : ''}`}>
                         <div className="flex items-start gap-2">
                             <div className="min-w-0 flex-1">
@@ -80,7 +92,12 @@ export function LineasOrden({ o, edicion }: { o: OrdenDetalle; edicion: Edicion 
                                 </Button>
                             )}
                             {editable && (l.esDemasia || base > 1) && (
-                                <Button variant="ghost" iconOnly aria-label={`Quitar la línea ${l.nLinea ?? ''}`} onClick={() => setQuitar(l)}>
+                                <Button
+                                    variant="ghost"
+                                    iconOnly
+                                    aria-label={l.esDemasia ? `Quitar la demasía de ${l.descripcion}` : `Quitar la línea ${l.nLinea ?? l.descripcion}`}
+                                    onClick={() => quitar(l)}
+                                >
                                     <Trash2 size={14} />
                                 </Button>
                             )}
@@ -90,33 +107,18 @@ export function LineasOrden({ o, edicion }: { o: OrdenDetalle; edicion: Edicion 
             </ul>
             {editar && <FormLinea o={o} l={editar} onCerrar={() => setEditar(null)} />}
             {demasia && <FormDemasia o={o} l={demasia} onCerrar={() => setDemasia(null)} />}
-            {quitar && <QuitarLinea o={o} l={quitar} onCerrar={() => setQuitar(null)} />}
         </>
     );
 }
 
-/** El pie de los diálogos: «Cancelar» y, a su derecha, el principal. Sin `onOk`, el principal envía el formulario (Enter). */
-function Pie({
-    onCerrar,
-    onOk,
-    ocupado,
-    texto,
-    textoOcupado = 'Guardando…',
-    peligro = false,
-}: {
-    onCerrar: () => void;
-    onOk?: () => void;
-    ocupado: boolean;
-    texto: string;
-    textoOcupado?: string;
-    peligro?: boolean;
-}) {
+/** El pie de los diálogos: «Cancelar» y, a su derecha, el principal, que envía el formulario (Enter). */
+function Pie({ onCerrar, ocupado, texto, textoOcupado = 'Guardando…' }: { onCerrar: () => void; ocupado: boolean; texto: string; textoOcupado?: string }) {
     return (
         <>
             <Button variant="secondary" onClick={onCerrar} disabled={ocupado}>
                 Cancelar
             </Button>
-            <Button variant={peligro ? 'danger' : 'primary'} type={onOk ? 'button' : 'submit'} onClick={onOk} disabled={ocupado}>
+            <Button type="submit" disabled={ocupado}>
                 {ocupado ? textoOcupado : texto}
             </Button>
         </>
@@ -164,6 +166,7 @@ function FormLinea({ o, l, onCerrar }: { o: OrdenDetalle; l: Linea; onCerrar: ()
             onCerrar={cerrar}
             onEnviar={() => void guardar()}
             aviso={aviso}
+            amplio
             titulo="Editar línea"
             descripcion={l.descripcion}
             pie={<Pie onCerrar={cerrar} ocupado={ocupado} texto="Guardar línea" />}
@@ -224,31 +227,6 @@ function FormDemasia({ o, l, onCerrar }: { o: OrdenDetalle; l: Linea; onCerrar: 
             <Field label="Motivo" error={errCampo.motivo} hint="Por ejemplo: el proveedor vende por caja de 12.">
                 {(p) => <Textarea {...p} rows={3} value={motivo} onChange={(e) => setMotivo(e.target.value)} />}
             </Field>
-            <MensajeError e={error} />
-        </Dialog>
-    );
-}
-
-function QuitarLinea({ o, l, onCerrar }: { o: OrdenDetalle; l: Linea; onCerrar: () => void }) {
-    const [error, setError] = useState<string | null>(null);
-    const [ocupado, setOcupado] = useState(false);
-    async function quitar() {
-        setOcupado(true);
-        const r = await ordenes().quitarLinea(o.id, l.id);
-        setOcupado(false);
-        if (r.isErr()) return setError(r.error.message);
-        toast.success(`${etiquetaLinea(l)} quitada de ${nombreOrden(o)}. El saldo vuelve al plan.`);
-        refrescar([...TOCA, 'plan']);
-        onCerrar();
-    }
-    return (
-        <Dialog
-            abierto
-            onCerrar={onCerrar}
-            titulo="Quitar línea"
-            descripcion={`«${l.descripcion}» sale de la orden y su cantidad vuelve al saldo del plan.`}
-            pie={<Pie onCerrar={onCerrar} onOk={() => void quitar()} ocupado={ocupado} texto="Quitar línea" textoOcupado="Quitando…" peligro />}
-        >
             <MensajeError e={error} />
         </Dialog>
     );

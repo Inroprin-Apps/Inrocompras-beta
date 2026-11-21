@@ -188,3 +188,21 @@ describe('solicitudes', () => {
         expect(siguienteNItem(l)).toBe(4);
     });
 });
+
+describe('exportar: columnas de solicitudes', () => {
+    it('un dato por columna, la fecha como fecha y el destino según el tipo', async () => {
+        const { columnasSolicitudes } = await import('@/modules/solicitudes/domain/exportar.ts');
+        const cols = columnasSolicitudes({ nombreProyecto: (id) => (id === 'p' ? 'Talleres EPT' : ''), nombrePersona: (id) => (id === 'j' ? 'Ana' : '') });
+        const fila = (s: Solicitud) => Object.fromEntries(cols.map((c) => [c.titulo, c.valor(s)]));
+        const p = fila(sol({ numero: 'SOL-2026-0012', nItems: 3 }));
+        expect(p.Solicitud).toBe('SOL-2026-0012');
+        expect(p.Proyecto).toBe('Talleres EPT');
+        expect(p['Jefe que la libera']).toBe('');
+        expect(p.Creada).toEqual(new Date(Date.UTC(2026, 10, 1)));
+        expect(cols.find((c) => c.titulo === 'Ítems')?.tipo).toBe('entero');
+        const a = fila(sol({ tipo: 'Administrativa', proyectoId: null, jefeId: 'j' }));
+        expect(a.Solicitud).toBe('Borrador sin número');
+        expect(a.Proyecto).toBe('');
+        expect(a['Jefe que la libera']).toBe('Ana');
+    });
+});

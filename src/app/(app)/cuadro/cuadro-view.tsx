@@ -98,33 +98,25 @@ export function CuadroView() {
                     <PorFirmar />
                 </section>
             )}
-            <div className="mb-3.5 flex flex-wrap items-center justify-end gap-2.5">
-                <Button variant="secondary" disabled={!estado.data || !lista.length || !!bajando} onClick={() => void bajar('excel')}>
-                    <FileSpreadsheet size={16} aria-hidden /> {bajando === 'excel' ? 'Descargando…' : 'Descargar Excel'}
-                </Button>
-                <Button variant="secondary" disabled={!estado.data || !lista.length || !!bajando} onClick={() => void bajar('csv')}>
-                    <FileDown size={16} aria-hidden /> {bajando === 'csv' ? 'Descargando…' : 'Descargar CSV'}
-                </Button>
-            </div>
             <FilterRow>
                 <SearchBox value={v.texto} onChange={(texto) => vista$.set({ texto })} placeholder="Busca por OC, proveedor, proyecto, comprador o RC" />
                 <SelectMenu
                     label="Estatus"
-                    className="w-52"
+                    className="w-60"
                     value={v.estatus}
                     onChange={(estatus) => vista$.set({ estatus })}
                     options={[{ value: '', label: 'Todos los estatus' }, ...ESTATUS.map((e) => ({ value: e, label: e }))]}
                 />
                 <SelectMenu
                     label="Estado de aprobación"
-                    className="w-48"
+                    className="w-52"
                     value={v.aprobacion}
                     onChange={(aprobacion) => vista$.set({ aprobacion })}
                     options={[{ value: '', label: 'Toda aprobación' }, ...ESTADOS_APROBACION.map((e) => ({ value: e, label: e }))]}
                 />
                 <SelectMenu
                     label="Procedencia"
-                    className="w-40"
+                    className="w-48"
                     value={v.procedencia}
                     onChange={(procedencia) => vista$.set({ procedencia })}
                     options={[{ value: '', label: 'Toda procedencia' }, ...PROCEDENCIAS.map((e) => ({ value: e, label: e }))]}
@@ -161,6 +153,14 @@ export function CuadroView() {
                         Quitar filtros
                     </Button>
                 )}
+                <div className="flex flex-wrap items-center gap-2.5 sm:ml-auto">
+                    <Button variant="secondary" disabled={!estado.data || !lista.length || !!bajando} onClick={() => void bajar('excel')}>
+                        <FileSpreadsheet size={16} aria-hidden /> {bajando === 'excel' ? 'Descargando…' : 'Descargar Excel'}
+                    </Button>
+                    <Button variant="secondary" disabled={!estado.data || !lista.length || !!bajando} onClick={() => void bajar('csv')}>
+                        <FileDown size={16} aria-hidden /> {bajando === 'csv' ? 'Descargando…' : 'Descargar CSV'}
+                    </Button>
+                </div>
             </FilterRow>
             <Lista
                 estado={{ data: estado.data ? lista : null, error: estado.error }}

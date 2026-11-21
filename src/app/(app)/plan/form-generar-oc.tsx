@@ -100,6 +100,7 @@ export function FormGenerarOc({ lineas: marcadas, onCerrar, onCreada }: { lineas
     return (
         <Dialog
             abierto
+            amplio
             onCerrar={cerrar}
             onEnviar={() => void crear()}
             aviso={aviso}

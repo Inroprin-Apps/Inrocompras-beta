@@ -6,6 +6,7 @@ import { useEffect, useMemo } from 'react';
 import {
     ESTADOS_REQ,
     FILTROS_REQ,
+    columnasRequerimientos,
     filtrarRequerimientos,
     ordenarRequerimientos,
     tonoEstado,
@@ -20,6 +21,7 @@ import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
+import { BotonExportar } from '../_components/exportar.tsx';
 import { urlState } from '../_lib/url-state.ts';
 import { proyectosStore } from '../proyectos/store.ts';
 import { FichaRequerimiento } from './ficha-requerimiento.tsx';
@@ -99,7 +101,10 @@ export function RequerimientosView() {
                         options={[{ value: '', label: 'Todas las áreas' }, ...areas.map((a) => ({ value: a, label: a }))]}
                     />
                 )}
-                <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                <div className="flex flex-wrap items-center gap-2.5 sm:ml-auto">
+                    <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                    <BotonExportar nombre="Requerimientos" columnas={columnasRequerimientos(nombreProyecto)} filas={estado.data ? lista : []} />
+                </div>
             </FilterRow>
             <Lista
                 estado={{ data: estado.data ? lista : null, error: estado.error }}
@@ -134,8 +139,8 @@ export function RequerimientosView() {
                                         <th className={T.th}>Proyecto o motivo</th>
                                         <th className={`${T.th} hidden sm:table-cell`}>Estado</th>
                                         <th className={`${T.th} hidden md:table-cell`}>Área emisora</th>
-                                        <th className={`${T.thNum} hidden text-right sm:table-cell`}>Ítems</th>
-                                        <th className={`${T.thNum} hidden text-right sm:table-cell`}>Creado</th>
+                                        <th className={`${T.thNum} hidden sm:table-cell`}>Ítems</th>
+                                        <th className={`${T.thNum} hidden sm:table-cell`}>Creado</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -148,8 +153,8 @@ export function RequerimientosView() {
                                             onKeyDown={(e) => e.key === 'Enter' && vista$.set({ ver: r.id, anulacion: '' })}
                                         >
                                             <td className={T.td}>
-                                                <div className="font-medium">{r.numero || 'En proceso, sin número'}</div>
-                                                {r.rqSidige && <div className={T.sub}>RQ SIDIGE {r.rqSidige}</div>}
+                                                <div className="font-medium whitespace-nowrap">{r.numero || 'En proceso, sin número'}</div>
+                                                {r.rqSidige && <div className={`${T.sub} whitespace-nowrap`}>RQ SIDIGE {r.rqSidige}</div>}
                                                 <div className="mt-1 sm:hidden">
                                                     <Chip tone={tonoEstado(r.estado)}>{r.estado}</Chip>
                                                 </div>
@@ -161,9 +166,9 @@ export function RequerimientosView() {
                                             <td className={`${T.td} hidden sm:table-cell`}>
                                                 <Chip tone={tonoEstado(r.estado)}>{r.estado}</Chip>
                                             </td>
-                                            <td className={`${T.td} hidden md:table-cell`}>{r.areaEmisora}</td>
-                                            <td className={`${T.tdNum} hidden text-right sm:table-cell`}>{r.nItems}</td>
-                                            <td className={`${T.tdNum} hidden text-right sm:table-cell`}>{dmy(r.creado)}</td>
+                                            <td className={`${T.td} hidden whitespace-nowrap md:table-cell`}>{r.areaEmisora}</td>
+                                            <td className={`${T.tdNum} hidden sm:table-cell`}>{r.nItems}</td>
+                                            <td className={`${T.tdNum} hidden sm:table-cell`}>{dmy(r.creado)}</td>
                                         </tr>
                                     ))}
                                 </tbody>

@@ -77,6 +77,7 @@ export function FormItem({
     return (
         <Dialog
             abierto
+            amplio
             onCerrar={cerrar}
             onEnviar={() => void guardar(false)}
             aviso={aviso}

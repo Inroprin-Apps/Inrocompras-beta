@@ -81,6 +81,7 @@ export function FormCabecera({ o, onCerrar }: { o: OrdenDetalle; onCerrar: () =>
     return (
         <Dialog
             abierto
+            amplio
             onCerrar={cerrar}
             onEnviar={() => void guardar()}
             aviso={aviso}

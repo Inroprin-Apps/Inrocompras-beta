@@ -11,6 +11,7 @@ import {
     retencion,
     yaRegistrado,
     type Proveedor,
+    columnasExcelProveedores,
 } from '@/modules/proveedores/domain/proveedor.ts';
 import { digitoVerificador, motivoRuc, rucValido } from '@/modules/proveedores/domain/ruc.ts';
 
@@ -129,5 +130,14 @@ describe('lista', () => {
         expect(faseProveedor(lista[0])).toBe(3);
         expect(faseProveedor(lista[1])).toBe(1);
         expect(faseProveedor(p({ origen: 'Extranjero', evaluacion: 'Aprobado' }))).toBe(2);
+    });
+});
+
+describe('exportar proveedores', () => {
+    it('la identificación y el contacto van en sus columnas; sin montos', () => {
+        const cols = columnasExcelProveedores();
+        const v = Object.fromEntries(cols.map((c) => [c.titulo, c.valor(p({ razonSocial: 'ACME', ruc: '20100070970', contacto: 'Eva' }))]));
+        expect(v).toMatchObject({ 'Razón social': 'ACME', 'RUC o identificación fiscal': '20100070970', Contacto: 'Eva' });
+        expect(cols.some((c) => c.tipo === 'monto')).toBe(false);
     });
 });

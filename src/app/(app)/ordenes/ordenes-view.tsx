@@ -9,6 +9,7 @@ import {
     ESTADOS_APROBACION,
     ESTATUS,
     FILTROS_ORDEN,
+    columnasExcelOrdenes,
     PROCEDENCIAS,
     dePestana,
     filtrarOrdenes,
@@ -29,6 +30,7 @@ import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
+import { BotonExportar } from '../_components/exportar.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
 import { personasStore, teTocaStore } from '../_lib/stores.ts';
 import { urlState } from '../_lib/url-state.ts';
@@ -119,21 +121,21 @@ export function OrdenesView() {
                 <SearchBox value={v.texto} onChange={(texto) => vista$.set({ texto })} placeholder="Busca por número, proveedor o proyecto" />
                 <SelectMenu
                     label="Estatus"
-                    className="w-52"
+                    className="w-60"
                     value={v.estatus}
                     onChange={(estatus) => vista$.set({ estatus })}
                     options={[{ value: '', label: 'Todos los estatus' }, ...ESTATUS.map((e) => ({ value: e, label: e }))]}
                 />
                 <SelectMenu
                     label="Aprobación"
-                    className="w-48"
+                    className="w-52"
                     value={v.aprobacion}
                     onChange={(aprobacion) => vista$.set({ aprobacion })}
                     options={[{ value: '', label: 'Toda aprobación' }, ...ESTADOS_APROBACION.map((e) => ({ value: e, label: e }))]}
                 />
                 <SelectMenu
                     label="Procedencia"
-                    className="w-40"
+                    className="w-48"
                     value={v.procedencia}
                     onChange={(p) => vista$.set({ procedencia: p as typeof v.procedencia })}
                     options={[{ value: '', label: 'Toda procedencia' }, ...PROCEDENCIAS.map((e) => ({ value: e, label: e }))]}
@@ -165,7 +167,10 @@ export function OrdenesView() {
                         options={[{ value: '', label: 'Todo comprador' }, ...compradores.map((id) => ({ value: id, label: nombre(id) || 'Otra persona' }))]}
                     />
                 )}
-                <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                <div className="flex flex-wrap items-center gap-2.5 sm:ml-auto">
+                    <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                    <BotonExportar nombre="Órdenes" columnas={columnasExcelOrdenes(nombre, perfil.ve_precios)} filas={lista} />
+                </div>
             </FilterRow>
             <Lista
                 estado={{ data: estado.data ? lista : null, error: estado.error }}
@@ -235,8 +240,8 @@ export function OrdenesView() {
                                         <th className={T.th}>Proyecto</th>
                                         <th className={T.th}>Estatus</th>
                                         <th className={T.th}>Aprobación</th>
-                                        <th className={`${T.thNum} text-right`}>Total</th>
-                                        <th className={`${T.thNum} text-right`}>Fecha</th>
+                                        <th className={T.thNum}>Total</th>
+                                        <th className={T.thNum}>Fecha</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -278,11 +283,11 @@ function FilaOrden({ o, activa, comprador }: { o: Orden; activa: boolean; compra
                 {o.estadoAprobacion ? <Chip tone={tonoAprobacion(o.estadoAprobacion)}>{o.estadoAprobacion}</Chip> : <span className="text-ink-3">—</span>}
                 {o.tipoAprobacion && <div className={T.sub}>{o.tipoAprobacion}</div>}
             </td>
-            <td className={`${T.tdNum} text-right`}>
+            <td className={T.tdNum}>
                 {monto(o.monto, o.moneda)}
                 {o.moneda !== 'PEN' && <div className={T.sub}>{monto(o.montoSoles)}</div>}
             </td>
-            <td className={`${T.tdNum} text-right`}>{dmy(o.fechaEmision ?? o.creado)}</td>
+            <td className={T.tdNum}>{dmy(o.fechaEmision ?? o.creado)}</td>
         </tr>
     );
 }

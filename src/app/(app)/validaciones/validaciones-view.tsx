@@ -9,6 +9,7 @@ import {
     FILTROS_TECNICA,
     VALIDACIONES,
     agruparPorRequerimiento,
+    columnasTecnica,
     filtrarTecnica,
     tonoValidacion,
     type ItemTecnica,
@@ -19,6 +20,7 @@ import { Chip } from '@/shared/ui/card.tsx';
 import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
+import { BotonExportar } from '../_components/exportar.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
 import { urlState } from '../_lib/url-state.ts';
 import { proyectosStore } from '../proyectos/store.ts';
@@ -53,6 +55,8 @@ export function ValidacionesView() {
     }, [proyectos]);
     const lista = useMemo(() => filtrarTecnica(estado.data ?? [], v, nombreProyecto), [estado.data, v, nombreProyecto]);
     const grupos = useMemo(() => agruparPorRequerimiento(lista), [lista]);
+    // El Excel sigue el orden de la pantalla: por requerimiento y, dentro, por número de ítem.
+    const enOrden = useMemo(() => grupos.flatMap((g) => g.items), [grupos]);
     const visibles = new Set(lista.map((i) => i.id));
     const elegidos = lista.filter((i) => marcados.has(i.id));
     const conItems = useMemo(() => {
@@ -109,6 +113,13 @@ export function ValidacionesView() {
                     onChange={(proyecto) => vista$.set({ proyecto })}
                     options={[{ value: '', label: 'Todos los proyectos' }, ...conItems.map((p) => ({ value: p.id, label: p.nombre }))]}
                 />
+                <div className="sm:ml-auto">
+                    <BotonExportar
+                        nombre="Validaciones técnicas"
+                        columnas={columnasTecnica(nombreProyecto, perfil.ve_precios)}
+                        filas={estado.data ? enOrden : []}
+                    />
+                </div>
             </FilterRow>
             {valida && elegidos.length > 0 && (
                 <div className="sticky top-2 z-10 mb-3 flex flex-wrap items-center gap-3 rounded-card border border-primary-line bg-primary-soft px-4 py-2.5">

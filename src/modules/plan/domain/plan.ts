@@ -6,6 +6,7 @@
 //   orden de atención: criticidad y después días a la fecha límite
 // La base vuelve a validar todo al crear la orden (ac_oc_crear): esto solo explica antes por qué no se puede.
 
+import { fechaExcel, type ColumnaExcel } from '@/shared/exportar/excel.ts';
 import { palabrasDe, plano } from '@/shared/texto.ts';
 
 export type Canal = 'Nacional' | 'Importación';
@@ -272,4 +273,32 @@ export function faltaEnLineaCarrito(l: LineaCarrito, leer: (t: string) => number
     if (c > l.saldo + 0.0001) return `«${l.descripcion}»: el saldo es ${l.saldo}. Lo que exceda va como demasía, desde la orden.`;
     if (p === null || p < 0) return `«${l.descripcion}»: escribe el precio unitario.`;
     return null;
+}
+
+// ── Exportar ──
+/** Las columnas del Excel del plan: las de la tabla, desarmadas (cada sub-línea en su columna). El plan no lleva montos. */
+export function columnasExcelPlan(): ColumnaExcel<FilaPlan>[] {
+    return [
+        { titulo: 'Descripción', valor: (f) => f.descripcion, ancho: 40 },
+        { titulo: 'Canal', valor: (f) => f.canal, ancho: 12 },
+        { titulo: 'Código del cliente', valor: (f) => f.codigoCliente, ancho: 16 },
+        { titulo: 'SKU', valor: (f) => f.sku, ancho: 14 },
+        { titulo: 'Requerimiento', valor: (f) => f.requerimiento, ancho: 18 },
+        { titulo: 'RQ SIDIGE', valor: (f) => f.rqSidige, ancho: 12 },
+        { titulo: 'Cantidad', tipo: 'numero', valor: (f) => f.cantidad },
+        { titulo: 'Unidad', valor: (f) => f.unidad, ancho: 8 },
+        { titulo: 'Saldo', tipo: 'numero', valor: (f) => f.saldo },
+        { titulo: 'Validación técnica', valor: (f) => f.validacion, ancho: 16 },
+        { titulo: 'Marca', valor: (f) => f.marca, ancho: 16 },
+        { titulo: 'Modelo', valor: (f) => f.modelo, ancho: 16 },
+        { titulo: 'Fecha límite de la OC', tipo: 'fecha', valor: (f) => fechaExcel(f.fechaLimite) },
+        { titulo: 'Fecha meta', tipo: 'fecha', valor: (f) => fechaExcel(f.fechaMeta) },
+        { titulo: 'Plazo (días)', tipo: 'entero', valor: (f) => f.plazoDias },
+        { titulo: 'Semáforo', valor: (f) => etiquetaSemaforo(f.semaforo), ancho: 14 },
+        { titulo: 'Días a la fecha límite', tipo: 'entero', valor: (f) => (f.saldo > 0 ? f.diasALimite : null) },
+        { titulo: 'Criticidad', valor: (f) => f.criticidad, ancho: 14 },
+        { titulo: 'OC', valor: (f) => f.ordenes.map((o) => (o.numero ? `${o.numero} (${o.estatus})` : 'Borrador')).join(', '), ancho: 30 },
+        { titulo: 'Pagado', valor: (f) => f.pagado },
+        { titulo: 'Bloqueo', valor: (f) => f.bloqueo, ancho: 40 },
+    ];
 }

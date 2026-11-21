@@ -2,3 +2,4 @@
 export * from '../domain/requerimiento.ts';
 export * from '../domain/validacion.ts';
 export * from '../domain/seguimiento.ts';
+export * from '../domain/exportar.ts';

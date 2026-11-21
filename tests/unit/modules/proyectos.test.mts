@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { faltaEnProyecto, filtrarProyectos, faseActual, etapasSinAprobador, type Proyecto } from '@/modules/proyectos/domain/proyecto.ts';
+import {
+    columnasExcelProyectos,
+    faltaEnProyecto,
+    filtrarProyectos,
+    faseActual,
+    etapasSinAprobador,
+    type Proyecto,
+} from '@/modules/proyectos/domain/proyecto.ts';
 
 const p = (x: Partial<Proyecto>): Proyecto => ({
     id: '1',
@@ -30,5 +37,16 @@ describe('proyectos', () => {
             /nombre/,
         );
         expect(etapasSinAprobador(p({ etapas: [{ id: 'e', nombre: 'General', orden: 1, aprobadores: [] }] }))).toHaveLength(1);
+    });
+});
+
+describe('exportar proyectos', () => {
+    it('desarma la fila en columnas: código aparte, gerente por nombre y fecha como Date', () => {
+        const cols = columnasExcelProyectos((id) => (id === 'g1' ? 'Ana' : ''));
+        const fila = p({ codigo: 'P-104', nombre: 'Planta', gerenteId: 'g1', fechaMeta: '2026-12-15' });
+        const v = Object.fromEntries(cols.map((c) => [c.titulo, c.valor(fila)]));
+        expect(v['Código']).toBe('P-104');
+        expect(v['Gerente']).toBe('Ana');
+        expect(v['Fecha meta']).toEqual(new Date(Date.UTC(2026, 11, 15)));
     });
 });

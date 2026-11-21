@@ -8,6 +8,7 @@ import { Plus } from 'lucide-react';
 import {
     EVALUACIONES,
     FILTROS_PROVEEDOR,
+    columnasExcelProveedores,
     ORIGENES,
     etiquetaEvaluacion,
     filtrarProveedores,
@@ -24,6 +25,7 @@ import { Encabezado } from '@/shared/ui/encabezado.tsx';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
+import { BotonExportar } from '../_components/exportar.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
 import { urlState } from '../_lib/url-state.ts';
 import { FichaProveedor } from './ficha-proveedor.tsx';
@@ -35,6 +37,8 @@ const ORDENES: { value: OrdenProveedor; label: string }[] = [
     { value: 'nombre', label: 'Razón social' },
     { value: 'recientes', label: 'Más recientes' },
 ];
+
+const COLUMNAS_EXCEL = columnasExcelProveedores();
 
 const vista$ = urlState(
     { ...FILTROS_PROVEEDOR, orden: 'nombre' as OrdenProveedor, page: '1', ver: '' },
@@ -70,30 +74,33 @@ export function ProveedoresView() {
                 <SearchBox value={v.texto} onChange={(texto) => vista$.set({ texto })} placeholder="Busca por razón social, RUC, país o contacto" />
                 <SelectMenu
                     label="Origen"
-                    className="w-44"
+                    className="w-40"
                     value={v.origen}
                     onChange={(o) => vista$.set({ origen: o as typeof v.origen })}
-                    options={[{ value: '', label: 'Nacional y extranjero' }, ...ORIGENES.map((o) => ({ value: o, label: o }))]}
+                    options={[{ value: '', label: 'Todo origen' }, ...ORIGENES.map((o) => ({ value: o, label: o }))]}
                 />
                 <SelectMenu
                     label="Evaluación financiera"
-                    className="w-52"
+                    className="w-60"
                     value={v.evaluacion}
                     onChange={(e) => vista$.set({ evaluacion: e as typeof v.evaluacion })}
                     options={[{ value: '', label: 'Toda evaluación' }, ...EVALUACIONES.map((e) => ({ value: e, label: etiquetaEvaluacion(e) }))]}
                 />
                 <SelectMenu
-                    label="Retención"
-                    className="w-56"
+                    label="Retención verificada por Contabilidad"
+                    className="w-44"
                     value={v.verificado}
                     onChange={(x) => vista$.set({ verificado: x as typeof v.verificado })}
                     options={[
-                        { value: '', label: 'Verificados o no' },
-                        { value: 'si', label: 'Verificados por Contabilidad' },
-                        { value: 'no', label: 'Por verificar (nacionales)' },
+                        { value: '', label: 'Toda retención' },
+                        { value: 'si', label: 'Verificada' },
+                        { value: 'no', label: 'Por verificar' },
                     ]}
                 />
-                <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                <div className="flex flex-wrap items-center gap-2.5 sm:ml-auto">
+                    <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                    <BotonExportar nombre="Proveedores" columnas={COLUMNAS_EXCEL} filas={lista} />
+                </div>
             </FilterRow>
             <Lista
                 estado={{ data: estado.data ? lista : null, error: estado.error }}
@@ -139,7 +146,7 @@ export function ProveedoresView() {
                                             >
                                                 <td className={T.td}>
                                                     <div className="font-medium">{p.razonSocial}</div>
-                                                    <div className={T.sub}>{identificacion(p) || '—'}</div>
+                                                    <div className={`${T.sub} whitespace-nowrap`}>{identificacion(p) || '—'}</div>
                                                 </td>
                                                 <td className={T.td}>{p.origen}</td>
                                                 <td className={T.td}>

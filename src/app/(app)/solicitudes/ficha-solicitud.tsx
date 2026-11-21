@@ -15,20 +15,19 @@ import {
     tonoEstado,
     type ItemSolicitud,
     type NuevoItem,
+    type Solicitud,
     type SolicitudDetalle,
 } from '@/modules/solicitudes/application/views.ts';
 import { Notice } from '@/shared/ui/bits.tsx';
 import { Button, LINK_CLASS } from '@/shared/ui/button.tsx';
 import { Chip } from '@/shared/ui/card.tsx';
-import { Dialog } from '@/shared/ui/dialog.tsx';
 import { Datos, Fases, Ficha, FichaSeccion } from '@/shared/ui/ficha.tsx';
 import { dayTime, dmy } from '@/shared/ui/format.ts';
 import { Hueco } from '@/shared/ui/hueco.tsx';
-import { toast } from '@/shared/ui/toaster.tsx';
 import { Historial } from '../_acciones/historial.tsx';
 import { PanelAcciones } from '../_acciones/panel-acciones.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
-import { refrescar } from '../_lib/resource.ts';
+import { useBorrarConDeshacer } from '../_lib/deshacer.ts';
 import { personasStore } from '../_lib/stores.ts';
 import { proyectosStore } from '../proyectos/store.ts';
 import { CargaExcel } from './carga-excel.tsx';
@@ -37,7 +36,18 @@ import { FormSolicitud } from './form-solicitud.tsx';
 import { solicitudStore } from './store.ts';
 import { ListaItems, SeccionCarga } from './items-solicitud.tsx';
 
-export function FichaSolicitud({ id, onCerrar, onAbrir }: { id: string; onCerrar: () => void; onAbrir: (id: string) => void }) {
+export function FichaSolicitud({
+    id,
+    onCerrar,
+    onAbrir,
+    onEliminarBorrador,
+}: {
+    id: string;
+    onCerrar: () => void;
+    onAbrir: (id: string) => void;
+    /** Elimina el borrador con «Deshacer»: la lista lo oculta y la ficha se cierra al momento. */
+    onEliminarBorrador: (s: Solicitud) => void;
+}) {
     const { data, error } = solicitudStore.use(id);
     if (error)
         return (
@@ -59,42 +69,40 @@ export function FichaSolicitud({ id, onCerrar, onAbrir }: { id: string; onCerrar
                 </div>
             </Ficha>
         );
-    return <FichaCargada key={data.solicitud.id} d={data} onCerrar={onCerrar} onAbrir={onAbrir} />;
+    return <FichaCargada key={data.solicitud.id} d={data} onCerrar={onCerrar} onAbrir={onAbrir} onEliminarBorrador={onEliminarBorrador} />;
 }
 
-function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar: () => void; onAbrir: (id: string) => void }) {
-    const { solicitud: s, items, carga } = d;
+function FichaCargada({
+    d,
+    onCerrar,
+    onAbrir,
+    onEliminarBorrador,
+}: {
+    d: SolicitudDetalle;
+    onCerrar: () => void;
+    onAbrir: (id: string) => void;
+    onEliminarBorrador: (s: Solicitud) => void;
+}) {
+    const { solicitud: s, carga } = d;
+    const { ocultos, borrar } = useBorrarConDeshacer();
+    const items = d.items.filter((i) => !ocultos.has(i.id));
     const perfil = usePerfil();
     const gente = personasStore.use().data ?? [];
     const proyectos = proyectosStore.use().data ?? [];
     const [editando, setEditando] = useState(false);
     const [item, setItem] = useState<NuevoItem | 'nuevo' | null>(null);
     const [cargando, setCargando] = useState(false);
-    const [borrando, setBorrando] = useState(false);
-    const [eliminando, setEliminando] = useState(false);
-    const [errorBorrar, setErrorBorrar] = useState<string | null>(null);
     const nombre = (x: string | null) => (x ? (gente.find((g) => g.id === x)?.nombre ?? '') : '');
     const proyecto = proyectos.find((p) => p.id === s.proyectoId) ?? null;
     const etapa = proyecto?.etapas.find((e) => e.id === s.etapaId) ?? null;
     const editable = esEditable(s, perfil.id);
 
-    async function quitarItem(i: ItemSolicitud) {
-        const r = await solicitudes().borrarItem(i.id);
-        if (r.isErr()) return toast.error(r.error.message);
-        toast.success(`Ítem «${i.descripcion}» quitado de ${s.numero || 'el borrador'}.`);
-        refrescar(['solicitud_items', 'acciones']);
-    }
-
-    async function borrarBorrador() {
-        setEliminando(true);
-        setErrorBorrar(null);
-        const r = await solicitudes().borrar(s.id);
-        setEliminando(false);
-        if (r.isErr()) return setErrorBorrar(r.error.message);
-        toast.success('Borrador de solicitud eliminado.');
-        refrescar(['solicitudes']);
-        onCerrar();
-    }
+    const quitarItem = (i: ItemSolicitud) =>
+        borrar(i.id, {
+            aviso: `Ítem «${i.descripcion}» quitado de ${s.numero || 'el borrador'}.`,
+            ejecutar: () => solicitudes().borrarItem(i.id),
+            tocadas: ['solicitud_items'],
+        });
 
     return (
         <Ficha
@@ -175,7 +183,7 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
                 />
                 {s.estado === 'Borrador' && s.solicitanteId === perfil.id && (
                     <div className="mt-3">
-                        <Button variant="ghost" className="text-danger-strong" onClick={() => setBorrando(true)}>
+                        <Button variant="ghost" className="text-danger-strong" onClick={() => onEliminarBorrador(s)}>
                             <Trash2 size={15} /> Eliminar borrador
                         </Button>
                     </div>
@@ -196,13 +204,7 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
                     )
                 }
             >
-                <ListaItems
-                    items={items}
-                    editable={editable}
-                    verMontos={perfil.ve_precios}
-                    onEditar={(i) => setItem(aNuevoItem(i))}
-                    onQuitar={(i) => void quitarItem(i)}
-                />
+                <ListaItems items={items} editable={editable} verMontos={perfil.ve_precios} onEditar={(i) => setItem(aNuevoItem(i))} onQuitar={quitarItem} />
             </FichaSeccion>
             {carga.length > 0 && <SeccionCarga filas={carga} editable={editable} />}
             {s.requerimientoId && (
@@ -219,31 +221,6 @@ function FichaCargada({ d, onCerrar, onAbrir }: { d: SolicitudDetalle; onCerrar:
             {editando && <FormSolicitud solicitud={s} onCerrar={() => setEditando(false)} onCreado={() => setEditando(false)} />}
             {item && <FormItem solicitudId={s.id} item={item === 'nuevo' ? undefined : item} items={items} onCerrar={() => setItem(null)} />}
             {cargando && <CargaExcel solicitudId={s.id} items={items} onCerrar={() => setCargando(false)} />}
-            {borrando && (
-                <Dialog
-                    abierto
-                    onCerrar={() => (setBorrando(false), setErrorBorrar(null))}
-                    titulo="Eliminar borrador"
-                    descripcion="Se borran la solicitud y sus ítems. No se puede deshacer."
-                    aviso={
-                        errorBorrar && (
-                            <p role="alert" className="text-small font-medium text-danger-strong">
-                                {errorBorrar}
-                            </p>
-                        )
-                    }
-                    pie={
-                        <>
-                            <Button variant="secondary" onClick={() => (setBorrando(false), setErrorBorrar(null))} disabled={eliminando}>
-                                Cancelar
-                            </Button>
-                            <Button variant="danger" onClick={() => void borrarBorrador()} disabled={eliminando}>
-                                {eliminando ? 'Eliminando…' : 'Eliminar borrador'}
-                            </Button>
-                        </>
-                    }
-                />
-            )}
         </Ficha>
     );
 }

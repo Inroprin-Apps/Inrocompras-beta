@@ -8,6 +8,7 @@ import { Plus } from 'lucide-react';
 import {
     ESTADOS_PROYECTO,
     FILTROS_PROYECTO,
+    columnasExcelProyectos,
     filtrarProyectos,
     ordenarProyectos,
     tonoEstado,
@@ -22,6 +23,7 @@ import { dmy } from '@/shared/ui/format.ts';
 import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, SortSelect, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
+import { BotonExportar } from '../_components/exportar.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
 import { personasStore } from '../_lib/stores.ts';
 import { urlState } from '../_lib/url-state.ts';
@@ -55,7 +57,8 @@ export function ProyectosView() {
     const pag = usePaged(lista, lista, 25, vista$.usePage());
     const abierto = estado.data?.find((p) => p.id === v.ver) ?? null;
     const conFiltros = Boolean(v.estado || v.texto);
-    const gerente = (p: Proyecto) => gente?.find((g) => g.id === p.gerenteId)?.nombre ?? '';
+    const nombreDe = (id: string | null) => gente?.find((g) => g.id === id)?.nombre ?? '';
+    const gerente = (p: Proyecto) => nombreDe(p.gerenteId);
 
     return (
         <>
@@ -79,7 +82,10 @@ export function ProyectosView() {
                     onChange={(e) => vista$.set({ estado: e as typeof v.estado })}
                     options={[{ value: '', label: 'Todos los estados' }, ...ESTADOS_PROYECTO.map((e) => ({ value: e, label: e }))]}
                 />
-                <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                <div className="flex flex-wrap items-center gap-2.5 sm:ml-auto">
+                    <SortSelect value={v.orden} onChange={(orden) => vista$.set({ orden })} options={ORDENES} />
+                    <BotonExportar nombre="Proyectos" columnas={columnasExcelProyectos(nombreDe)} filas={lista} />
+                </div>
             </FilterRow>
             <Lista
                 estado={{ data: estado.data ? lista : null, error: estado.error }}
@@ -109,7 +115,7 @@ export function ProyectosView() {
                                         <th className={T.th}>Cliente</th>
                                         <th className={T.th}>Estado</th>
                                         <th className={T.th}>Gerente</th>
-                                        <th className={`${T.thNum} text-right`}>Fecha meta</th>
+                                        <th className={T.thNum}>Fecha meta</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -123,14 +129,14 @@ export function ProyectosView() {
                                         >
                                             <td className={T.td}>
                                                 <div className="font-medium">{p.nombre}</div>
-                                                <div className={T.sub}>{p.codigo || 'Sin código'}</div>
+                                                <div className={`${T.sub} whitespace-nowrap`}>{p.codigo || 'Sin código'}</div>
                                             </td>
                                             <td className={T.td}>{p.cliente || <span className="text-ink-3">—</span>}</td>
                                             <td className={T.td}>
                                                 <Chip tone={tonoEstado(p.estado)}>{p.estado}</Chip>
                                             </td>
                                             <td className={T.td}>{gerente(p) || <span className="text-ink-3">—</span>}</td>
-                                            <td className={`${T.tdNum} text-right`}>{p.fechaMeta ? dmy(p.fechaMeta) : '—'}</td>
+                                            <td className={T.tdNum}>{p.fechaMeta ? dmy(p.fechaMeta) : '—'}</td>
                                         </tr>
                                     ))}
                                 </tbody>

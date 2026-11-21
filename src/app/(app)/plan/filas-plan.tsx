@@ -106,14 +106,14 @@ export function FilaTabla({ f, compra, marcada, onMarcar, verOc }: { f: FilaPlan
             <td className={`${T.td} min-w-64`}>
                 <Descripcion f={f} />
             </td>
-            <td className={`${T.tdNum} text-right`}>
+            <td className={T.tdNum}>
                 {cant(f.cantidad)} <span className="text-ink-3">{f.unidad}</span>
             </td>
-            <td className={`${T.tdNum} text-right font-medium`}>{cant(f.saldo)}</td>
+            <td className={`${T.tdNum} font-medium`}>{cant(f.saldo)}</td>
             <td className={T.td}>
                 <Validacion f={f} />
             </td>
-            <td className={`${T.tdNum} text-right`}>
+            <td className={T.tdNum}>
                 <Fechas f={f} />
             </td>
             <td className={T.td}>

@@ -94,6 +94,7 @@ export function DialogoTecnica({ items, onCerrar, onHecho }: { items: ItemTecnic
     return (
         <Dialog
             abierto
+            amplio
             onCerrar={cerrar}
             onEnviar={() => void confirmar()}
             aviso={aviso}

@@ -180,3 +180,26 @@ describe('seguimiento', () => {
         expect(filtrarSeguimiento(l, { estado: '', texto: 'nac-2026' }).map((x) => x.itemId)).toEqual(['b']);
     });
 });
+
+describe('exportar: columnas', () => {
+    it('validaciones: el presupuesto solo para quien ve precios, con la moneda aparte', async () => {
+        const { columnasTecnica } = await import('@/modules/requerimientos/domain/exportar.ts');
+        const sin = columnasTecnica(() => '', false).map((c) => c.titulo);
+        expect(sin).not.toContain('Presupuesto unitario');
+        const con = columnasTecnica(() => '', true);
+        const ppto = con.find((c) => c.titulo === 'Presupuesto unitario')!;
+        expect(ppto.tipo).toBe('monto');
+        const i = tec({ presupuestoUnit: 12.5, monedaPpto: 'USD' }, { numero: 'RC-1', motivo: 'Oficina' });
+        expect(ppto.valor(i)).toBe(12.5);
+        expect(con.find((c) => c.titulo === 'Moneda')!.valor(i)).toBe('USD');
+        expect(con.find((c) => c.titulo === 'Proyecto o motivo')!.valor(i)).toBe('Oficina');
+    });
+    it('requerimientos y seguimiento: la sub-línea en su propia columna', async () => {
+        const { columnasRequerimientos, columnasSeguimiento } = await import('@/modules/requerimientos/domain/exportar.ts');
+        const r = rq({ numero: 'RC-0001', rqSidige: '4521', creado: '2026-11-03T10:00:00Z' });
+        const cols = columnasRequerimientos(() => 'Talleres');
+        expect(cols.find((c) => c.titulo === 'RQ del SIDIGE')!.valor(r)).toBe('4521');
+        expect(cols.find((c) => c.titulo === 'Creado')!.valor(r)).toEqual(new Date(Date.UTC(2026, 10, 3)));
+        expect(columnasSeguimiento().some((c) => c.tipo === 'monto')).toBe(false);
+    });
+});

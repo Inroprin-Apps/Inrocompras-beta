@@ -12,6 +12,7 @@ import {
     FILTROS_PLAN,
     SEMAFOROS,
     calcular,
+    columnasExcelPlan,
     filtrarPlan,
     hoyLima,
     motivoNoMarcar,
@@ -27,6 +28,7 @@ import { Lista, ListaVacia } from '@/shared/ui/lista-estado.tsx';
 import { Pager, usePaged } from '@/shared/ui/pager.tsx';
 import { SelectMenu } from '@/shared/ui/select-menu.tsx';
 import { toast } from '@/shared/ui/toaster.tsx';
+import { BotonExportar } from '../_components/exportar.tsx';
 import { usePerfil } from '../_components/perfil.tsx';
 import { catalogosStore } from '../_lib/stores.ts';
 import { urlState } from '../_lib/url-state.ts';
@@ -34,6 +36,8 @@ import { proyectosStore } from '../proyectos/store.ts';
 import { FormGenerarOc } from './form-generar-oc.tsx';
 import { planStore } from './store.ts';
 import { FilaTabla, TarjetaPlan } from './filas-plan.tsx';
+
+const COLUMNAS_EXCEL = columnasExcelPlan();
 
 const vista$ = urlState(
     { proyecto: '', ...FILTROS_PLAN, page: '1' },
@@ -152,6 +156,9 @@ export function PlanView() {
                         { value: 'pendiente', label: 'Validación pendiente' },
                     ]}
                 />
+                <div className="sm:ml-auto">
+                    <BotonExportar nombre="Plan de compras" columnas={COLUMNAS_EXCEL} filas={lista} />
+                </div>
             </FilterRow>
             <Lista
                 estado={{ data: filas ? lista : null, error: estado.error }}
@@ -195,10 +202,10 @@ export function PlanView() {
                                             </th>
                                         )}
                                         <th className={T.th}>Ítem</th>
-                                        <th className={`${T.thNum} text-right`}>Cantidad</th>
-                                        <th className={`${T.thNum} text-right`}>Saldo</th>
+                                        <th className={T.thNum}>Cantidad</th>
+                                        <th className={T.thNum}>Saldo</th>
                                         <th className={T.th}>Validación técnica</th>
-                                        <th className={`${T.thNum} text-right`}>Fechas</th>
+                                        <th className={T.thNum}>Fechas</th>
                                         <th className={T.th}>Semáforo</th>
                                         <th className={T.th}>Criticidad</th>
                                         <th className={T.th}>OC</th>

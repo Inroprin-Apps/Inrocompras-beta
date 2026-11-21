@@ -102,6 +102,7 @@ export function FormProveedor({
     return (
         <Dialog
             abierto
+            amplio
             onCerrar={cerrar}
             onEnviar={() => void guardar()}
             aviso={aviso}

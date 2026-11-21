@@ -1,6 +1,7 @@
 // Órdenes de compra (AppSheet: OC, Base de datos OC NAC, Pagos). PURO: tipos, filtros, orden y presentación.
 // Las reglas (quién emite, aprueba, edita) viven en la base (0002/0003/0030): la UI pregunta y muestra.
 
+import { fechaExcel, type ColumnaExcel } from '@/shared/exportar/excel.ts';
 import { palabrasDe, plano } from '@/shared/texto.ts';
 
 export const PROCEDENCIAS = ['Nacional', 'Importación'] as const;
@@ -306,4 +307,30 @@ export function leerNumero(t: string): number | null {
     const norm = s.includes(',') && !s.includes('.') ? s.replace(',', '.') : s.replace(/,/g, '');
     const n = Number(norm);
     return Number.isFinite(n) ? n : null;
+}
+
+// ── Exportar ──
+/**
+ * Las columnas del Excel de la lista: las de la tabla, con cada sub-línea en su propia columna. Los montos (número,
+ * con la moneda en su columna) solo si la persona ve precios.
+ */
+export function columnasExcelOrdenes(comprador: (id: string) => string, vePrecios: boolean): ColumnaExcel<Orden>[] {
+    return [
+        { titulo: 'Orden', valor: (o) => nombreOrden(o), ancho: 22 },
+        { titulo: 'Proveedor', valor: (o) => o.proveedor, ancho: 32 },
+        { titulo: 'Comprador', valor: (o) => comprador(o.compradorId), ancho: 22 },
+        { titulo: 'Proyecto', valor: (o) => o.proyecto, ancho: 30 },
+        { titulo: 'Procedencia', valor: (o) => o.procedencia, ancho: 12 },
+        { titulo: 'Estatus', valor: (o) => o.estatus, ancho: 22 },
+        { titulo: 'Aprobación', valor: (o) => o.estadoAprobacion, ancho: 20 },
+        { titulo: 'Tipo de aprobación', valor: (o) => o.tipoAprobacion, ancho: 20 },
+        ...(vePrecios
+            ? ([
+                  { titulo: 'Moneda', valor: (o) => o.moneda, ancho: 8 },
+                  { titulo: 'Total', tipo: 'monto', valor: (o) => o.monto },
+                  { titulo: 'Total en soles', tipo: 'monto', valor: (o) => o.montoSoles },
+              ] satisfies ColumnaExcel<Orden>[])
+            : []),
+        { titulo: 'Fecha', tipo: 'fecha', valor: (o) => fechaExcel(o.fechaEmision ?? o.creado) },
+    ];
 }

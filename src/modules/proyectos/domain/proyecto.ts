@@ -1,6 +1,7 @@
 // Proyectos y sus etapas (AppSheet: Proyectos, Proyecto_Etapas). PURO: tipos, filtros, orden y reglas de
 // presentación. Las reglas de negocio (quién marca ganado, quién edita) viven en la base (0002/0003).
 
+import { fechaExcel, type ColumnaExcel } from '@/shared/exportar/excel.ts';
 import { palabrasDe, plano } from '@/shared/texto.ts';
 
 export const ESTADOS_PROYECTO = ['Estudio de mercado', 'Ganado', 'Perdido', 'Cerrado'] as const;
@@ -77,3 +78,16 @@ export function faltaEnProyecto(p: NuevoProyecto): string | null {
 
 /** Una etapa sin aprobadores no deja emitir solicitudes de proyecto (app.p_solicitud_emitir). */
 export const etapasSinAprobador = (p: Proyecto) => p.etapas.filter((e) => e.aprobadores.length === 0);
+
+// ── Exportar ──
+/** Las columnas del Excel de la lista: las de la tabla, con la sub-línea (código) en su propia columna. */
+export function columnasExcelProyectos(gerente: (id: string | null) => string): ColumnaExcel<Proyecto>[] {
+    return [
+        { titulo: 'Código', valor: (p) => p.codigo, ancho: 14 },
+        { titulo: 'Proyecto', valor: (p) => p.nombre, ancho: 36 },
+        { titulo: 'Cliente', valor: (p) => p.cliente, ancho: 28 },
+        { titulo: 'Estado', valor: (p) => p.estado, ancho: 18 },
+        { titulo: 'Gerente', valor: (p) => gerente(p.gerenteId), ancho: 24 },
+        { titulo: 'Fecha meta', tipo: 'fecha', valor: (p) => fechaExcel(p.fechaMeta) },
+    ];
+}

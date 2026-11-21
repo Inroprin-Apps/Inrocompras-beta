@@ -82,6 +82,7 @@ export function FormCabecera({ req, onCerrar }: { req: Requerimiento; onCerrar: 
     return (
         <Dialog
             abierto
+            amplio
             onCerrar={cerrar}
             onEnviar={() => void guardar()}
             aviso={aviso}
@@ -161,6 +162,7 @@ export function FormItemReq({ item, numero, onCerrar }: { item: ItemRequerimient
     return (
         <Dialog
             abierto
+            amplio
             onCerrar={cerrar}
             onEnviar={() => void guardar()}
             aviso={aviso}

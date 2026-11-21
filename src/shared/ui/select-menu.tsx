@@ -76,6 +76,7 @@ export function SelectMenu({
                 aria-describedby={describedBy}
                 aria-haspopup="listbox"
                 aria-expanded={open}
+                title={selected && selected.label.length > 28 ? selected.label : undefined}
                 className="flex w-full items-center justify-between gap-2 rounded-control border border-control bg-surface px-3 py-2 text-ui text-ink outline-none transition-colors hover:border-control-hover focus-visible:border-primary aria-[invalid=true]:border-danger disabled:cursor-not-allowed disabled:border-disabled disabled:bg-disabled disabled:text-disabled-ink"
             >
                 <span className={`truncate ${selected ? '' : 'text-ink-3'}`}>{selected ? selected.label : placeholder}</span>
@@ -98,7 +99,7 @@ export function SelectMenu({
                             }}
                             className="flex min-h-11 w-full items-center justify-between gap-2 rounded-inner px-2.5 py-1.5 text-left text-ui hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none sm:min-h-0"
                         >
-                            <span className={`truncate ${o.value === value ? 'font-medium text-primary' : 'text-ink'}`}>{o.label}</span>
+                            <span className={`break-words ${o.value === value ? 'font-medium text-primary' : 'text-ink'}`}>{o.label}</span>
                             {o.value === value && <Check size={14} className="shrink-0 text-primary" aria-hidden="true" />}
                         </button>
                     ))}

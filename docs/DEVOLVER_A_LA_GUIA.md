@@ -5,11 +5,12 @@ volver a la guía, o la próxima app copiará la versión vieja.
 
 ## Correcciones a componentes de la guía
 
-| Componente                        | Qué se cambió                                     | Por qué                                                                                                                                |
-| --------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `bits.tsx` · `T.thNum`, `T.tdNum` | `text-right`                                      | La guía dice «los números a la derecha y su cabecera alineada igual», pero las clases no lo hacían: cada pantalla tenía que acordarse. |
-| `card.tsx` · `Segmented`          | `min-h-9 sm:min-h-0`                              | Medía ~30 px; la guía pide ≥ 36 px para lo que se toca en el celular.                                                                  |
-| `select-menu.tsx`                 | Dentro de un `<dialog>` la lista se abre en línea | El diálogo recorta lo que desborda y la lista quedaba cortada.                                                                         |
+| Componente                        | Qué se cambió                                                  | Por qué                                                                                                                                |
+| --------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `bits.tsx` · `T.thNum`, `T.tdNum` | `text-right`                                                   | La guía dice «los números a la derecha y su cabecera alineada igual», pero las clases no lo hacían: cada pantalla tenía que acordarse. |
+| `card.tsx` · `Segmented`          | `min-h-9 sm:min-h-0`                                           | Medía ~30 px; la guía pide ≥ 36 px para lo que se toca en el celular.                                                                  |
+| `select-menu.tsx`                 | Dentro de un `<dialog>` la lista se abre en línea              | El diálogo recorta lo que desborda y la lista quedaba cortada.                                                                         |
+| `select-menu.tsx`                 | Las opciones largas pasan a dos líneas; el botón lleva `title` | Los nombres de proyecto largos se cortaban con «…» justo al elegir.                                                                    |
 
 ## Componentes nuevos (la guía los tenía como pendientes)
 

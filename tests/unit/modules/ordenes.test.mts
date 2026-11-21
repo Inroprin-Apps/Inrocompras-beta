@@ -13,6 +13,7 @@ import {
     totales,
     type Cabecera,
     type Orden,
+    columnasExcelOrdenes,
 } from '@/modules/ordenes/domain/orden.ts';
 
 const o = (x: Partial<Orden>): Orden => ({
@@ -121,5 +122,15 @@ describe('órdenes', () => {
         expect(monto(0.001, 'EUR')).toBe('€ 0.00');
         expect(monto(-0.001)).toBe('S/ 0.00');
         expect(monto(10, 'GBP')).toBe('GBP 10.00');
+    });
+});
+
+describe('exportar órdenes', () => {
+    it('los montos van como número con la moneda aparte, y solo si se ven precios', () => {
+        const fila = o({ numero: 'OC-1', moneda: 'USD', monto: 100, montoSoles: 375 });
+        const con = columnasExcelOrdenes(() => 'Luis', true);
+        const v = Object.fromEntries(con.map((c) => [c.titulo, c.valor(fila)]));
+        expect(v).toMatchObject({ Orden: 'OC-1', Comprador: 'Luis', Moneda: 'USD', Total: 100, 'Total en soles': 375 });
+        expect(columnasExcelOrdenes(() => '', false).some((c) => c.tipo === 'monto' || c.titulo === 'Moneda')).toBe(false);
     });
 });

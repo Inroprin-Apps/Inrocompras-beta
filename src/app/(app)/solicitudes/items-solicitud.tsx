@@ -1,16 +1,14 @@
 'use client';
 
 // Los ítems de una solicitud (editables en Borrador/Observada) y el resultado de la última carga Excel.
-import { useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { etiquetaFila, itemsAnidados, resumenCarga, type FilaCarga, type ItemSolicitud } from '@/modules/solicitudes/application/views.ts';
 import { Notice } from '@/shared/ui/bits.tsx';
 import { Button, LINK_CLASS } from '@/shared/ui/button.tsx';
 import { FichaSeccion } from '@/shared/ui/ficha.tsx';
 import { dmy, money } from '@/shared/ui/format.ts';
-import { toast } from '@/shared/ui/toaster.tsx';
 import { ejecutarAccion } from '../_acciones/panel-acciones.tsx';
-import { refrescar } from '../_lib/resource.ts';
+import { useBorrarConDeshacer } from '../_lib/deshacer.ts';
 
 const fmtNum = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 3 });
 
@@ -76,18 +74,18 @@ export function ListaItems({
 }
 
 export function SeccionCarga({ filas, editable }: { filas: FilaCarga[]; editable: boolean }) {
-    const r = resumenCarga(filas);
-    const [haciendo, setHaciendo] = useState<string | null>(null);
-    const conError = filas.filter((f) => f.estadoFila === 'Error');
+    const { ocultos, borrar } = useBorrarConDeshacer();
+    // Lo descartado con «Deshacer» pendiente ya cuenta como descartado.
+    const vistas = filas.map((f) => (ocultos.has(f.id) ? { ...f, estadoFila: 'Descartado' as const } : f));
+    const r = resumenCarga(vistas);
+    const conError = vistas.filter((f) => f.estadoFila === 'Error');
 
-    async function descartar(f: FilaCarga) {
-        setHaciendo(f.id);
-        const x = await ejecutarAccion('ac_carga_descartar_fila', { p_fila: f.id });
-        setHaciendo(null);
-        if (x.isErr()) return toast.error(x.error.message);
-        toast.success(`${etiquetaFila(f.datos, f.nFila)}: descartada.`);
-        refrescar(['carga_items', 'acciones']);
-    }
+    const descartar = (f: FilaCarga) =>
+        borrar(f.id, {
+            aviso: `${etiquetaFila(f.datos, f.nFila)}: descartada.`,
+            ejecutar: () => ejecutarAccion('ac_carga_descartar_fila', { p_fila: f.id }),
+            tocadas: ['carga_items'],
+        });
 
     return (
         <FichaSeccion titulo="Última carga desde Excel">
@@ -112,8 +110,8 @@ export function SeccionCarga({ filas, editable }: { filas: FilaCarga[]; editable
                                     </ul>
                                 </div>
                                 {editable && (
-                                    <Button variant="secondary" disabled={!!haciendo} onClick={() => void descartar(f)}>
-                                        {haciendo === f.id ? 'Descartando…' : 'Descartar fila'}
+                                    <Button variant="secondary" onClick={() => descartar(f)}>
+                                        Descartar fila
                                     </Button>
                                 )}
                             </li>
