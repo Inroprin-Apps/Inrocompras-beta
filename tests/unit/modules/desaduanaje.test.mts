@@ -16,7 +16,7 @@ import {
     type Checklist,
     type Desaduanaje,
     type GastoDes,
-} from '@/modules/desaduanaje/domain/desaduanaje.ts';
+} from '@/modules/desaduanaje/application/views.ts';
 
 const sinChk: Checklist = { factura: false, bl: false, certOrigen: false, seguro: false, permiso: false };
 
