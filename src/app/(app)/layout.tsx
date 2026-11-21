@@ -1,3 +1,4 @@
+import { buttonClass } from '@/shared/ui/button.tsx';
 import { LogOut } from 'lucide-react';
 import { miPerfil } from '@/shared/auth/sesion.ts';
 import { rolLabel } from '@/shared/tipos.ts';
@@ -57,12 +58,12 @@ function SalirBoton({ icono = false }: { icono?: boolean }) {
                     type="submit"
                     aria-label="Cerrar sesión"
                     title="Cerrar sesión"
-                    className="rounded-control p-2 text-ink-2 hover:bg-surface-3 hover:text-ink focus-visible:outline-2 focus-visible:outline-primary"
+                    className="inline-flex size-9 items-center justify-center rounded-control text-ink-2 hover:bg-surface-3 hover:text-ink focus-visible:outline-2 focus-visible:outline-primary"
                 >
                     <LogOut size={18} />
                 </button>
             ) : (
-                <button type="submit" className="rounded-control border border-control bg-surface px-3.5 py-2 text-ui font-medium hover:bg-surface-2">
+                <button type="submit" className={buttonClass('secondary')}>
                     Cerrar sesión
                 </button>
             )}

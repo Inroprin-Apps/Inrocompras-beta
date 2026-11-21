@@ -34,7 +34,7 @@ export function Campana() {
                 onClick={alternar}
                 aria-label={sinLeer.length ? `${sinLeer.length} notificaciones sin leer` : 'Notificaciones'}
                 aria-expanded={abierta}
-                className="relative rounded-control p-2 text-ink-2 hover:bg-surface-3 hover:text-ink focus-visible:outline-2 focus-visible:outline-primary"
+                className="relative inline-flex size-9 items-center justify-center rounded-control text-ink-2 hover:bg-surface-3 hover:text-ink focus-visible:outline-2 focus-visible:outline-primary"
             >
                 <Bell size={18} />
                 {sinLeer.length > 0 && (
@@ -55,7 +55,7 @@ export function Campana() {
                                     <Link
                                         href={rutaDe(n.tabla, n.refId)}
                                         onClick={() => setAbierta(false)}
-                                        className="block px-4 py-2.5 text-ink no-underline hover:bg-surface-2"
+                                        className="block px-4 py-2.5 text-ink no-underline hover:bg-surface-2 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
                                     >
                                         <div className={`text-ui ${n.leida ? '' : 'font-semibold'}`}>{n.titulo}</div>
                                         {n.cuerpo && <div className="truncate text-small text-ink-2">{n.cuerpo}</div>}
