@@ -15,7 +15,7 @@ import {
 import { s, sn, type Fila } from '@/shared/supabase/filas.ts';
 
 const COLUMNAS =
-    'id,ruc,razon_social,origen,pais,correo,telefono,contacto,cuentas,es_agente_retencion,es_buen_contribuyente,verificado_contab,verificado_por,fecha_verificacion,evaluacion_fin,evaluacion_fin_por,evaluacion_fin_fecha,evaluacion_fin_nota,creado_por,creado';
+    'id,ruc,razon_social,origen,pais,correo,telefono,contacto,direccion,cuenta_detraccion,cuentas,es_agente_retencion,es_buen_contribuyente,verificado_contab,verificado_por,fecha_verificacion,evaluacion_fin,evaluacion_fin_por,evaluacion_fin_fecha,evaluacion_fin_nota,creado_por,creado';
 
 function cuentas(v: unknown): Cuenta[] {
     if (!Array.isArray(v)) return [];
@@ -39,6 +39,8 @@ function proveedor(f: Fila): Proveedor {
         correo: s(f.correo),
         telefono: s(f.telefono),
         contacto: s(f.contacto),
+        direccion: s(f.direccion),
+        cuentaDetraccion: s(f.cuenta_detraccion),
         cuentas: cuentas(f.cuentas),
         esAgenteRetencion: f.es_agente_retencion === true,
         esBuenContribuyente: f.es_buen_contribuyente === true,
@@ -60,6 +62,8 @@ const aFila = (d: DatosProveedor) => ({
     contacto: d.contacto.trim() || null,
     correo: d.correo.trim().toLowerCase() || null,
     telefono: d.telefono.trim() || null,
+    direccion: d.direccion.trim() || null,
+    cuenta_detraccion: d.cuentaDetraccion.trim() || null,
     cuentas: cuentasLimpias(d.cuentas),
     es_agente_retencion: d.esAgenteRetencion,
     es_buen_contribuyente: d.esBuenContribuyente,

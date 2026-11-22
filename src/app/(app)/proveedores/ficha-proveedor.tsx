@@ -72,7 +72,9 @@ export function FichaProveedor({ proveedor: p, onCerrar }: { proveedor: Proveedo
                     filas={[
                         [p.origen === 'Nacional' ? 'RUC' : 'Identificación fiscal', p.ruc],
                         ['País', p.origen === 'Nacional' ? p.pais || 'Perú' : p.pais],
-                        ['Contacto', p.contacto],
+                        ['Contacto (atención)', p.contacto],
+                        ['Dirección', p.direccion],
+                        ...(p.origen === 'Nacional' ? ([['Cuenta de detracción', p.cuentaDetraccion]] as [string, string][]) : []),
                         [
                             'Correo',
                             p.correo ? (

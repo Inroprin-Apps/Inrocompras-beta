@@ -177,7 +177,7 @@ export function FormProveedor({
                 </div>
             )}
             <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Contacto" optional>
+                <Field label="Contacto (atención)" optional>
                     {(p) => <Input {...p} value={f.contacto} onChange={(e) => set({ contacto: e.target.value })} />}
                 </Field>
                 <Field label="Teléfono" optional>
@@ -187,6 +187,14 @@ export function FormProveedor({
             <Field label="Correo" optional error={errDe('correo')} hint="A este correo se envía la orden de compra.">
                 {(p) => <Input {...p} type="email" value={f.correo} onChange={(e) => set({ correo: e.target.value })} />}
             </Field>
+            <Field label="Dirección" optional hint="Va en la orden de compra que recibe.">
+                {(p) => <Input {...p} value={f.direccion} onChange={(e) => set({ direccion: e.target.value })} />}
+            </Field>
+            {f.origen === 'Nacional' && (
+                <Field label="Cuenta de detracción" optional hint="La del Banco de la Nación, si sus servicios llevan detracción.">
+                    {(p) => <Input {...p} value={f.cuentaDetraccion} inputMode="numeric" onChange={(e) => set({ cuentaDetraccion: e.target.value })} />}
+                </Field>
+            )}
 
             <fieldset className="flex flex-col gap-3">
                 <legend className="mb-1.5 text-ui font-medium">

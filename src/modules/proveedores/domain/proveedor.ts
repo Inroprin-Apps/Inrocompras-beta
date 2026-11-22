@@ -29,6 +29,8 @@ export interface Proveedor {
     correo: string;
     telefono: string;
     contacto: string;
+    direccion: string;
+    cuentaDetraccion: string;
     cuentas: Cuenta[];
     esAgenteRetencion: boolean;
     esBuenContribuyente: boolean;
@@ -50,6 +52,8 @@ export interface DatosProveedor {
     contacto: string;
     correo: string;
     telefono: string;
+    direccion: string;
+    cuentaDetraccion: string;
     cuentas: Cuenta[];
     esAgenteRetencion: boolean;
     esBuenContribuyente: boolean;
@@ -69,6 +73,8 @@ export const NUEVO_PROVEEDOR: NuevoProveedor = {
     contacto: '',
     correo: '',
     telefono: '',
+    direccion: '',
+    cuentaDetraccion: '',
     cuentas: [],
     esAgenteRetencion: false,
     esBuenContribuyente: false,
@@ -80,6 +86,8 @@ export const datosDe = (p: Proveedor): DatosProveedor => ({
     contacto: p.contacto,
     correo: p.correo,
     telefono: p.telefono,
+    direccion: p.direccion,
+    cuentaDetraccion: p.cuentaDetraccion,
     cuentas: p.cuentas.map((c) => ({ ...c })),
     esAgenteRetencion: p.esAgenteRetencion,
     esBuenContribuyente: p.esBuenContribuyente,
