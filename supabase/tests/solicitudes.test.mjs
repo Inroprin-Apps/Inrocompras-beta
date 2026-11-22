@@ -40,6 +40,7 @@ await db.exec(leer('migrations/0006_correcciones_null.sql'));
 await db.exec(leer('migrations/0007_permisos_supabase.sql'));
 await db.exec(leer('migrations/0008_permisos_equipo.sql'));
 await db.exec(leer('migrations/0010_solicitudes_reglas.sql'));
+await db.exec(leer('migrations/0074_admin_libera_propias.sql'));
 await db.exec(`grant usage, select on all sequences in schema public to authenticated;`);
 
 // Personas de prueba (inventadas)
@@ -96,6 +97,24 @@ await adm(`update public.solicitudes set estado = 'Borrador' where id = $1`, [ad
 await como('sol', `update public.solicitudes set jefe_id = $1 where id = $2`, [U.ger[0], adm1]);
 await como('sol', `select public.ac_solicitud_emitir($1)`, [adm1]);
 check((await acciones('ger', 'solicitudes', adm1)).includes('liberar'), 'Con su jefe real, el jefe sí la libera');
+
+// Decisión 0074: el administrador sí libera las suyas (los demás, no).
+const ADM = '33333333-0000-0000-0000-000000000099';
+await adm(`insert into public.usuarios (id, email, nombre, area) values ($1, 'admin-prueba@inroprin.com', 'Persona admin', 'Administración')`, [ADM]);
+await adm(`insert into public.usuario_roles (usuario_id, rol) values ($1, 'ADMIN')`, [ADM]);
+U.adm = [ADM, 'Administración', ['ADMIN']];
+const adm2 = (
+    await uno(
+        'adm',
+        `insert into public.solicitudes (tipo, jefe_id, solicitante_id, sustento) values ('Administrativa',$1,$1,'Prueba del admin') returning id`,
+        [ADM],
+    )
+).id;
+await como('adm', `insert into public.solicitud_items (solicitud_id, n_item, descripcion, cantidad) values ($1,1,'Tóner',2)`, [adm2]);
+await como('adm', `select public.ac_solicitud_emitir($1)`, [adm2]);
+check((await acciones('adm', 'solicitudes', adm2)).includes('liberar'), 'El administrador sí ve «Liberar» en su propia solicitud (0074)');
+await como('adm', `select public.ac_solicitud_liberar($1)`, [adm2]);
+check((await adm(`select estado from public.solicitudes where id = $1`, [adm2]))[0].estado === 'En Req', 'Y la libera: pasa a requerimiento');
 
 console.log('\n2. Proyecto: etapa de otro proyecto, proyecto no ganado, solicitante aprobador de su etapa');
 const pA = (await adm(`insert into public.proyectos (codigo, nombre, estado, gerente_id) values ('P-A','Proyecto A','Ganado',$1) returning id`, [U.ger[0]]))[0]
