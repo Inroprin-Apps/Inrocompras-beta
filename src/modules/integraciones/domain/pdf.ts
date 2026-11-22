@@ -146,7 +146,7 @@ export function formaPagoTexto(o: OrdenPdf, idioma: Idioma): string {
 export const numeroPdf = (n: number | null | undefined, decimales = 2) =>
     new Intl.NumberFormat('es-PE', { minimumFractionDigits: decimales, maximumFractionDigits: decimales }).format(n ?? 0);
 
-/** INROPRIN-NAC-2026-0025.pdf · …-interna.pdf · …-rev2.pdf */
+/** 0025-2026.pdf · …-interna.pdf · …-rev2.pdf */
 export function nombrePdf(o: Pick<OrdenPdf, 'numero' | 'revision'>, version: VersionPdf): string {
     return `${o.numero ?? 'borrador'}${version === 'interna' ? '-interna' : ''}${o.revision ? `-rev${o.revision}` : ''}.pdf`;
 }

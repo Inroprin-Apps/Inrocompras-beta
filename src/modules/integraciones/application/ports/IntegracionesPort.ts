@@ -45,6 +45,8 @@ export interface OrdenCarpeta {
     procedencia: string;
     fecha: string | null;
     proveedor: string;
+    /** El proyecto (null en una OC administrativa) y su carpeta de Drive si ya se conoce. */
+    proyecto: { id: string; nombre: string; carpetaId: string | null } | null;
 }
 
 export interface OrdenCorreo {
@@ -71,6 +73,7 @@ export interface NotificacionCorreo {
 export interface RepositorioPort {
     ordenCarpeta(id: string): R<OrdenCarpeta | null>;
     guardarCarpetaOrden(id: string, c: CarpetaDrive): R<null>;
+    guardarCarpetaProyecto(id: string, carpetaId: string): R<null>;
     /** Los documentos de la orden aún sin archivar (subidos al borrador antes de que existiera la carpeta). */
     documentosSinArchivar(ordenId: string): R<string[]>;
     desaduanajeCarpeta(id: string): R<{ numero: string | null; romano: string | null; carpetaOC: string | null } | null>;
@@ -93,8 +96,12 @@ export interface RepositorioPort {
 export interface DrivePort {
     /** null si está configurado; si no, lo que falta (nombres de variables). */
     falta(): string[] | null;
-    /** Crea (o encuentra) la ruta desde la raíz con sus subcarpetas. Idempotente. */
-    carpetaOC(ruta: string[], subcarpetas: readonly string[]): R<CarpetaDrive>;
+    /** La carpeta madre de nacionales o de importaciones (mientras se valida, una de prueba). */
+    raiz(procedencia: 'Nacional' | 'Importación'): string;
+    /** Las carpetas que hay dentro de otra (para encontrar «NN) PROYECTO»). */
+    hijas(padre: string): R<{ id: string; nombre: string }[]>;
+    /** Crea (o encuentra) la carpeta `nombre` dentro de `padre`, con sus subcarpetas. Idempotente. */
+    carpetaOC(padre: string, nombre: string, subcarpetas: readonly string[]): R<CarpetaDrive>;
     carpeta(nombre: string, padre: string): R<CarpetaDrive>;
     subir(p: { carpeta: string; subcarpeta: string; nombre: string; mime: string; datos: Uint8Array }): R<CarpetaDrive>;
     bajar(fileId: string): R<Uint8Array>;

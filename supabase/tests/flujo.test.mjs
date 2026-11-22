@@ -181,7 +181,7 @@ await falla('com', `select public.ac_oc_emitir($1)`, [oc], 'No se emite sin coti
 await como('com', `insert into public.documentos (orden_id, tipo_doc, nombre_archivo, subido_por) values ($1,'Cotización','cot.pdf',$2)`, [oc, U.com[0]]);
 await falla('com', `update public.ordenes set estatus = 'Aprobada' where id = $1`, [oc], 'Compras no puede poner el estatus a mano');
 const emi = (await uno('com', `select public.ac_oc_emitir($1) r`, [oc])).r;
-check(/^INROPRIN-NAC-\d{4}-0001$/.test(emi.numero), 'Numeración por serie: ' + emi.numero);
+check(/^0001-\d{4}$/.test(emi.numero), 'Numeración de la empresa (NNNN-AAAA, como la lee INROCONTA): ' + emi.numero);
 await falla('gop', `select public.ac_oc_aprobar_gop($1)`, [oc], 'La GOP no aprueba antes de que CG valide el presupuesto');
 const acc = (await como('cg', `select accion from public.acciones_disponibles('ordenes', $1)`, [oc])).map((r) => r.accion);
 check(acc.includes('validar_ppto') && acc.includes('observar_ppto') && !acc.includes('aprobar_gop'), 'Botones de CG: ' + acc.join(', '));
@@ -295,8 +295,8 @@ await como('imp', `update public.ordenes set pct_adelanto = 0.3, hito_saldo = 'C
 await como('imp', `insert into public.documentos (orden_id, tipo_doc, nombre_archivo, subido_por) values ($1,'Cotización','pi.pdf',$2)`, [oc3, U.imp[0]]);
 const e3 = (await uno('imp', `select public.ac_oc_emitir($1) r`, [oc3])).r;
 check(
-    /IMP/.test(e3.numero) && (await adm(`select tipo_impuesto from public.ordenes where id=$1`, [oc3]))[0].tipo_impuesto === 'Sin IGV',
-    'Serie IMP y «Sin IGV»: ' + e3.numero,
+    /^001-\d{4}$/.test(e3.numero) && (await adm(`select tipo_impuesto from public.ordenes where id=$1`, [oc3]))[0].tipo_impuesto === 'Sin IGV',
+    'Importación con su propio correlativo de 3 dígitos y «Sin IGV»: ' + e3.numero,
 );
 await como('cg', `select public.ac_oc_validar_ppto($1, 'Presupuestado')`, [oc3]);
 await como('gop', `select public.ac_oc_aprobar_gop($1)`, [oc3]);

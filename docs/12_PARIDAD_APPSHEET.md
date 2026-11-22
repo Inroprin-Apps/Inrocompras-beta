@@ -11,6 +11,36 @@ En INROCOMPRAS los bots no existen como tales: su lógica vive en las funciones 
 la misma transacción que el cambio (no hay un bot que corra después y pueda fallar solo), y lo que sale de la base
 (Drive, PDF, correo, InroPay) va por la cola de trabajos.
 
+## El enfoque
+
+La **secuencia** es la del AppSheet de Geanfranco (jefe de Compras Nacionales y COMEX), paso por paso y con las reglas
+de sus fórmulas y bots: solicitud → liberación → requerimiento → emisión (RQ del SIDIGE) → validación técnica → OC →
+validación de presupuesto (CG) → aprobación (GOP / GAF) → envío al proveedor → legajo → pagos → desaduanaje y costeo.
+INROCOMPRAS no cambia ese orden: lo hace en una sola app, corrige los huecos que tenía (seguridad, reglas que no
+avisaban a nadie, ortografía de los estados) y agrega lo acordado (plan de compras y OC dentro de la app).
+
+## Lo que falta para superarlo (al 22/11/2026)
+
+**Ya superado:** los 9 huecos de seguridad (B-00 a B-08), historial de cada cambio, plan de compras y OC dentro de la
+app, numeración y carpetas de Drive iguales a las de Compras (las que lee INROCONTA, 0072), factura por el total de la
+OC, aviso de requerimiento que sí llega a su área, recordatorio de facturas, empresas con RUC validado, exportar a
+Excel, deshacer en vez de «¿seguro?», y 18 bots revisados contra sus fórmulas reales (abajo).
+
+**Falta, en orden:**
+
+| #   | Qué                                     | Por qué                                                                                                                                                                           | Depende de                                                      |
+| --- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| 1   | Código del Apps Script de Geanfranco    | 4 bots solo lo llaman (Ejecutar anulación, OC - Anulada liberar ítems, Emitir Req, PDF del requerimiento): su lógica está en el script                                            | Tomás / Geanfranco                                              |
+| 2   | PDF de la OC con el formato actual      | Lo que recibe el proveedor: datos completos del proveedor, columnas concepto / cód. interno / cód. proyecto, adelantos y saldo, instrucciones de entrega, texto antisoborno, logo | Dirección, banco y cuentas del proveedor (nuevos campos); logos |
+| 3   | PDF de la solicitud y del requerimiento | Bots «Generar PDF Solicitud» y «Generar Requerimiento › PDF»                                                                                                                      | El formato actual (un ejemplo de cada uno)                      |
+| 4   | Numeración de las demás empresas        | Hoy INROPRIN numera NNNN-AAAA; las demás llevan su código delante hasta confirmar                                                                                                 | Tomás / Compras                                                 |
+| 5   | Avisos «Aviso - …» restantes            | Ver que destinatarios y textos coincidan (13 bots de aviso; las reglas ya están)                                                                                                  | Revisión rápida de sus condiciones                              |
+| 6   | Google Chat                             | Nombres de los espacios y webhooks nuevos en Vercel                                                                                                                               | Sistemas                                                        |
+| 7   | Drive                                   | Carpeta de PRUEBA compartida con la cuenta de servicio; validar; recién después, las carpetas madre reales                                                                        | Sistemas                                                        |
+| 8   | Credenciales del servidor               | SUPABASE_SERVICE_ROLE_KEY, CRON_SECRET, APP_URL, correo, Gemini, InroPay                                                                                                          | Sistemas                                                        |
+| 9   | INROCONTA lee las OC de INROCOMPRAS     | Si no, INROCONTA se queda sin OC nuevas al apagar las hojas (docs/13 §1.3)                                                                                                        | Acuerdo entre las dos apps                                      |
+| 10  | Prueba con Compras (diciembre)          | Recorrer el flujo completo con casos de verdad (sin subir datos reales al repo)                                                                                                   | Los puntos 2, 6, 7 y 8                                          |
+
 ## Verificados con el bot real
 
 ### Aprobada → Legajo incompleto ✅

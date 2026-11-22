@@ -5,7 +5,7 @@
 import { err, ok, type Result } from 'neverthrow';
 import { rutaDe } from '@/modules/comun/application/views.ts';
 import { rucValido } from '@/modules/proveedores/application/views.ts';
-import { SUBCARPETAS_OC, nombreCarpetaDes, rutaCarpetaOC, subcarpetaDe } from '../domain/carpetas.ts';
+import { PROYECTO_ADMINISTRATIVO, SUBCARPETAS_OC, elegirCarpetaProyecto, nombreCarpetaDes, nombreCarpetaOC, subcarpetaDe } from '../domain/carpetas.ts';
 import { mensajeChat } from '../domain/chat.ts';
 import { correoValido, notificacion, ocProveedor, primerNombre } from '../domain/correo.ts';
 import { solicitudInroPay } from '../domain/inropay.ts';
@@ -100,7 +100,24 @@ async function crearCarpeta(d: Integraciones, t: Trabajo): Paso {
         if (o.isErr()) return err(o.error);
         if (!o.value) return err(final('La orden ya no existe.'));
         if (!o.value.numero) return err(reintentar('La orden aún no tiene número.'));
-        const c = await d.drive.carpetaOC(rutaCarpetaOC({ ...o.value, numero: o.value.numero }), SUBCARPETAS_OC);
+        // <madre> / NN) PROYECTO / OC AAAA - NNNN PROVEEDOR - PROYECTO (docs/13 §1.1: así la reconoce INROCONTA).
+        const madre = d.drive.raiz(o.value.procedencia === 'Importación' ? 'Importación' : 'Nacional');
+        const proyecto = o.value.proyecto;
+        let carpetaProyecto = proyecto?.carpetaId ?? null;
+        if (!carpetaProyecto) {
+            const hijas = await d.drive.hijas(madre);
+            if (hijas.isErr()) return err(hijas.error);
+            const eleccion = elegirCarpetaProyecto(hijas.value, proyecto?.nombre ?? PROYECTO_ADMINISTRATIVO);
+            if ('id' in eleccion) carpetaProyecto = eleccion.id;
+            else {
+                const nueva = await d.drive.carpeta(eleccion.crear, madre);
+                if (nueva.isErr()) return err(nueva.error);
+                carpetaProyecto = nueva.value.id;
+            }
+            if (proyecto) await d.repo.guardarCarpetaProyecto(proyecto.id, carpetaProyecto);
+        }
+        const nombre = nombreCarpetaOC({ ...o.value, numero: o.value.numero, proyecto: proyecto?.nombre ?? null });
+        const c = await d.drive.carpetaOC(carpetaProyecto, nombre, SUBCARPETAS_OC);
         if (c.isErr()) return err(c.error);
         const g = await d.repo.guardarCarpetaOrden(t.refId, c.value);
         if (g.isErr()) return err(g.error);

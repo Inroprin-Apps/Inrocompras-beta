@@ -84,7 +84,11 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
     // ── Carpetas ──
     async ordenCarpeta(id: string): R<OrdenCarpeta | null> {
         const r = res<Fila | null>(
-            await this.db.from('ordenes').select('numero,empresa_id,procedencia,clase,fecha,proveedores(razon_social)').eq('id', id).maybeSingle(),
+            await this.db
+                .from('ordenes')
+                .select('numero,empresa_id,procedencia,clase,fecha,proveedores(razon_social),proyectos(id,nombre,carpeta_drive_id)')
+                .eq('id', id)
+                .maybeSingle(),
             'No se pudo leer la orden',
         );
         return r.map((f) =>
@@ -96,6 +100,9 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
                       clase: s(f.clase),
                       fecha: sn(f.fecha),
                       proveedor: s(uno(f.proveedores)?.razon_social),
+                      proyecto: uno(f.proyectos)
+                          ? { id: s(uno(f.proyectos)?.id), nombre: s(uno(f.proyectos)?.nombre), carpetaId: sn(uno(f.proyectos)?.carpeta_drive_id) }
+                          : null,
                   }
                 : null,
         );
@@ -105,6 +112,13 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
         return res<null>(
             await this.db.from('ordenes').update({ carpeta_drive_id: c.id, carpeta_drive_url: c.url }).eq('id', id),
             'No se pudo guardar la carpeta',
+        ).map(() => null);
+    }
+
+    async guardarCarpetaProyecto(id: string, carpetaId: string): R<null> {
+        return res<null>(
+            await this.db.from('proyectos').update({ carpeta_drive_id: carpetaId }).eq('id', id),
+            'No se pudo guardar la carpeta del proyecto',
         ).map(() => null);
     }
 

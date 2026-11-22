@@ -186,7 +186,7 @@ export function tonoPago(e: string): TonoChip {
     return 'info';
 }
 
-/** «INROPRIN-NAC-2026-0001 · cuota 1». */
+/** «0001-2026 · cuota 1». */
 export const nombrePago = (p: Pick<Pago, 'ordenNumero' | 'nCuota'>) => `${p.ordenNumero || 'Orden'} · cuota ${formatoCuota(p.nCuota)}`;
 export const formatoCuota = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 

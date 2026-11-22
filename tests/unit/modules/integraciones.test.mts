@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
-    anioDe,
+    elegirCarpetaProyecto,
     nombreCarpetaDes,
     nombreCarpetaOC,
     nombreSeguro,
-    rutaCarpetaOC,
-    serieOC,
+    partesNumero,
     subcarpetaDe,
     escaparConsultaDrive,
 } from '@/modules/integraciones/domain/carpetas.ts';
@@ -28,19 +27,58 @@ import { firmaValida, firmar } from '@/modules/integraciones/infrastructure/hmac
 import { mensajeMime } from '@/modules/integraciones/infrastructure/mime.ts';
 import { rucValido } from '@/modules/proveedores/domain/ruc.ts';
 
-describe('carpetas del legajo (docs/07 §2)', () => {
-    const oc = {
-        numero: 'INROPRIN-NAC-2026-0025',
-        empresaId: 'INROPRIN',
-        clase: 'Compra',
-        procedencia: 'Nacional',
-        fecha: '2026-12-03',
-        proveedor: 'Ferretería / Andina SAC',
+// La regla con que INROCONTA reconoce una OC por el nombre de su carpeta, copiada tal cual de su
+// src/shared/lib/drive/carpetas-oc.ts (carpetaDeOC). Si INROCOMPRAS nombra distinto, INROCONTA deja de ver la OC.
+const IMPO = String.raw`(?:IMP(?:O|ORTACI[OÓ]N)?\.?)`;
+const PREFIJO = String.raw`(?:(?:[O0]\.?\s*C\.?|[O0]\.?\s*S\.?|ORDEN\s+DE\s+COMPRA|ORDEN\s+DE\s+SERVICIO)(?:\s*${IMPO})?|${IMPO}(?:\s*O\.?\s*C\.?)?)`;
+const NUM = String.raw`(\d{1,5})(?:\.\d{1,2})?`;
+const ANIO = String.raw`(20[2-3]\d)`;
+const SEP = String.raw`\s*[-_]\s*`;
+function comoLaLeeInroconta(nombre: string) {
+    const t = nombre.normalize('NFC').trim().replace(/\s+/g, ' ');
+    const m = new RegExp(String.raw`^(${PREFIJO}\s*(?:N[°ºo.]?\s*)?)?(?:${ANIO}${SEP}${NUM}|${NUM}${SEP}${ANIO})(?!\d)\s*(.*)$`, 'i').exec(t);
+    if (!m || !m[1]) return null;
+    const [, , anioA, numA, numB, anioB, resto] = m;
+    const limpio = (resto ?? '').replace(/^[\s\-_–—:.]+/, '').trim();
+    const corte = limpio.lastIndexOf(' - ');
+    return {
+        tipo: /^([O0]\.?\s*S|ORDEN\s+DE\s+SERVICIO)/i.test(t) ? 'OS' : 'OC',
+        oc: `${numA ?? numB}-${anioA ?? anioB}`,
+        proveedor: (corte > 0 ? limpio.slice(0, corte) : limpio).trim(),
+        proyecto: corte > 0 ? limpio.slice(corte + 3).trim() : '',
     };
-    it('Raíz / AAAA / EMPRESA-PROC / N° OC – Proveedor', () => {
-        expect(rutaCarpetaOC(oc)).toEqual(['2026', 'INROPRIN-NAC', 'INROPRIN-NAC-2026-0025 – Ferretería Andina SAC']);
-        expect(serieOC({ ...oc, procedencia: 'Importación' })).toBe('INROPRIN-IMP');
-        expect(serieOC({ ...oc, clase: 'Servicio', procedencia: 'Importación' })).toBe('INROPRIN-SRV');
+}
+
+describe('carpetas del legajo (docs/07 §2, docs/13 §1.1)', () => {
+    const oc = { numero: '0200-2026', clase: 'Compra', procedencia: 'Nacional', proveedor: 'Ferretería / Andina SAC', proyecto: 'Talleres de prueba' };
+    it('nacional «OC AAAA - NNNN PROVEEDOR - PROYECTO», servicio «OS …», importación «OC NNN-AAAA …»', () => {
+        expect(nombreCarpetaOC(oc)).toBe('OC 2026 - 0200 Ferretería Andina SAC - Talleres de prueba');
+        expect(nombreCarpetaOC({ ...oc, clase: 'Servicio', numero: '0911-2026' })).toBe('OS 2026 - 0911 Ferretería Andina SAC - Talleres de prueba');
+        expect(nombreCarpetaOC({ ...oc, procedencia: 'Importación', numero: '172-2026' })).toBe('OC 172-2026 Ferretería Andina SAC - Talleres de prueba');
+        expect(nombreCarpetaOC({ ...oc, proyecto: null })).toBe('OC 2026 - 0200 Ferretería Andina SAC - ADMINISTRATIVO');
+        expect(partesNumero('INROPLAS 0003-2027')).toEqual({ num: '0003', anio: '2027' });
+        expect(nombreCarpetaOC({ ...oc, numero: 'OC-ANTIGUA' })).toBe('OC-ANTIGUA Ferretería Andina SAC - Talleres de prueba');
+    });
+    it('INROCONTA reconoce la OC, el proveedor y el proyecto con su propia regla', () => {
+        expect(comoLaLeeInroconta(nombreCarpetaOC(oc))).toEqual({
+            tipo: 'OC',
+            oc: '0200-2026',
+            proveedor: 'Ferretería Andina SAC',
+            proyecto: 'Talleres de prueba',
+        });
+        expect(comoLaLeeInroconta(nombreCarpetaOC({ ...oc, clase: 'Servicio', numero: '0911-2026' }))).toMatchObject({ tipo: 'OS', oc: '0911-2026' });
+        expect(comoLaLeeInroconta(nombreCarpetaOC({ ...oc, procedencia: 'Importación', numero: '172-2026' }))).toMatchObject({ tipo: 'OC', oc: '172-2026' });
+    });
+    it('la carpeta del proyecto: la que ya existe (sin importar tildes ni mayúsculas) o la siguiente', () => {
+        const hijas = [
+            { id: 'a', nombre: '01) TALLERES DE PRUEBA' },
+            { id: 'b', nombre: '06) Mobiliario Escolar' },
+            { id: 'c', nombre: 'Varios' },
+        ];
+        expect(elegirCarpetaProyecto(hijas, 'Talleres de prueba')).toEqual({ id: 'a' });
+        expect(elegirCarpetaProyecto(hijas, 'mobiliario escolar')).toEqual({ id: 'b' });
+        expect(elegirCarpetaProyecto(hijas, 'Laboratorio Química')).toEqual({ crear: '07) LABORATORIO QUIMICA' });
+        expect(elegirCarpetaProyecto([], 'Nuevo')).toEqual({ crear: '01) NUEVO' });
     });
     it('cada documento a su subcarpeta', () => {
         expect(subcarpetaDe('Cotización')).toBe('002 Cotizaciones');
@@ -51,9 +89,7 @@ describe('carpetas del legajo (docs/07 §2)', () => {
     });
     it('desaduanaje dentro de su OC y nombres seguros', () => {
         expect(nombreCarpetaDes('DES-2026-0001', 'II')).toBe('DES-2026-0001 (II)');
-        expect(nombreCarpetaOC('N1', '')).toBe('N1');
         expect(nombreSeguro('a'.repeat(200)).length).toBe(120);
-        expect(anioDe(null, new Date('2027-01-02'))).toBe('2027');
         expect(escaparConsultaDrive("O'Brien")).toBe("O\\'Brien");
     });
 });

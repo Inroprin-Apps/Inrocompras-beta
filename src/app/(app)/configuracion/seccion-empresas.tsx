@@ -143,7 +143,7 @@ function FormEmpresa({ inicial, nueva, existentes, onCerrar }: { inicial: Empres
         >
             <div className="grid gap-4 sm:grid-cols-2">
                 {nueva ? (
-                    <Field label="Código" hint="Va en el número de sus órdenes: INROPRIN-NAC-2026-0001. No se cambia después.">
+                    <Field label="Código" hint="Identifica a la empresa en la app y en sus órdenes. No se cambia después.">
                         {(p) => <Input {...p} value={e.id} onChange={(x) => poner({ id: x.target.value.toUpperCase() })} placeholder="INROPRIN" />}
                     </Field>
                 ) : (
