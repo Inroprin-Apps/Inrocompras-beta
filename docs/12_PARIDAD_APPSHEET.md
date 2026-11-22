@@ -167,4 +167,4 @@ anuladas, `ac_req_emitir`), pero para confirmarlo hace falta ver el código del 
 
 ## Fuera de los bots
 
-- Pantalla **Empresas** (el AppSheet la tiene en el menú): en INROCOMPRAS la tabla existe pero no hay pantalla. ❌
+- Pantalla **Empresas** (el AppSheet la tiene en el menú) ⭐ (0071): en Configuración → Empresas, solo el administrador. RUC validado con su dígito verificador, y una OC de una empresa sin RUC no se emite (el proveedor no sabría a quién facturar). Los datos reales se cargan en la base, no en el repo.

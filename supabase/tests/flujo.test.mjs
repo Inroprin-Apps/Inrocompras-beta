@@ -86,6 +86,9 @@ async function falla(k, sql, params, msg) {
 const uno = async (k, sql, p) => (await como(k, sql, p))[0];
 const adm = async (sql, p) => (await db.query(sql, p)).rows;
 
+// Empresa con RUC (inventado, con dígito verificador válido): sin RUC no se emiten órdenes (0071).
+await db.query(`update public.empresas set ruc = '20100000009', direccion = 'Av. Ejemplo 123, Lima' where id = 'INROPRIN'`);
+
 console.log('\n1. Proyecto, solicitud y liberación');
 const proy = (
     await adm(
@@ -459,6 +462,20 @@ check(
     !(await adm(`select has_function_privilege('authenticated', 'public.correr_diarios()', 'execute') p`))[0].p,
     'Lo diario no lo llama una sesión: solo el servidor',
 );
+
+console.log('\n8d. Empresas (0071)');
+await como('com', `update public.empresas set direccion = 'Otra' where id = 'INROPRIN'`).catch(() => {});
+check((await adm(`select direccion from public.empresas where id = 'INROPRIN'`))[0].direccion !== 'Otra', 'Compras no edita empresas (solo el administrador)');
+try {
+    await db.query(`update public.empresas set ruc = '20100000001' where id = 'INROPLAS'`);
+    check(false, 'Un RUC con dígito verificador malo no se guarda (debió fallar)');
+} catch (e) {
+    check(/empresas_ruc_valido/.test(e.message), 'Un RUC con dígito verificador malo no se guarda');
+}
+// Al final del flujo, una OC vuelta a borrador y pasada a una empresa sin RUC: la regla de emitir lo dice.
+await adm(`update public.ordenes set estatus = 'Borrador', empresa_id = 'INROPLAS' where id = $1`, [oc2]);
+const motivoRuc = (await como('com', `select app.p_oc_emitir($1) m`, [oc2]))[0].m;
+check(/INROPLAS no tiene RUC/.test(motivoRuc ?? ''), 'Una OC de una empresa sin RUC no se emite → «' + motivoRuc + '»');
 
 console.log('\n9. Historial');
 const h = await adm(`select count(*)::int n from public.historial`);

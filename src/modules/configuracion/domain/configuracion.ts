@@ -228,6 +228,34 @@ export interface Concepto {
     activo: boolean;
 }
 
+/** Una empresa del grupo que compra (unidad de negocio): numera sus OC y va en la cabecera del PDF al proveedor. */
+export interface Empresa {
+    id: string;
+    razonSocial: string;
+    ruc: string | null;
+    direccion: string | null;
+    activo: boolean;
+}
+
+/** El código de una empresa: mayúsculas, números y guiones (INROPRIN, CONSORCIO-PUCP). Va en el número de la OC. */
+export const codigoEmpresaValido = (c: string) => /^[A-Z0-9][A-Z0-9-]{1,23}$/.test(c);
+
+/** Qué falta o está mal en una empresa (null si está bien). `rucValido` viene de Proveedores (dígito verificador). */
+export function faltaEnEmpresa(e: Empresa, existentes: readonly string[], nueva: boolean, rucValido: (r: string) => boolean): string | null {
+    if (nueva && !codigoEmpresaValido(e.id)) return 'El código va en mayúsculas, sin espacios: INROPRIN o CONSORCIO-PUCP.';
+    if (nueva && existentes.includes(e.id)) return `Ya existe la empresa ${e.id}.`;
+    if (!e.razonSocial.trim()) return 'Escribe la razón social, como figura en SUNAT.';
+    if (e.ruc && !rucValido(e.ruc)) return 'El RUC no es válido: revisa los 11 dígitos.';
+    return null;
+}
+
+/** Lo que le falta a la empresa para que su OC salga completa al proveedor. */
+export function avisoEmpresa(e: Empresa): string | null {
+    if (!e.ruc) return 'Sin RUC: sus órdenes no se pueden emitir';
+    if (!e.direccion) return 'Sin dirección: el PDF sale sin ella';
+    return null;
+}
+
 export interface ConceptoGasto {
     concepto: string;
     entraCosto: boolean;

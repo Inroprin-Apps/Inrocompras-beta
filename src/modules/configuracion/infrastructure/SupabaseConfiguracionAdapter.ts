@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { err, ok, type Result } from 'neverthrow';
 import { resultado, type ErrorFuente } from '@/shared/errores.ts';
 import type { ColaPort, ConfiguracionPort, DatosConfiguracion } from '../application/ports/ConfiguracionPort.ts';
-import type { AmbitoConcepto, ConceptoGasto, EstadoCola, ResumenCola, TrabajoCola } from '../domain/configuracion.ts';
+import type { AmbitoConcepto, ConceptoGasto, Empresa, EstadoCola, ResumenCola, TrabajoCola } from '../domain/configuracion.ts';
 import { s, sn, type Fila } from '@/shared/supabase/filas.ts';
 
 /** RLS deja un UPDATE en 0 filas (sin error) cuando no le toca: se dice como permiso negado. */
@@ -15,37 +15,47 @@ export class SupabaseConfiguracionAdapter implements ConfiguracionPort, ColaPort
     constructor(private readonly db: SupabaseClient) {}
 
     async leer(): Promise<Result<DatosConfiguracion, ErrorFuente>> {
-        const [c, m, t, k, g] = await Promise.all([
+        const [c, m, t, k, g, e] = await Promise.all([
             this.db.from('config').select('clave,valor,nota').order('clave'),
             this.db.from('monedas').select('id,nombre,tasa_a_soles,actualizado').order('id'),
             this.db.from('tc_costeo').select('id,moneda,tc,vigente_desde,registrado_por,comentario').order('vigente_desde', { ascending: false }).limit(200),
             this.db.from('conceptos').select('id,ambito,activo').order('id'),
             this.db.from('conceptos_gasto_imp').select('concepto,entra_costo,reparto,orden,activo').order('orden'),
+            this.db.from('empresas').select('id,razon_social,ruc,direccion,activo').order('id'),
         ]);
         return resultado<Fila[]>(c).andThen((cfg) =>
             resultado<Fila[]>(m).andThen((mon) =>
                 resultado<Fila[]>(t).andThen((tc) =>
                     resultado<Fila[]>(k).andThen((con) =>
-                        resultado<Fila[]>(g).map((gas) => ({
-                            config: cfg.map((x) => ({ clave: s(x.clave), valor: x.valor, nota: s(x.nota) })),
-                            monedas: mon.map((x) => ({ id: s(x.id), nombre: s(x.nombre), tasa: Number(x.tasa_a_soles), actualizado: s(x.actualizado) })),
-                            tcCosteo: tc.map((x) => ({
-                                id: s(x.id),
-                                moneda: s(x.moneda),
-                                tc: Number(x.tc),
-                                vigenteDesde: s(x.vigente_desde),
-                                registradoPor: sn(x.registrado_por),
-                                comentario: s(x.comentario),
+                        resultado<Fila[]>(g).andThen((gas) =>
+                            resultado<Fila[]>(e).map((emp) => ({
+                                config: cfg.map((x) => ({ clave: s(x.clave), valor: x.valor, nota: s(x.nota) })),
+                                monedas: mon.map((x) => ({ id: s(x.id), nombre: s(x.nombre), tasa: Number(x.tasa_a_soles), actualizado: s(x.actualizado) })),
+                                tcCosteo: tc.map((x) => ({
+                                    id: s(x.id),
+                                    moneda: s(x.moneda),
+                                    tc: Number(x.tc),
+                                    vigenteDesde: s(x.vigente_desde),
+                                    registradoPor: sn(x.registrado_por),
+                                    comentario: s(x.comentario),
+                                })),
+                                conceptos: con.map((x) => ({ id: s(x.id), ambito: s(x.ambito) as AmbitoConcepto, activo: x.activo === true })),
+                                gastos: gas.map((x) => ({
+                                    concepto: s(x.concepto),
+                                    entraCosto: x.entra_costo === true,
+                                    reparto: (s(x.reparto) || 'Valor') as ConceptoGasto['reparto'],
+                                    orden: Number(x.orden),
+                                    activo: x.activo === true,
+                                })),
+                                empresas: emp.map((x) => ({
+                                    id: s(x.id),
+                                    razonSocial: s(x.razon_social),
+                                    ruc: sn(x.ruc),
+                                    direccion: sn(x.direccion),
+                                    activo: x.activo === true,
+                                })),
                             })),
-                            conceptos: con.map((x) => ({ id: s(x.id), ambito: s(x.ambito) as AmbitoConcepto, activo: x.activo === true })),
-                            gastos: gas.map((x) => ({
-                                concepto: s(x.concepto),
-                                entraCosto: x.entra_costo === true,
-                                reparto: (s(x.reparto) || 'Valor') as ConceptoGasto['reparto'],
-                                orden: Number(x.orden),
-                                activo: x.activo === true,
-                            })),
-                        })),
+                        ),
                     ),
                 ),
             ),
@@ -89,6 +99,12 @@ export class SupabaseConfiguracionAdapter implements ConfiguracionPort, ColaPort
     }
 
     // ── Cola (funciones solo-admin de 0021) ──
+    async guardarEmpresa(e: Empresa, nueva: boolean): Promise<Result<null, ErrorFuente>> {
+        const fila = { razon_social: e.razonSocial.trim(), ruc: e.ruc?.trim() || null, direccion: e.direccion?.trim() || null, activo: e.activo };
+        if (nueva) return resultado(await this.db.from('empresas').insert({ id: e.id.trim().toUpperCase(), ...fila })).map(() => null);
+        return alMenosUna(resultado<Fila[]>(await this.db.from('empresas').update(fila).eq('id', e.id).select('id')), 'el administrador');
+    }
+
     async resumen(): Promise<Result<ResumenCola[], ErrorFuente>> {
         const r = resultado<Fila[]>(await this.db.rpc('cola_resumen'));
         return r.map((fs) =>

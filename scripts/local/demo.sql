@@ -50,3 +50,6 @@ on conflict (id) do nothing;
 insert into public.proveedores (id, razon_social, origen, pais, correo, evaluacion_fin)
 values ('d0000000-0000-0000-0000-000000000003', 'Overseas Machinery Ltd (prueba)', 'Extranjero', 'China', 'sales@overseas.example', 'Aprobado')
 on conflict (id) do nothing;
+
+-- Empresa con RUC inventado (dígito verificador válido): sin RUC no se emiten órdenes (0071).
+update public.empresas set ruc = '20100000009', direccion = 'Av. Ejemplo 123, Lima' where id = 'INROPRIN';

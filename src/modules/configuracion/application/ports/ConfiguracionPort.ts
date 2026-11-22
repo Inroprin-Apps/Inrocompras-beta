@@ -1,6 +1,6 @@
 import type { Result } from 'neverthrow';
 import type { ErrorFuente } from '@/shared/errores.ts';
-import type { AmbitoConcepto, ConceptoGasto, Concepto, Moneda, ResumenCola, TcCosteo, TrabajoCola } from '../../domain/configuracion.ts';
+import type { AmbitoConcepto, ConceptoGasto, Concepto, Empresa, Moneda, ResumenCola, TcCosteo, TrabajoCola } from '../../domain/configuracion.ts';
 
 export interface DatosConfiguracion {
     config: { clave: string; valor: unknown; nota: string }[];
@@ -8,6 +8,7 @@ export interface DatosConfiguracion {
     tcCosteo: TcCosteo[];
     conceptos: Concepto[];
     gastos: ConceptoGasto[];
+    empresas: Empresa[];
 }
 
 export interface ConfiguracionPort {
@@ -18,6 +19,7 @@ export interface ConfiguracionPort {
     agregarConcepto(id: string, ambito: AmbitoConcepto): Promise<Result<null, ErrorFuente>>;
     activarConcepto(id: string, activo: boolean): Promise<Result<null, ErrorFuente>>;
     guardarGasto(g: ConceptoGasto, nuevo: boolean): Promise<Result<null, ErrorFuente>>;
+    guardarEmpresa(e: Empresa, nueva: boolean): Promise<Result<null, ErrorFuente>>;
 }
 
 export interface ColaPort {
