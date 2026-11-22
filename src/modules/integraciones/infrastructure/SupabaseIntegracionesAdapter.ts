@@ -68,6 +68,10 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
         );
     }
 
+    async diarios(): R<Record<string, unknown>> {
+        return res<Record<string, unknown>>(await this.db.rpc('correr_diarios'), 'No se pudo correr lo diario');
+    }
+
     async terminar(id: number, okk: boolean, mensaje: string | null, fin: 'Error' | 'Descartado' | null): R<string> {
         const r = res<Fila>(await this.db.rpc('cola_terminar', { p_id: id, p_ok: okk, p_error: mensaje, p_final: fin }), 'No se pudo cerrar el trabajo');
         return r.map((f) => s(uno(f)?.estado));

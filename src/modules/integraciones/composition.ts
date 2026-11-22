@@ -6,6 +6,7 @@ import { supabaseServicio } from '@/shared/supabase/servicio.ts';
 import { procesarCola } from './application/procesar-cola.ts';
 import type { Integraciones } from './application/ports/IntegracionesPort.ts';
 import { recibirInroPay } from './application/webhook-inropay.ts';
+import { ChatAdapter } from './infrastructure/ChatAdapter.ts';
 import { CorreoAdapter } from './infrastructure/CorreoAdapter.ts';
 import { GoogleDriveAdapter } from './infrastructure/GoogleDriveAdapter.ts';
 import { firmaValida } from './infrastructure/hmac.ts';
@@ -32,6 +33,7 @@ function integraciones(): Integraciones | null {
         lector: new LectorAdapter(),
         pdf: new ReactPdfAdapter(),
         inropay: new InroPayAdapter(),
+        chat: new ChatAdapter(),
         appUrl: (process.env.APP_URL ?? '').replace(/\/+$/, ''),
     };
 }

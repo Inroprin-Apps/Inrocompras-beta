@@ -359,6 +359,60 @@ await falla('fin', `select public.ac_pago_pagado($1, 'OP-1', $2)`, [adel3.id, do
 await como('fin', `select public.ac_pago_pagado($1, 'OP-2')`, [adel3.id]);
 check((await adm(`select estado_pago from public.pagos where id = $1`, [adel3.id]))[0].estado_pago === 'Pagado', 'Sin voucher, Finanzas paga igual');
 
+console.log('\n8c. Lo que hacían bots del AppSheet (0070)');
+// Aviso - Solicitud cancelada
+const solC = (
+    await uno(
+        'sol',
+        `insert into public.solicitudes (tipo, proyecto_id, etapa_id, solicitante_id, sustento) values ('Proyecto',$1,$2,$3,'Para cancelar') returning id`,
+        [proy, etapa.id, U.sol[0]],
+    )
+).id;
+await como('sol', `insert into public.solicitud_items (solicitud_id, n_item, descripcion, cantidad, unidad) values ($1,1,'Mesa',1,'UND')`, [solC]);
+const emC = (await uno('sol', `select public.ac_solicitud_emitir($1) r`, [solC])).r;
+await como('sol', `select public.ac_solicitud_cancelar($1, 'Ya no se necesita')`, [solC]);
+const avisoC = await adm(`select usuario_id, cuerpo from public.notificaciones where titulo = $1`, ['Solicitud cancelada: ' + emC.numero]);
+check(
+    avisoC.some((n) => n.usuario_id === U.ger[0] && n.cuerpo === 'Ya no se necesita') && !avisoC.some((n) => n.usuario_id === U.sol[0]),
+    'Cancelar avisa a quien la libera, con el motivo (y no a quien canceló)',
+);
+// Chat: liberar una solicitud y pagar una cuota quedan en la cola para Google Chat
+const chats = await adm(`select ref_tabla, payload from public.cola_trabajos where tipo = 'chat' order by id`);
+check(
+    chats.some(
+        (c) => c.ref_tabla === 'solicitudes' && c.payload.espacio === 'compras' && /^Solicitud SOL-\d{4}-0001: Liberada · Persona ger$/.test(c.payload.texto),
+    ),
+    'Liberar una solicitud encola el aviso a Google Chat: «' + (chats.find((c) => c.ref_tabla === 'solicitudes')?.payload.texto ?? '—') + '»',
+);
+check(
+    chats.some((c) => c.ref_tabla === 'pagos' && / cuota \d+: Pagado · Persona fin(\n|$)/.test(c.payload.texto)),
+    'Pagar una cuota encola el aviso a Google Chat: «' + (chats.find((c) => c.ref_tabla === 'pagos')?.payload.texto ?? '—') + '»',
+);
+check(!chats.some((c) => c.ref_tabla === 'ordenes'), 'Lo que no está en chat_avisos no va a Chat');
+// Correo de envío al aprobar, si quedó vacío
+await adm(`update public.proveedores set correo = 'ventas@proveedor-ficticio.pe' where id = $1`, [prov]);
+await adm(`update public.ordenes set correo_envio = null, estado_aprobacion = 'Pendiente' where id = $1`, [oc2]);
+await adm(`update public.ordenes set estado_aprobacion = 'Aprobado para Compra' where id = $1`, [oc2]);
+check(
+    (await adm(`select correo_envio from public.ordenes where id = $1`, [oc2]))[0].correo_envio === 'ventas@proveedor-ficticio.pe',
+    'Al aprobar sin correo de envío, toma el del proveedor',
+);
+// Recordatorio de facturas: la cuota de adelanto se pagó sin factura
+const r1 = (await adm(`select app.recordatorio_facturas() n`))[0].n;
+const avisoF = await adm(`select usuario_id, cuerpo from public.notificaciones where titulo like 'Falta la factura%'`);
+check(
+    r1 >= 1 && avisoF.some((n) => n.usuario_id === U.imp[0] && /cuota pagada sin factura/.test(n.cuerpo)),
+    'Recordatorio: avisa al comprador de la cuota pagada sin factura',
+);
+check((await adm(`select app.recordatorio_facturas() n`))[0].n === 0, 'Y no lo repite antes de los días configurados');
+const d1 = (await adm(`select public.correr_diarios() r`))[0].r;
+const d2 = (await adm(`select public.correr_diarios() r`))[0].r;
+check(d1.dia && d2.ya_corrio === d1.dia, 'Lo diario corre una vez por día (' + d1.dia + ')');
+check(
+    !(await adm(`select has_function_privilege('authenticated', 'public.correr_diarios()', 'execute') p`))[0].p,
+    'Lo diario no lo llama una sesión: solo el servidor',
+);
+
 console.log('\n9. Historial');
 const h = await adm(`select count(*)::int n from public.historial`);
 check(h[0].n > 30, 'Cada paso dejó historial: ' + h[0].n + ' registros');

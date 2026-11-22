@@ -35,6 +35,14 @@ de credito | Caja Chica | Pago pendiente), "Legajo incompleto")` y `Fecha_Aproba
   igual (`app.oc_sync_estatus`). Una entrega parcial se resuelve dividiendo la cuota («Dividir»), en vez de
   Entrega_Total + Monto_a_Registrar. Mismo resultado, sin una casilla que se pueda marcar sin documentos.
 
+### OC - Estado al aprobar ⭐
+
+- **AppSheet:** tabla OC, Updates. Condición: `[Estado de Aprobación3]` pasa a «Aprobado para Compra». Pasos: (1)
+  acción «actualizar estado» sobre la misma OC; (2) `Correo_Envio = IF(ISBLANK([Correo_Envio]), correo del proveedor,
+[Correo_Envio])`; (3) webhook a un Apps Script que recalcula las cuotas.
+- **INROCOMPRAS:** (1) `app.oc_sync_estatus`; (3) `app.generar_cuotas` en la misma transacción, sin script externo;
+  (2) el correo del proveedor se copia al crear la OC y, desde 0070, también al aprobar si quedó vacío (como el bot).
+
 ## Por verificar
 
 | Grupo                | Bot                                | Dónde lo cubre INROCOMPRAS                                  | Estado |

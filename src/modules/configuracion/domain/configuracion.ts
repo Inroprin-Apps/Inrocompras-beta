@@ -69,6 +69,20 @@ export const PARAMETROS: DefParametro[] = [
         unidad: 'días',
     },
     { clave: 'lector_documentos', etiqueta: 'Lector de cotizaciones y facturas', descripcion: 'Proveedor del lector y si está activo (JSON).', tipo: 'json' },
+    {
+        clave: 'chat_avisos',
+        etiqueta: 'Avisos a Google Chat',
+        descripcion:
+            'Qué cambios de estado se publican y en qué espacio (JSON: {"solicitudes.liberar": "compras"}). La URL de cada espacio la configura Sistemas en el servidor.',
+        tipo: 'json',
+    },
+    {
+        clave: 'recordatorio_facturas_dias',
+        etiqueta: 'Recordatorio de facturas',
+        descripcion: 'Cada cuántos días se le recuerda al comprador una cuota pagada sin factura.',
+        tipo: 'entero',
+        unidad: 'días',
+    },
 ];
 
 export interface Parametro extends DefParametro {
@@ -262,6 +276,7 @@ const TIPOS: Record<string, string> = {
     notificar: 'Correo de aviso',
     inropay_solicitar: 'Solicitud a InroPay',
     sidige_escribir: 'Escribir en el SIDIGE',
+    chat: 'Aviso a Google Chat',
 };
 export const etiquetaTipo = (t: string) => TIPOS[t] ?? t.replace(/_/g, ' ');
 

@@ -15,6 +15,8 @@ export interface ColaPort {
     /** Devuelve el estado en que quedó (Hecho, Descartado, Pendiente o Error). */
     terminar(id: number, ok: boolean, mensaje: string | null, final: 'Error' | 'Descartado' | null): R<string>;
     encolar(tipo: string, tabla: string, id: string, payload?: Record<string, unknown>): R<null>;
+    /** Lo que corre una vez al día (public.correr_diarios: recordatorio de facturas). Idempotente en el día. */
+    diarios(): R<Record<string, unknown>>;
 }
 
 export interface CarpetaDrive {
@@ -122,6 +124,12 @@ export interface InroPayPort {
     solicitar(cuerpo: Record<string, unknown>): R<{ id: string }>;
 }
 
+export interface ChatPort {
+    /** Los espacios con webhook configurado (GOOGLE_CHAT_WEBHOOKS). */
+    espacios(): string[];
+    publicar(espacio: string, texto: string): R<null>;
+}
+
 export interface Integraciones {
     cola: ColaPort;
     repo: RepositorioPort;
@@ -130,6 +138,7 @@ export interface Integraciones {
     lector: LectorPort;
     pdf: PdfPort;
     inropay: InroPayPort;
+    chat: ChatPort;
     /** Para los enlaces de los correos (APP_URL). */
     appUrl: string;
 }

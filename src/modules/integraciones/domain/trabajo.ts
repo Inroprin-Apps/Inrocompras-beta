@@ -10,6 +10,7 @@ export const TIPOS_TRABAJO = [
     'notificar',
     'inropay_solicitar',
     'sidige_escribir',
+    'chat',
 ] as const;
 export type TipoTrabajo = (typeof TIPOS_TRABAJO)[number];
 

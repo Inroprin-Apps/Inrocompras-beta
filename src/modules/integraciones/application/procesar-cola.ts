@@ -6,6 +6,7 @@ import { err, ok, type Result } from 'neverthrow';
 import { rutaDe } from '@/modules/comun/application/views.ts';
 import { rucValido } from '@/modules/proveedores/application/views.ts';
 import { SUBCARPETAS_OC, nombreCarpetaDes, rutaCarpetaOC, subcarpetaDe } from '../domain/carpetas.ts';
+import { mensajeChat } from '../domain/chat.ts';
 import { correoValido, notificacion, ocProveedor, primerNombre } from '../domain/correo.ts';
 import { solicitudInroPay } from '../domain/inropay.ts';
 import { bastaElTexto, combinar, extraerDeTexto, LECTURA_VACIA, revisarGemini, sinGemini } from '../domain/lectura.ts';
@@ -35,6 +36,9 @@ export async function procesarCola(d: Integraciones, opciones: { maximo?: number
     const maximo = opciones.maximo ?? 50;
     const limite = Date.now() + (opciones.presupuestoMs ?? PRESUPUESTO_MS);
     const resumen: ResumenCola = { ...RESUMEN_VACIO, detalle: [] };
+    // Lo diario (recordatorio de facturas) va primero: lo que deje encolado sale en esta misma corrida. Si falla, la
+    // cola sigue igual; se reintenta en la próxima.
+    await d.cola.diarios().catch(() => null);
     while (resumen.tomados < maximo && Date.now() < limite) {
         const lote = await d.cola.tomar(Math.min(POR_VUELTA, maximo - resumen.tomados));
         if (lote.isErr()) return resumen.tomados ? ok(resumen) : err(lote.error);
@@ -72,6 +76,8 @@ export function ejecutar(d: Integraciones, t: Trabajo): Paso {
             return notificar(d, t);
         case 'inropay_solicitar':
             return inropay(d, t);
+        case 'chat':
+            return chat(d, t);
         case 'sidige_escribir':
             // CLAUDE.md: no se escribe en el SIDIGE; lo hará la integración oficial.
             return Promise.resolve(ok(descartado('La escritura al SIDIGE no está habilitada en esta etapa: la hará la integración oficial.')));
@@ -246,6 +252,19 @@ async function notificar(d: Integraciones, t: Trabajo): Paso {
     const r = await d.correo.enviar({ para: [u.email], asunto: p.asunto, html: p.html });
     if (r.isErr()) return err(r.error);
     return ok(d.correo.modo === 'registro' ? descartado(`Correo en modo registro: no se envió a ${u.email}.`) : hecho(`Enviado a ${u.email}.`));
+}
+
+async function chat(d: Integraciones, t: Trabajo): Paso {
+    const espacio = String(t.payload.espacio ?? '')
+        .trim()
+        .toLowerCase();
+    const texto = String(t.payload.texto ?? '').trim();
+    if (!espacio || !texto) return err(final('El trabajo no dice a qué espacio ni qué publicar.'));
+    // Sin webhook para ese espacio no se publica: el aviso igual quedó en la app y por correo.
+    if (!d.chat.espacios().includes(espacio)) return ok(descartado(`El espacio «${espacio}» no tiene webhook en GOOGLE_CHAT_WEBHOOKS: no se publicó.`));
+    const enlace = t.refTabla && t.refId ? d.appUrl + rutaDe(t.refTabla, t.refId) : '';
+    const r = await d.chat.publicar(espacio, mensajeChat(texto, d.appUrl ? enlace : ''));
+    return r.isErr() ? err(r.error) : ok(hecho(`Publicado en «${espacio}».`));
 }
 
 async function inropay(d: Integraciones, t: Trabajo): Paso {
