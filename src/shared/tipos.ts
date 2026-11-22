@@ -14,6 +14,7 @@ export const AREAS = [
     'Proyectos',
     'Administración',
     'Almacén',
+    'Logística',
     'Sin área',
 ] as const;
 export type Area = (typeof AREAS)[number];

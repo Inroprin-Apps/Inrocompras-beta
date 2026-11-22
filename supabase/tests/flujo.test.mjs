@@ -385,8 +385,8 @@ check(
     'Liberar una solicitud encola el aviso a Google Chat: «' + (chats.find((c) => c.ref_tabla === 'solicitudes')?.payload.texto ?? '—') + '»',
 );
 check(
-    chats.some((c) => c.ref_tabla === 'pagos' && / cuota \d+: Pagado · Persona fin(\n|$)/.test(c.payload.texto)),
-    'Pagar una cuota encola el aviso a Google Chat: «' + (chats.find((c) => c.ref_tabla === 'pagos')?.payload.texto ?? '—') + '»',
+    chats.some((c) => c.ref_tabla === 'pagos' && c.payload.espacio === 'finanzas' && / cuota \d+: Solicitado · Persona imp(\n|$)/.test(c.payload.texto)),
+    'Solicitar una cuota (legajo completo) encola el aviso de pago a Finanzas: «' + (chats.find((c) => c.ref_tabla === 'pagos')?.payload.texto ?? '—') + '»',
 );
 check(!chats.some((c) => c.ref_tabla === 'ordenes'), 'Lo que no está en chat_avisos no va a Chat');
 // Correo de envío al aprobar, si quedó vacío
@@ -405,6 +405,56 @@ check(
     'Recordatorio: avisa al comprador de la cuota pagada sin factura',
 );
 check((await adm(`select app.recordatorio_facturas() n`))[0].n === 0, 'Y no lo repite antes de los días configurados');
+const resumen = (await adm(`select payload from public.cola_trabajos where tipo = 'chat' and ref_tabla = 'ordenes' order by id desc limit 1`))[0];
+check(
+    resumen && /^Facturas pendientes: 1 orden/.test(resumen.payload.texto),
+    'El recordatorio deja el resumen del día para Chat: «' + (resumen?.payload.texto.split('\n')[0] ?? '—') + '»',
+);
+// Factura por el total de la OC: cubre la cuota ya pagada sin factura (antes quedaba «sin factura»)
+const total3 = (await adm(`select monto from public.ordenes where id = $1`, [oc3]))[0].monto;
+await adm(
+    `insert into public.documentos (orden_id, tipo_doc, nombre_archivo, subido_por, monto_doc, fecha_doc) values ($1, 'Factura', 'f-total.pdf', $2, $3, current_date)`,
+    [oc3, U.imp[0], total3],
+);
+check(
+    !!(await adm(`select factura_id from public.pagos where id = $1`, [adel3.id]))[0].factura_id,
+    'Una factura por el total de la OC cubre la cuota ya pagada sin factura',
+);
+const saldoPlan = (await adm(`select id from public.pagos where orden_id = $1 and estado_pago = 'Plan' order by n_cuota limit 1`, [oc3]))[0];
+check(!saldoPlan || !!(await adm(`select app.factura_libre($1) f`, [saldoPlan.id]))[0].f, 'Y al pedir otra cuota de la OC, la encuentra: no pide sustento');
+// Área que emite el requerimiento
+const solAdm = (
+    await adm(`insert into public.solicitudes (tipo, solicitante_id, sustento) values ('Administrativa', $1, 'Útiles de oficina') returning id`, [U.sol[0]])
+)[0].id;
+check(
+    (await adm(`select app.area_emisora_de($1) a`, [solAdm]))[0].a === 'Planeamiento',
+    'Administrativa sin nadie en Administración: Planeamiento (no queda trabada)',
+);
+await adm(
+    `insert into public.usuarios (id, email, nombre, area) values ('11111111-0000-0000-0000-000000000099', 'adm@ejemplo.pe', 'Persona adm', 'Administración')`,
+);
+check(
+    (await adm(`select app.area_emisora_de($1) a`, [solAdm]))[0].a === 'Administración',
+    'Administrativa con alguien en Administración: la emite Administración',
+);
+const etT = (
+    await adm(`insert into public.proyecto_etapas (proyecto_id, nombre, orden, aprobadores) values ($1, 'Transporte local', 2, $2) returning id`, [
+        proy,
+        [U.ger[0]],
+    ])
+)[0].id;
+const solT = (
+    await adm(`insert into public.solicitudes (tipo, proyecto_id, etapa_id, solicitante_id, sustento) values ('Proyecto', $1, $2, $3, 'Flete') returning id`, [
+        proy,
+        etT,
+        U.sol[0],
+    ])
+)[0].id;
+await adm(
+    `insert into public.usuarios (id, email, nombre, area) values ('11111111-0000-0000-0000-000000000098', 'log@ejemplo.pe', 'Persona log', 'Logística')`,
+);
+check((await adm(`select app.area_emisora_de($1) a`, [solT]))[0].a === 'Logística', 'Etapa de transporte: la emite Logística');
+check((await adm(`select app.area_emisora_de($1) a`, [sol]))[0].a === 'Planeamiento', 'Lo demás: Planeamiento');
 const d1 = (await adm(`select public.correr_diarios() r`))[0].r;
 const d2 = (await adm(`select public.correr_diarios() r`))[0].r;
 check(d1.dia && d2.ya_corrio === d1.dia, 'Lo diario corre una vez por día (' + d1.dia + ')');

@@ -65,40 +65,47 @@ de credito | Caja Chica | Pago pendiente), "Legajo incompleto")` y `Fecha_Aproba
 - **INROCOMPRAS:** la acción «Dividir» (`ac_pago_dividir`, 0061) hace lo mismo a propósito, no como efecto de editar
   el monto: mismo número (+0.1, sin repetirse), tipo, hito, crédito, letra, fecha límite y comentario.
 
-### Pago - Factura subida 🔶 → se corrige
+### Pago - Factura subida ⭐ (0070)
 
 - **AppSheet:** al subir una «Factura» de la OC: (1) la vincula a TODAS las cuotas de la OC sin factura que estén
   Solicitadas, Programadas o Pagadas; (2) solicita las cuotas en Plan con hito «A la aprobación» o «Contra factura»;
   (3) pone la fecha de factura; (4) actualiza la OC.
 - **INROCOMPRAS hoy:** `app.al_subir_factura` solo actúa si la factura trae monto, y vincula o solicita UNA cuota cuyo
   monto calce (±1). Una factura que cubre varias cuotas (o sin monto leído) deja cuotas «sin factura», y el
-  recordatorio seguiría avisando. **Corrección:** hacer lo del AppSheet (vincular todas las cuotas sin factura y
-  solicitar las de hito «A la aprobación» / «Contra factura»), y además la cuota cuyo monto calce.
+  recordatorio seguiría avisando.
+- **Corrección (0070), más precisa que el AppSheet:** una factura por el **total de la OC** (±1) cubre todas sus
+  cuotas: se vincula a las ya solicitadas, programadas o pagadas sin factura, el adelanto que siga en Plan se solicita,
+  y las demás cuotas, al pedirlas, la encuentran y no piden sustento. Una factura por **otro monto** sigue yendo solo a
+  la cuota con ese monto. No se copia la regla amplia del AppSheet (vincular cualquier factura a todas las cuotas):
+  con entregas parciales, la primera factura «taparía» cuotas que esperan su propia factura y el control se pierde.
 
-### Generar Requerimiento 🔶 → se corrige
+### Generar Requerimiento ⭐ (0070)
 
 - **AppSheet:** al pasar la solicitud de Liberada a «En Req»: (1) Apps Script (PDF del requerimiento); (2) aviso al
   área que lo emite: «Administración» si la solicitud es administrativa, «Logística» si la etapa dice «Transporte»,
   si no «Planeamiento».
 - **INROCOMPRAS hoy:** `ac_solicitud_liberar` crea el requerimiento y avisa, pero el área sale de un parámetro fijo
-  (`area_emisora_rq` = Planeamiento) para todas. **Corrección:** la misma regla de tres áreas. El PDF del
-  requerimiento: ver «Apps Script» abajo.
+  (`area_emisora_rq` = Planeamiento) para todas.
+- **Corrección (0070):** la misma regla de tres áreas (`app.area_emisora_de`), con el área «Logística» agregada (no
+  existía) y una red: si el área elegida no tiene a nadie activo, va a Planeamiento, porque solo el área emisora puede
+  emitir y el requerimiento quedaría trabado. Responde D-01 con lo que se usa hoy. El PDF del requerimiento: ver
+  «Apps Script» abajo.
 
-### OC - Pago · Chat - Pago registrado · Chat Liberada 🔶 → se ajusta
+### OC - Pago · Chat - Pago registrado · Chat Liberada ⭐ (0070)
 
 - **AppSheet:** «OC - Pago» publica en un espacio de Chat cuando el legajo se completa; «Chat - Pago registrado»,
   cuando se agrega un pago (Adds en Pagos); «Chat Liberada», cuando se libera una solicitud.
 - **INROCOMPRAS:** el legajo se completa y el pago «se registra» en el mismo momento: cuando se solicita una cuota
-  (las cuotas existen desde la aprobación). **Ajuste:** el aviso de pago va en `pagos.solicitar` (no en
-  `pagos.pagado`). Falta saber el nombre de cada espacio.
+  (las cuotas existen desde la aprobación). **Ajuste (0070):** `chat_avisos` = solicitud liberada → «compras», cuota
+  solicitada → «finanzas», resumen de facturas → «compras». Falta confirmar los espacios y cargar sus webhooks.
 
-### Recordatorio - Facturas 🔶 → se ajusta
+### Recordatorio - Facturas ⭐ (0070)
 
 - **AppSheet:** programado, todos los días a las 8:00 (hora de Lima), sin condición: publica un resumen («digest») de
   las facturas pendientes en un espacio de Chat.
 - **INROCOMPRAS hoy:** un aviso a cada comprador por OC con cuotas pagadas sin factura (cada 3 días), una vez al día
-  con la cola (hoy el cron corre a la 1:00 de Lima). **Ajuste:** además, el resumen del día en el espacio de Chat, y el
-  cron a las 8:00 de Lima.
+  con la cola. **Ajuste (0070):** además, el resumen del día en el espacio de Chat, y el cron a las 8:00 de Lima
+  (`vercel.json`: 13:00 UTC; en el plan Hobby corre dentro de esa hora).
 
 ### Ejecutar anulación · OC - Anulada liberar ítems · Emitir Req · Generar PDF (Apps Script) 🔶
 
