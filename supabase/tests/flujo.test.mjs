@@ -450,10 +450,7 @@ const solT = (
         U.sol[0],
     ])
 )[0].id;
-await adm(
-    `insert into public.usuarios (id, email, nombre, area) values ('11111111-0000-0000-0000-000000000098', 'log@ejemplo.pe', 'Persona log', 'Logística')`,
-);
-check((await adm(`select app.area_emisora_de($1) a`, [solT]))[0].a === 'Logística', 'Etapa de transporte: la emite Logística');
+check((await adm(`select app.area_emisora_de($1) a`, [solT]))[0].a === 'Compras', 'Etapa de transporte: la emite Compras («Logística» en el AppSheet)');
 check((await adm(`select app.area_emisora_de($1) a`, [sol]))[0].a === 'Planeamiento', 'Lo demás: Planeamiento');
 const d1 = (await adm(`select public.correr_diarios() r`))[0].r;
 const d2 = (await adm(`select public.correr_diarios() r`))[0].r;

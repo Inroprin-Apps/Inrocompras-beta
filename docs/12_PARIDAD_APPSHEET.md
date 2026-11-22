@@ -86,9 +86,10 @@ de credito | Caja Chica | Pago pendiente), "Legajo incompleto")` y `Fecha_Aproba
   si no «Planeamiento».
 - **INROCOMPRAS hoy:** `ac_solicitud_liberar` crea el requerimiento y avisa, pero el área sale de un parámetro fijo
   (`area_emisora_rq` = Planeamiento) para todas.
-- **Corrección (0070):** la misma regla de tres áreas (`app.area_emisora_de`), con el área «Logística» agregada (no
-  existía) y una red: si el área elegida no tiene a nadie activo, va a Planeamiento, porque solo el área emisora puede
-  emitir y el requerimiento quedaría trabado. Responde D-01 con lo que se usa hoy. El PDF del requerimiento: ver
+- **Corrección (0070):** la misma regla de tres áreas (`app.area_emisora_de`), con «Logística» = **Compras**: en
+  INROPRIN «Logística» es el equipo de compras nacionales e importaciones, no un área aparte (en el AppSheet ese
+  aviso no le llegaba a nadie, porque ningún usuario tiene el área «Logística»). Y una red: si el área elegida no tiene a
+  nadie activo, va a Planeamiento, porque solo el área emisora puede emitir y el requerimiento quedaría trabado. Responde D-01 con lo que se usa hoy. El PDF del requerimiento: ver
   «Apps Script» abajo.
 
 ### OC - Pago · Chat - Pago registrado · Chat Liberada ⭐ (0070)

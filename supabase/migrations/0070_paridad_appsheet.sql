@@ -9,9 +9,10 @@
 --      y un resumen del día al espacio de Chat. Corre una vez al día desde la cola (public.correr_diarios).
 --   5. «Pago - Factura subida»: una factura por el TOTAL de la OC cubre todas sus cuotas (antes solo se vinculaba la
 --      cuota con el mismo monto, y una factura por el total dejaba cuotas «sin factura»).
---   6. «Generar Requerimiento»: el área que emite sale de la solicitud (Administración si es administrativa, Logística
---      si la etapa es de transporte, si no el parámetro area_emisora_rq), y si esa área no tiene a nadie activo, va al
---      parámetro: un requerimiento nunca queda sin quién lo emita.
+--   6. «Generar Requerimiento»: el área que emite sale de la solicitud (Administración si es administrativa, Compras si
+--      la etapa es de transporte, si no el parámetro area_emisora_rq), y si esa área no tiene a nadie activo, va al
+--      parámetro: un requerimiento nunca queda sin quién lo emita. (El AppSheet dice «Logística»: en INROPRIN así se
+--      llama al equipo de compras nacionales e importaciones; no es un área aparte.)
 
 -- ───────────────────────── 1. Solicitud cancelada ─────────────────────────
 create or replace function public.ac_solicitud_cancelar(p_id uuid, p_motivo text) returns jsonb language plpgsql security definer set search_path = public as $$
@@ -199,20 +200,16 @@ begin
 end $$;
 
 -- ───────────────────────── 6. Área que emite el requerimiento ─────────────────────────
-alter table public.usuarios drop constraint if exists usuarios_area_check;
-alter table public.usuarios add constraint usuarios_area_check check (area in (
-  'Compras','Importaciones','Finanzas','Contabilidad','Control de Gestión','Gerencia','Planeamiento','Comercial','Técnica',
-  'Costos','Proyectos','Administración','Almacén','Logística','Sin área'));
-
--- [Generar Requerimiento › AVISO AREA]: Administración si la solicitud es administrativa, Logística si la etapa es de
--- transporte, si no el parámetro (Planeamiento). Si esa área no tiene a nadie activo, el parámetro.
+-- [Generar Requerimiento › AVISO AREA]: Administración si la solicitud es administrativa, Compras si la etapa es de
+-- transporte («Logística» en el AppSheet = compras nacionales e importaciones), si no el parámetro (Planeamiento). Si
+-- esa área no tiene a nadie activo, el parámetro.
 create or replace function app.area_emisora_de(p_sol uuid) returns text language plpgsql stable security definer set search_path = public as $$
 declare defecto text := coalesce(app.cfg('area_emisora_rq', '"Planeamiento"') #>> '{}', 'Planeamiento'); s public.solicitudes; etapa text; area text;
 begin
   select * into s from public.solicitudes where id = p_sol;
   select nombre into etapa from public.proyecto_etapas where id = s.etapa_id;
   area := case when s.tipo = 'Administrativa' then 'Administración'
-               when etapa ilike '%transporte%' then 'Logística'
+               when etapa ilike '%transporte%' then 'Compras'
                else defecto end;
   if cardinality(app.usuarios_de_area(area)) = 0 then area := defecto; end if;
   return area;
