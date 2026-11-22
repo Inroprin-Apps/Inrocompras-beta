@@ -95,6 +95,12 @@ function FichaCargada({ d, anulacionMarcada, onCerrar }: { d: RequerimientoDetal
                         Observado: «{r.motivoObservacion}». La solicitud volvió a su solicitante para que la corrija.
                     </Notice>
                 )}
+                {r.estado === 'En Proceso' && !editable && (
+                    <Notice tone="info" cerrable={false}>
+                        Lo completa y lo emite el área {r.areaEmisora}. Tu área es {perfil.area}: si te toca a ti, pide al administrador que te asigne{' '}
+                        {r.areaEmisora} en Equipo.
+                    </Notice>
+                )}
                 <PanelAcciones
                     tabla="requerimientos"
                     id={r.id}
