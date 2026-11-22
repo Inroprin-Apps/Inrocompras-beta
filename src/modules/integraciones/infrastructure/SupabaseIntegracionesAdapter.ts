@@ -6,7 +6,7 @@ import { err, ok, type Result } from 'neverthrow';
 import type { ModoCorreo } from '../domain/correo.ts';
 import type { EventoInroPay, PagoInroPay } from '../domain/inropay.ts';
 import type { LecturaDocumento } from '../domain/lectura.ts';
-import { tipoDocPdf, type OrdenPdf, type VersionPdf } from '../domain/pdf.ts';
+import { iniciales, cuentaPara, tipoDocPdf, type OrdenPdf, type VersionPdf } from '../domain/pdf.ts';
 import { final, reintentar, type Fallo, type Trabajo } from '../domain/trabajo.ts';
 import type {
     CarpetaDrive,
@@ -186,54 +186,105 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
             await this.db
                 .from('ordenes')
                 .select(
-                    '*, empresas(razon_social,ruc,direccion), proveedores(razon_social,ruc,pais), proyectos(codigo,nombre), oc_lineas(*), comprador:usuarios!ordenes_comprador_id_fkey(id,nombre)',
+                    '*, empresas(id,razon_social,ruc,direccion), proveedores(razon_social,ruc,pais,direccion,contacto,telefono,correo,cuentas,cuenta_detraccion), proyectos(codigo,nombre), oc_lineas(*), comprador:usuarios!ordenes_comprador_id_fkey(id,nombre)',
                 )
                 .eq('id', id)
                 .maybeSingle(),
             'No se pudo leer la orden',
         );
-        return r.map((o) => {
-            if (!o) return null;
-            const emp = uno(o.empresas);
-            const prov = uno(o.proveedores);
-            const proy = uno(o.proyectos);
-            const comp = uno(o.comprador);
-            return {
-                id: s(o.id),
-                numero: sn(o.numero),
-                revision: n(o.revision),
-                clase: s(o.clase),
-                procedencia: s(o.procedencia),
-                fecha: s(o.fecha),
-                moneda: s(o.moneda),
-                tipoImpuesto: s(o.tipo_impuesto),
-                subtotal: n(o.subtotal),
-                igv: n(o.igv),
-                monto: n(o.monto),
-                formaPago: s(o.forma_pago),
-                pctAdelanto: nn(o.pct_adelanto),
-                hitoSaldo: sn(o.hito_saldo),
-                diasCredito: nn(o.dias_credito),
-                lugarEntrega: sn(o.lugar_entrega),
-                plazoEntregaDias: nn(o.plazo_entrega_dias),
-                terminos: sn(o.terminos),
-                incoterm: sn(o.incoterm),
-                penalidadPctDia: nn(o.penalidad_pct_dia),
-                penalidadTopePct: nn(o.penalidad_tope_pct),
-                empresa: { razonSocial: s(emp?.razon_social), ruc: sn(emp?.ruc), direccion: sn(emp?.direccion) },
-                proveedor: prov ? { razonSocial: s(prov.razon_social), ruc: sn(prov.ruc), pais: sn(prov.pais) } : null,
-                proyecto: proy ? { codigo: sn(proy.codigo), nombre: s(proy.nombre) } : null,
-                aprobaciones: {
-                    ppto: sn(o.aprobacion_ppto),
-                    cgFecha: sn(o.cg_fecha),
-                    gop: sn(o.aprobacion_gop),
-                    gopFecha: sn(o.gop_fecha),
-                    gaf: sn(o.aprobacion_gaf),
-                    gafFecha: sn(o.gaf_fecha),
-                    tipo: sn(o.tipo_aprobacion),
-                },
-                comprador: { id: s(comp?.id ?? o.comprador_id), nombre: s(comp?.nombre) },
-                lineas: ((o.oc_lineas as Fila[] | null) ?? []).map((l) => ({
+        if (r.isErr()) return err(r.error);
+        const o = r.value;
+        if (!o) return ok(null);
+        const lineasF = (o.oc_lineas as Fila[] | null) ?? [];
+
+        // Lo que viene del requerimiento y de la solicitud de sus ítems (para la cabecera y las columnas del detalle).
+        const itemIds = [...new Set(lineasF.map((l) => sn(l.item_id)).filter((x): x is string => !!x))];
+        const items = itemIds.length
+            ? ((await this.db.from('requerimiento_items').select('id,concepto,codigo_cliente,codigo_sidige,requerimiento_id').in('id', itemIds)).data ?? [])
+            : [];
+        const itemDe = new Map((items as Fila[]).map((x) => [s(x.id), x]));
+        const reqIds = [...new Set((items as Fila[]).map((x) => sn(x.requerimiento_id)).filter((x): x is string => !!x))];
+        const reqs = reqIds.length ? ((await this.db.from('requerimientos').select('id,numero,motivo,solicitud_id').in('id', reqIds)).data ?? []) : [];
+        const solIds = [...new Set((reqs as Fila[]).map((x) => sn(x.solicitud_id)).filter((x): x is string => !!x))];
+        const sols = solIds.length ? ((await this.db.from('solicitudes').select('id,solicitante_id,jefe_id').in('id', solIds)).data ?? []) : [];
+        const sol = (sols as Fila[])[0];
+        const gente = [sn(sol?.solicitante_id), sn(sol?.jefe_id), sn(o.gop_por), sn(o.gaf_por)].filter((x): x is string => !!x);
+        const personas = gente.length ? ((await this.db.from('usuarios').select('id,nombre,area').in('id', gente)).data ?? []) : [];
+        const persona = (uid: unknown) => (personas as Fila[]).find((p) => p.id === uid);
+        const pie = uno(((await this.db.from('config').select('valor').eq('clave', 'oc_pie')).data ?? []) as Fila[])?.valor as Fila | undefined;
+
+        const emp = uno(o.empresas);
+        const prov = uno(o.proveedores);
+        const proy = uno(o.proyectos);
+        const comp = uno(o.comprador);
+        const cuentas = Array.isArray(prov?.cuentas)
+            ? (prov.cuentas as Fila[]).map((c) => ({ banco: s(c.banco), moneda: s(c.moneda), numero: s(c.numero), cci: s(c.cci) }))
+            : [];
+        const jefe = persona(sol?.jefe_id);
+        return ok({
+            id: s(o.id),
+            numero: sn(o.numero),
+            revision: n(o.revision),
+            clase: s(o.clase),
+            procedencia: s(o.procedencia),
+            fecha: s(o.fecha),
+            moneda: s(o.moneda),
+            tipoImpuesto: s(o.tipo_impuesto),
+            subtotal: n(o.subtotal),
+            igv: n(o.igv),
+            monto: n(o.monto),
+            formaPago: s(o.forma_pago),
+            pctAdelanto: nn(o.pct_adelanto),
+            hitoSaldo: sn(o.hito_saldo),
+            diasCredito: nn(o.dias_credito),
+            lugarEntrega: sn(o.lugar_entrega),
+            plazoEntregaDias: nn(o.plazo_entrega_dias),
+            terminos: sn(o.terminos),
+            incoterm: sn(o.incoterm),
+            penalidadPctDia: nn(o.penalidad_pct_dia),
+            penalidadTopePct: nn(o.penalidad_tope_pct),
+            empresa: { id: s(emp?.id ?? o.empresa_id), razonSocial: s(emp?.razon_social), ruc: sn(emp?.ruc), direccion: sn(emp?.direccion) },
+            proveedor: prov
+                ? {
+                      razonSocial: s(prov.razon_social),
+                      ruc: sn(prov.ruc),
+                      pais: sn(prov.pais),
+                      direccion: sn(prov.direccion),
+                      atencion: sn(prov.contacto),
+                      telefono: sn(prov.telefono),
+                      correo: sn(o.correo_envio) ?? sn(prov.correo),
+                      cuenta: cuentaPara(cuentas, s(o.moneda)),
+                      detraccion: sn(prov.cuenta_detraccion),
+                  }
+                : null,
+            proyecto: proy ? { codigo: sn(proy.codigo), nombre: s(proy.nombre) } : null,
+            pedido: {
+                motivo: sn((reqs as Fila[])[0]?.motivo),
+                requerimientos: (reqs as Fila[]).map((x) => s(x.numero)).filter(Boolean),
+                solicitado: sn(persona(sol?.solicitante_id)?.nombre),
+                supervisor: jefe ? s(jefe.area) || s(jefe.nombre) : null,
+            },
+            firmas: { primera: iniciales(sn(persona(o.gop_por)?.nombre)), segunda: iniciales(sn(persona(o.gaf_por)?.nombre)) },
+            pie: {
+                horario: s(pie?.horario),
+                documentos: Array.isArray(pie?.documentos) ? (pie.documentos as unknown[]).map(String) : [],
+                nota: s(pie?.nota),
+                legal: s(pie?.legal),
+                enlace: s(pie?.enlace),
+            },
+            aprobaciones: {
+                ppto: sn(o.aprobacion_ppto),
+                cgFecha: sn(o.cg_fecha),
+                gop: sn(o.aprobacion_gop),
+                gopFecha: sn(o.gop_fecha),
+                gaf: sn(o.aprobacion_gaf),
+                gafFecha: sn(o.gaf_fecha),
+                tipo: sn(o.tipo_aprobacion),
+            },
+            comprador: { id: s(comp?.id ?? o.comprador_id), nombre: s(comp?.nombre) },
+            lineas: lineasF.map((l) => {
+                const it = itemDe.get(s(l.item_id));
+                return {
                     nLinea: n(l.n_linea),
                     descripcion: s(l.descripcion),
                     descripcionProv: sn(l.descripcion_prov),
@@ -243,8 +294,11 @@ export class SupabaseIntegracionesAdapter implements ColaPort, RepositorioPort {
                     subtotal: n(l.subtotal),
                     esDemasia: l.es_demasia === true,
                     demasiaEstado: sn(l.demasia_estado),
-                })),
-            };
+                    concepto: sn(it?.concepto) ?? sn(o.concepto),
+                    codInt: sn(it?.codigo_sidige),
+                    codProy: sn(it?.codigo_cliente),
+                };
+            }),
         });
     }
 
